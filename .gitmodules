@@ -1,0 +1,3 @@
+[submodule "hail_configuration_files"]
+	path = hail_configuration_files
+	url = https://gitlab.internal.sanger.ac.uk/hgi-projects/hail_configuration_files
