@@ -26,6 +26,13 @@ with open(f"{storage}", 'r') as f:
 with open(f"{thresholds}", 'r') as f:
     thresholds = json.load(f)
 
+partitions=500
+
+
+s3location_input=storage["ddd_elgh_ukbb_exomes"]["s3"]["vcfs"]
+s3location_output= storage["ddd_elgh_ukbb_exomes"]["s3"]["mts"]
+vcf_header_file = storage["ddd_elgh_ukbb_exomes"]["s3"]["header_file"]
+
 
 if __name__ == "__main__":
     # need to create spark cluster first before intiialising hail
@@ -44,4 +51,18 @@ if __name__ == "__main__":
     #####################################################################
     ###################### INPUT DATA  ##############################
     #####################################################################
-    print(f"{storage['intervalwgs']['s3']['matrixtables']}")
+    objects = hl.utils.hadoop_ls(s3location_input)
+    print("Reading vcf files")
+    vcfs = [vcf["path"] for vcf in objects if vcf["path"].endswith(".bgz")]
+    print(vcfs)
+
+    mt = hl.import_vcf(vcfs, array_elements_required=False, min_partitions=partitions,
+                       force_bgz=True, header_file=vcf_header_file)
+
+    print("Imported vcf files")
+    print("Start repartitioning:")
+    if mt.n_partitions() > partitions:
+        mt = mt.naive_coalesce(partitions)
+    print("Write to disk:")
+
+    mt.write(f"{tmp_dir}/ddd-elgh-ukbb/WES_autosomes.mt", overwrite=True)
