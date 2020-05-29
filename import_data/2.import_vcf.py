@@ -26,11 +26,11 @@ with open(f"{storage}", 'r') as f:
 with open(f"{thresholds}", 'r') as f:
     thresholds = json.load(f)
 
-partitions=500
+partitions = 500
 
 
-s3location_input=storage["ddd_elgh_ukbb_exomes"]["s3"]["vcfs"]
-s3location_output= storage["ddd_elgh_ukbb_exomes"]["s3"]["mts"]
+s3location_input = storage["ddd_elgh_ukbb_exomes"]["s3"]["vcfs"]
+s3location_output = storage["ddd_elgh_ukbb_exomes"]["s3"]["mts"]
 vcf_header_file = storage["ddd_elgh_ukbb_exomes"]["s3"]["header_file"]
 
 
@@ -65,4 +65,4 @@ if __name__ == "__main__":
         mt = mt.naive_coalesce(partitions)
     print("Write to disk:")
 
-    mt.write(f"{tmp_dir}/ddd-elgh-ukbb/WES_autosomes.mt", overwrite=True)
+    mt.write(f"{tmp_dir}/ddd-elgh-ukbb/ddd-elgh-ukbb-initial.mt", overwrite=True)
