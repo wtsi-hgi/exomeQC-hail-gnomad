@@ -73,5 +73,5 @@ if __name__ == "__main__":
             print("Write to disk:")
 
             mt.write(
-                f"{tmp_dir}/ddd-elgh-ukbb/ddd-elgh-ukbb-{chromosome}.mt", overwrite=True)
+                f"{tmp_dir}/ddd-elgh-ukbb/{chromosome}.mt", overwrite=True)
             print(f"Wrote matrixtable for {chromosome}")
