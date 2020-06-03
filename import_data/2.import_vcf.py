@@ -3,6 +3,7 @@ import hail as hl
 import pyspark
 import json
 import sys
+import re
 from pathlib import Path
 
 project_root = Path(__file__).parent.parent
@@ -56,15 +57,21 @@ if __name__ == "__main__":
     vcfs = [vcf["path"] for vcf in objects if vcf["path"].endswith(".bgz")]
     print(vcfs)
     for vcf in vcfs:
-        print(vcf.stem)
-    # mt = hl.import_vcf(vcf, array_elements_required=False, min_partitions=partitions,
-        # force_bgz = True, header_file = vcf_header_file)
+        print(vcf)
+        m = re.search(r'chr([\d+|\w+]+)_vcf.(\d+).vcf.bgz', vcf)
 
-    print("Imported vcf file")
+        if m:
+            chromosome = "chr"+m.group(1)
+            print(chromosome)
+            mt = hl.import_vcf(vcf, array_elements_required=False,
+                               force_bgz=True, header_file=vcf_header_file)
+
+            print("Imported vcf file for" + chromosome)
     # print("Start repartitioning:")
     # if mt.n_partitions() > partitions:
     # mt = mt.naive_coalesce(partitions)
-    print("Write to disk:")
+            print("Write to disk:")
 
-    mt.write(f"{tmp_dir}/ddd-elgh-ukbb/ddd-elgh-ukbb-initial.mt",
-             overwrite=True)
+            mt.write(
+                f"{tmp_dir}/ddd-elgh-ukbb/ddd-elgh-ukbb-{chromosome}.mt", overwrite=True)
+            print(f"Wrote matrixtable for {chromosome}")
