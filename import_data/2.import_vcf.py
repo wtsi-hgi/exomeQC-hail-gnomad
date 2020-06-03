@@ -26,7 +26,7 @@ with open(f"{storage}", 'r') as f:
 with open(f"{thresholds}", 'r') as f:
     thresholds = json.load(f)
 
-partitions = 10000
+#partitions = 1000
 
 
 s3location_input = storage["ddd_elgh_ukbb_exomes"]["s3"]["vcfs"]
@@ -59,10 +59,10 @@ if __name__ == "__main__":
     mt = hl.import_vcf(vcfs, array_elements_required=False, min_partitions=partitions,
                        force_bgz=True, header_file=vcf_header_file)
 
-    print("Imported vcf files")
-    print("Start repartitioning:")
-    if mt.n_partitions() > partitions:
-        mt = mt.naive_coalesce(partitions)
+    print("Imported vcf file")
+    #print("Start repartitioning:")
+    # if mt.n_partitions() > partitions:
+    # mt = mt.naive_coalesce(partitions)
     print("Write to disk:")
 
     mt.write(f"{tmp_dir}/ddd-elgh-ukbb/ddd-elgh-ukbb-initial.mt", overwrite=True)
