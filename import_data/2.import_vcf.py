@@ -55,14 +55,16 @@ if __name__ == "__main__":
     print("Reading vcf files")
     vcfs = [vcf["path"] for vcf in objects if vcf["path"].endswith(".bgz")]
     print(vcfs)
-
-    mt = hl.import_vcf(vcfs, array_elements_required=False, min_partitions=partitions,
-                       force_bgz=True, header_file=vcf_header_file)
+    for vcf in vcfs:
+        print(vcf.stem)
+    # mt = hl.import_vcf(vcf, array_elements_required=False, min_partitions=partitions,
+        # force_bgz = True, header_file = vcf_header_file)
 
     print("Imported vcf file")
-    #print("Start repartitioning:")
+    # print("Start repartitioning:")
     # if mt.n_partitions() > partitions:
     # mt = mt.naive_coalesce(partitions)
     print("Write to disk:")
 
-    mt.write(f"{tmp_dir}/ddd-elgh-ukbb/ddd-elgh-ukbb-initial.mt", overwrite=True)
+    mt.write(f"{tmp_dir}/ddd-elgh-ukbb/ddd-elgh-ukbb-initial.mt",
+             overwrite=True)
