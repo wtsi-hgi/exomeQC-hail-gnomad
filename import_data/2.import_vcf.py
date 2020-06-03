@@ -26,7 +26,7 @@ with open(f"{storage}", 'r') as f:
 with open(f"{thresholds}", 'r') as f:
     thresholds = json.load(f)
 
-#partitions = 1000
+partitions = 1000
 
 
 s3location_input = storage["ddd_elgh_ukbb_exomes"]["s3"]["vcfs"]
