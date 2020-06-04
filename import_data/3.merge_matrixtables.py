@@ -75,9 +75,9 @@ if __name__ == "__main__":
     matrixtables_folder = f"{tmp_dir}/ddd-elgh-ukbb"
 
     print("Reading all matrixtables and joining them")
-    mt = hl.read_matrixtable(f"{temp_dir}/ddd-elgh-ukbb/chr1.mt")
+    mt = hl.read_matrix_table(f"{temp_dir}/ddd-elgh-ukbb/chr1.mt")
     for chromosome in CHROMOSOMES:
-        mt2 = hl.read_matrixtable(f"{temp_dir}/ddd-elgh-ukbb/{chromosome}.mt")
+        mt2 = hl.read_matrix_table(f"{temp_dir}/ddd-elgh-ukbb/{chromosome}.mt")
         mt = mt.union_rows(mt2)
 
     print("Now writing joined matrixtable to disk:")
