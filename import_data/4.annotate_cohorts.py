@@ -66,7 +66,7 @@ if __name__ == "__main__":
 
     # import table with annotated samples
     # save
-    table_cohort = "s3://DDD-ELGH-UKBB-exomes/samples_cohorts.tsv"
+    table_cohort = "s3a://DDD-ELGH-UKBB-exomes/samples_cohorts.tsv"
     mt_annotated = annotate_samples_with_cohort_info(mt, table_cohort)
     mt_annotated.write(
         f"{tmp_dir}/ddd-elgh-ukbb/chr1_annotated.mt", overwrite=True)
