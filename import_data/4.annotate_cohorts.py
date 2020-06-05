@@ -36,7 +36,7 @@ def annotate_samples_with_cohort_info(mt: hl.MatrixTable, cohort_file) -> hl.Mat
     :return: matrixtable with new column annotation
     '''
     # import the tab delimited file. Note that it is important for joins of tables to have defined keys in the hail tables
-    table_cohort = hl.import_table(cohort_file, no_header=True, key='sample')
+    table_cohort = hl.import_table(cohort_file, key='sample')
     # annotate the samples with a new attribute called cohort:
     mt_result = mt.annotate_cols(cohort=table_cohort[mt.s].f1)
     return mt_result
