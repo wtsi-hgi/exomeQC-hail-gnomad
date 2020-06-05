@@ -5,7 +5,7 @@ import json
 import sys
 import re
 from pathlib import Path
-import * from "../hail_funtions.py"
+
 project_root = Path(__file__).parent.parent
 print(project_root)
 
