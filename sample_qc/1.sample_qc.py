@@ -45,8 +45,9 @@ if __name__ == "__main__":
     #####################################################################
     ###################### INPUT DATA  ##############################
     #####################################################################
-    CHROMOSOME = "chr1"
-    mt = hl.read_matrix_table(f"{temp_dir}/ddd-elgh-ukbb/chr1_annotated.mt")
+    CHROMOSOME = "WGS"
+    mt = hl.read_matrix_table(
+        f"{temp_dir}/ddd-elgh-ukbb/{CHROMOSOME}_annotated.mt")
     mt_split = hl.split_multi_hts(mt, keep_star=False, left_aligned=False)
     mt_split = mt_split.checkpoint(
         f"{tmp_dir}/ddd-elgh-ukbb/{CHROMOSOME}-split-multi_checkpoint.mt",  overwrite=True)
@@ -74,10 +75,18 @@ if __name__ == "__main__":
     mt_rows.select(mt_rows.variant_QC_Hail).flatten().export(f"{tmp_dir}/ddd-elgh-ukbb/{CHROMOSOME}_variantQC_unfiltered.tsv.bgz",
                                                              header=True)
 
-    mt2 = mt2.checkpoint(
-        f"{tmp_dir}/ddd-elgh-ukbb/{CHROMOSOME}-sampleqc-variantqc-unfiltered.mt", overwrite=True)
-
     # run sex determination script -not without chrX!
+    print("Sex imputation:")
+    #mt2_sex = mt2.select_entries(GT=hl.unphased_diploid_gt_index_call(mt2.GT.n_alt_alleles()))
+    imputed_sex = hl.impute_sex(mt2.GT)
+
+    # Annotate samples male or female:
+    mt = mt2.annotate_cols(sex=hl.cond(
+        imputed_sex[mt2.s].is_female, "female", "male"))
+
+    mt = mt.checkpoint(
+        f"{tmp_dir}/ddd-elgh-ukbb/{CHROMOSOME}-sampleqc-variantqc-unfiltered_sex_annotated.mt", overwrite=True)
+    #
     # run sample_qc
     # plot various sample_qc per cohort -use intervalwgs threshold
     # plot sex determination per cohort - also undetermined -not without chrX
