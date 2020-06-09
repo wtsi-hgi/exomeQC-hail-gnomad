@@ -62,11 +62,11 @@ if __name__ == "__main__":
     matrixtables_folder = f"{tmp_dir}/ddd-elgh-ukbb"
 
     print("Reading all matrixtables and joining them")
-    mt = hl.read_matrix_table(f"{temp_dir}/ddd-elgh-ukbb/chr1.mt")
+    mt = hl.read_matrix_table(f"{temp_dir}/ddd-elgh-ukbb/WGS-ddd-elgh-ukbb.mt")
 
     # import table with annotated samples
     # save
     table_cohort = "s3a://DDD-ELGH-UKBB-exomes/samples_cohorts.tsv"
     mt_annotated = annotate_samples_with_cohort_info(mt, table_cohort)
     mt_annotated.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/chr1_annotated.mt", overwrite=True)
+        f"{tmp_dir}/ddd-elgh-ukbb/WGS_annotated.mt", overwrite=True)
