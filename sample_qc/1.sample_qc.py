@@ -63,29 +63,29 @@ if __name__ == "__main__":
                     "Other"))))
     mt_sampleqc = hl.sample_qc(mt, name='sample_QC_Hail')
     panda_df_unfiltered_table = mt_sampleqc.cols().flatten()
+    print("Sex imputation:")
+    #mt2_sex = mt2.select_entries(GT=hl.unphased_diploid_gt_index_call(mt2.GT.n_alt_alleles()))
+    imputed_sex = hl.impute_sex(mt_sampleqc.GT)
+
+    # Annotate samples male or female:
+    mt = mt_sampleqc.annotate_cols(sex=hl.cond(
+        imputed_sex[mt_sampleqc.s].is_female, "female", "male"))
 
     print("Outputting table of sample qc")
     panda_df_unfiltered_table.export(
-        f"{tmp_dir}/ddd-elgh-ukbb/{CHROMOSOME}_sampleQC_unfiltered.tsv.bgz", header=True)
+        f"{tmp_dir}/ddd-elgh-ukbb/{CHROMOSOME}_sampleQC_unfiltered_sex_annotated.tsv.bgz", header=True)
 
-    mt2 = hl.variant_qc(mt_sampleqc, name='variant_QC_Hail')
+   # mt2 = hl.variant_qc(mt_sampleqc, name='variant_QC_Hail')
 
-    print('Exporting variant qc pandas table to disk')
-    mt_rows = mt2.rows()
-    mt_rows.select(mt_rows.variant_QC_Hail).flatten().export(f"{tmp_dir}/ddd-elgh-ukbb/{CHROMOSOME}_variantQC_unfiltered.tsv.bgz",
-                                                             header=True)
+    #print('Exporting variant qc pandas table to disk')
+   # mt_rows = mt2.rows()
+   # mt_rows.select(mt_rows.variant_QC_Hail).flatten().export(f"{tmp_dir}/ddd-elgh-ukbb/{CHROMOSOME}_variantQC_unfiltered.tsv.bgz",
+    #          header=True)
 
     # run sex determination script -not without chrX!
-    print("Sex imputation:")
-    #mt2_sex = mt2.select_entries(GT=hl.unphased_diploid_gt_index_call(mt2.GT.n_alt_alleles()))
-    imputed_sex = hl.impute_sex(mt2.GT)
-
-    # Annotate samples male or female:
-    mt = mt2.annotate_cols(sex=hl.cond(
-        imputed_sex[mt2.s].is_female, "female", "male"))
 
     mt = mt.checkpoint(
-        f"{tmp_dir}/ddd-elgh-ukbb/{CHROMOSOME}-sampleqc-variantqc-unfiltered_sex_annotated.mt", overwrite=True)
+        f"{tmp_dir}/ddd-elgh-ukbb/{CHROMOSOME}-sampleqc-unfiltered_sex_annotated.mt", overwrite=True)
     #
     # run sample_qc
     # plot various sample_qc per cohort -use intervalwgs threshold
