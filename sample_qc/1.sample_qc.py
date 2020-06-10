@@ -48,6 +48,8 @@ if __name__ == "__main__":
     CHROMOSOME = "WGS"
     mt = hl.read_matrix_table(
         f"{temp_dir}/ddd-elgh-ukbb/{CHROMOSOME}_annotated.mt")
+    mt = mt.key_rows_by('locus').distinct_by_row(
+    ).key_rows_by('locus', 'alleles')
     mt_split = hl.split_multi_hts(mt, keep_star=False, left_aligned=False)
     mt_split = mt_split.checkpoint(
         f"{tmp_dir}/ddd-elgh-ukbb/{CHROMOSOME}-split-multi_checkpoint.mt",  overwrite=True)
