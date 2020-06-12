@@ -53,6 +53,8 @@ with open(map_file4, newline='') as samples4:
 # print(samples_list)
 print(f"sample\tcohort")
 for sample, cohort in samples_list.items():
+    if cohort == "ELGH":
+        cohort = ELGH_1
     print(f"{sample}\t{cohort}")
 # if "elgh" in s1[1]:
 #     print(f'{s1[0]}\tELGH')
