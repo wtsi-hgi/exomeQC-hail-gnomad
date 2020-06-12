@@ -45,7 +45,7 @@ with open(map_file4, newline='') as samples4:
     samples_reader = csv.reader(samples4, delimiter=' ')
     for s1 in samples_reader:
         if s1[0] in samples_list.keys() and "ELGH" not in samples_list[s1[0]]:
-            if "IHTP_ISC_British" in s1[2]:
+            if "IHTP_ISC_British" in s1[2] or "SEQCAP_WES_AUTOZYGOSITY_Born_in_Bradford" in s1[2]:
                 samples_list[s1[0]] = ELGH_1
             else:
                 samples_list[s1[0]] = s1[2]
