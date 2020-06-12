@@ -7,6 +7,8 @@ map_file2 = "/nfs/users/nfs_m/mercury/pa10/ddd-elgh-ukbb/sample_list.before_QC.w
 map_file3 = "/nfs/users/nfs_m/mercury/pa10/ddd-elgh-ukbb/IHTP_ISC_British_Autozygosity_Populations_Resource_Part_5.all_IDs.180119.txt"
 # 15001608192016	sc_autozygELGH7220216	EGAN00001833179	Female	NULL
 map_file4 = "/nfs/users/nfs_m/mercury/pa10/ddd-elgh-ukbb/EGA_to_study.txt"
+
+# First read the samples
 samples_list = {}
 with open(map_file, newline='') as samples:
     samples_reader = csv.reader(samples, delimiter='\t')
@@ -25,13 +27,16 @@ with open(map_file, newline='') as samples:
 # print(samples_list)
 with open(map_file2, newline='') as samples2:
     samples_reader = csv.reader(samples2, delimiter='\t')
+
     for s1 in samples_reader:
-        samples_list[s1[0]] = s1[1]
+        if s1[0] in samples_list.keys:
+            samples_list[s1[0]] = s1[1]
         # print(s1[0])
 with open(map_file3, newline='') as samples3:
-    samples_reader = csv.reader(samples3, delimiter='\t')
+    samples_reader = csv.reader(samples3, delimiter=' ')
     for s1 in samples_reader:
-        samples_list[s1[2]] = s1[1]
+        if s1[2] in samples_list.keys:
+            samples_list[s1[2]] = s1[1]
 
 # print(samples_list)
 for sample, cohort in samples_list.items():
