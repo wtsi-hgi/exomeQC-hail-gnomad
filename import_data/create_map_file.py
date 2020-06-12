@@ -2,9 +2,9 @@ import re
 import csv
 map_file = "/nfs/users/nfs_m/mercury/pa10/ddd-elgh-ukbb/UKBB_DDD_ELGH_July19.map"
 
-map_file2="/nfs/users/nfs_m/mercury/pa10/ddd-elgh-ukbb/sample_list.before_QC.with_cohort_labels.txt"
-map_file3="/nfs/users/nfs_m/mercury/pa10/ddd-elgh-ukbb/IHTP_ISC_British_Autozygosity_Populations_Resource_Part_5.all_IDs.180119.txt"
-map_file4="/nfs/users/nfs_m/mercury/pa10/ddd-elgh-ukbb/EGA_to_study.txt"
+map_file2 = "/nfs/users/nfs_m/mercury/pa10/ddd-elgh-ukbb/sample_list.before_QC.with_cohort_labels.txt"
+map_file3 = "/nfs/users/nfs_m/mercury/pa10/ddd-elgh-ukbb/IHTP_ISC_British_Autozygosity_Populations_Resource_Part_5.all_IDs.180119.txt"
+map_file4 = "/nfs/users/nfs_m/mercury/pa10/ddd-elgh-ukbb/EGA_to_study.txt"
 samples_list = {}
 with open(map_file, newline='') as samples:
     samples_reader = csv.reader(samples, delimiter='\t')
@@ -21,11 +21,15 @@ with open(map_file, newline='') as samples:
             samples_list[s1[0]] = s1[1]
 
 # print(samples_list)
-with open(additional_cohorts, newline='') as samples2:
-    samples_reader = csv.reader(samples2, delimiter=' ')
+with open(map_file2, newline='') as samples2:
+    samples_reader = csv.reader(samples2, delimiter='\t')
     for s1 in samples_reader:
         samples_list[s1[0]] = s1[1]
         # print(s1[0])
+with open(map_file3, newline='') as samples3:
+    samples_reader = csv.reader(samples2, delimiter='\t')
+    for s1 in samples_reader:
+        samples_list[s1[0]] = s1[1]
 
 # print(samples_list)
 for sample, cohort in samples_list.items():
