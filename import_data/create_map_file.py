@@ -3,7 +3,9 @@ import csv
 map_file = "/nfs/users/nfs_m/mercury/pa10/ddd-elgh-ukbb/UKBB_DDD_ELGH_July19.map"
 
 map_file2 = "/nfs/users/nfs_m/mercury/pa10/ddd-elgh-ukbb/sample_list.before_QC.with_cohort_labels.txt"
+
 map_file3 = "/nfs/users/nfs_m/mercury/pa10/ddd-elgh-ukbb/IHTP_ISC_British_Autozygosity_Populations_Resource_Part_5.all_IDs.180119.txt"
+# 15001608192016	sc_autozygELGH7220216	EGAN00001833179	Female	NULL
 map_file4 = "/nfs/users/nfs_m/mercury/pa10/ddd-elgh-ukbb/EGA_to_study.txt"
 samples_list = {}
 with open(map_file, newline='') as samples:
@@ -29,7 +31,7 @@ with open(map_file2, newline='') as samples2:
 with open(map_file3, newline='') as samples3:
     samples_reader = csv.reader(samples3, delimiter='\t')
     for s1 in samples_reader:
-        samples_list[s1[0]] = s1[1]
+        samples_list[s1[2]] = s1[1]
 
 # print(samples_list)
 for sample, cohort in samples_list.items():
