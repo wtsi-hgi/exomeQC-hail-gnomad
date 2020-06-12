@@ -1,7 +1,10 @@
 import re
 import csv
-map_file = "./UKBB_DDD_ELGH_July19.map"
-additional_cohorts = "./EGA_to_study.txt"
+map_file = "/nfs/users/nfs_m/mercury/pa10/ddd-elgh-ukbb/UKBB_DDD_ELGH_July19.map"
+
+map_file2="/nfs/users/nfs_m/mercury/pa10/ddd-elgh-ukbb/sample_list.before_QC.with_cohort_labels.txt"
+map_file3="/nfs/users/nfs_m/mercury/pa10/ddd-elgh-ukbb/IHTP_ISC_British_Autozygosity_Populations_Resource_Part_5.all_IDs.180119.txt"
+map_file4="/nfs/users/nfs_m/mercury/pa10/ddd-elgh-ukbb/EGA_to_study.txt"
 samples_list = {}
 with open(map_file, newline='') as samples:
     samples_reader = csv.reader(samples, delimiter='\t')
