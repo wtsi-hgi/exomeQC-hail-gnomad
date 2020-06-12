@@ -29,13 +29,13 @@ with open(map_file2, newline='') as samples2:
     samples_reader = csv.reader(samples2, delimiter='\t')
 
     for s1 in samples_reader:
-        if s1[0] in samples_list.keys:
+        if s1[0] in samples_list.keys():
             samples_list[s1[0]] = s1[1]
         # print(s1[0])
 with open(map_file3, newline='') as samples3:
     samples_reader = csv.reader(samples3, delimiter=' ')
     for s1 in samples_reader:
-        if s1[2] in samples_list.keys:
+        if s1[2] in samples_list.keys():
             samples_list[s1[2]] = s1[1]
 
 # print(samples_list)
