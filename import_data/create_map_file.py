@@ -14,7 +14,7 @@ with open(map_file, newline='') as samples:
     samples_reader = csv.reader(samples, delimiter='\t')
     for s1 in samples_reader:
         if "elgh" in s1[1]:
-            samples_list[s1[0]] = "ELGH"
+            samples_list[s1[0]] = "ELGH_Parts1-4"
         elif "UK10K" in s1[1] or "ukbb" in s1[1]:
             samples_list[s1[0]] = "UKBB"
         elif "ddd" in s1[1]:
@@ -36,7 +36,13 @@ with open(map_file3, newline='') as samples3:
     samples_reader = csv.reader(samples3, delimiter='\t')
     for s1 in samples_reader:
         if s1[2] in samples_list.keys():
-            samples_list[s1[2]] = s1[1]
+            samples_list[s1[2]] = "ELGH_Part5"
+
+with open(map_file4, newline='') as samples4:
+    samples_reader = csv.reader(samples4, delimiter=' ')
+    for s1 in samples_reader:
+        if s1[0] in samples_list.keys():
+            samples_list[s1[2]] = s1[3]
 
 # print(samples_list)
 for sample, cohort in samples_list.items():
