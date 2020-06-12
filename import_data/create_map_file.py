@@ -42,7 +42,10 @@ with open(map_file4, newline='') as samples4:
     samples_reader = csv.reader(samples4, delimiter=' ')
     for s1 in samples_reader:
         if s1[0] in samples_list.keys() and "ELGH" not in samples_list[s1[0]]:
-            samples_list[s1[0]] = s1[2]
+            if "IHTP_ISC_British" in s1[2]:
+                samples_list[s1[0]] = "ELGH_Parts1_4"
+            else:
+                samples_list[s1[0]] = s1[2]
 
 # print(samples_list)
 print(f"sample\tcohort")
