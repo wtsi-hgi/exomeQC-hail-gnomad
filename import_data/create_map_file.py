@@ -10,11 +10,14 @@ map_file4 = "/nfs/users/nfs_m/mercury/pa10/ddd-elgh-ukbb/EGA_to_study.txt"
 
 # First read the samples
 samples_list = {}
+ELGH_1 = "ELGH_Parts1-4"
+ELGH_5 = "ELGH_Part5"
+
 with open(map_file, newline='') as samples:
     samples_reader = csv.reader(samples, delimiter='\t')
     for s1 in samples_reader:
         if "elgh" in s1[1]:
-            samples_list[s1[0]] = "ELGH_Parts1-4"
+            samples_list[s1[0]] = ELGH_1
         elif "UK10K" in s1[1] or "ukbb" in s1[1]:
             samples_list[s1[0]] = "UKBB"
         elif "ddd" in s1[1]:
@@ -36,14 +39,14 @@ with open(map_file3, newline='') as samples3:
     samples_reader = csv.reader(samples3, delimiter='\t')
     for s1 in samples_reader:
         if s1[2] in samples_list.keys():
-            samples_list[s1[2]] = "ELGH_Part5"
+            samples_list[s1[2]] = ELGH_5
 
 with open(map_file4, newline='') as samples4:
     samples_reader = csv.reader(samples4, delimiter=' ')
     for s1 in samples_reader:
         if s1[0] in samples_list.keys() and "ELGH" not in samples_list[s1[0]]:
             if "IHTP_ISC_British" in s1[2]:
-                samples_list[s1[0]] = "ELGH_Parts1_4"
+                samples_list[s1[0]] = ELGH_1
             else:
                 samples_list[s1[0]] = s1[2]
 
