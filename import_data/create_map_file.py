@@ -45,6 +45,7 @@ with open(map_file4, newline='') as samples4:
             samples_list[s1[0]] = s1[2]
 
 # print(samples_list)
+print(f"sample\tcohort")
 for sample, cohort in samples_list.items():
     print(f"{sample}\t{cohort}")
 # if "elgh" in s1[1]:
