@@ -41,7 +41,7 @@ with open(map_file3, newline='') as samples3:
 with open(map_file4, newline='') as samples4:
     samples_reader = csv.reader(samples4, delimiter=' ')
     for s1 in samples_reader:
-        if s1[0] in samples_list.keys():
+        if s1[0] in samples_list.keys() and "ELGH" not in samples_list[s1[0]]:
             samples_list[s1[0]] = s1[2]
 
 # print(samples_list)
