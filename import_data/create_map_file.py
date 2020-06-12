@@ -42,7 +42,7 @@ with open(map_file4, newline='') as samples4:
     samples_reader = csv.reader(samples4, delimiter=' ')
     for s1 in samples_reader:
         if s1[0] in samples_list.keys():
-            samples_list[s1[2]] = s1[3]
+            samples_list[s1[0]] = s1[2]
 
 # print(samples_list)
 for sample, cohort in samples_list.items():
