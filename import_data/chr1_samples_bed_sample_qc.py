@@ -68,15 +68,14 @@ if __name__ == "__main__":
         f"{temp_dir}/ddd-elgh-ukbb/{CHROMOSOME}.mt")
 
     mt_annotated = annotate_samples_with_cohort_info(mt, table_cohort)
-    mt_annotated.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/{CHROMOSOME}_annotated.mt", overwrite=True)
+    # mt_annotated.write(
+    #    f"{tmp_dir}/ddd-elgh-ukbb/{CHROMOSOME}_annotated.mt", overwrite=True)
 
     mt_annotated = mt_annotated.key_rows_by('locus').distinct_by_row(
     ).key_rows_by('locus', 'alleles')
-    mt_split = hl.split_multi_hts(mt_annotated, keep_star=False, left_aligned=False)
-    mt_split = mt_split.checkpoint(
-        f"{tmp_dir}/ddd-elgh-ukbb/{CHROMOSOME}-split-multi_checkpoint.mt",  overwrite=True)
-    print("Finished splitting and writing mt. ")
+    mt_split = hl.split_multi_hts(
+        mt_annotated, keep_star=False, left_aligned=False)
+
     mt = mt_split.annotate_rows(
         Variant_Type=hl.cond((hl.is_snp(mt_split.alleles[0], mt_split.alleles[1])), "SNP",
                              hl.cond(
@@ -86,6 +85,10 @@ if __name__ == "__main__":
             hl.cond(hl.is_deletion(mt_split.alleles[0],
                                    mt_split.alleles[1]), "INDEL",
                     "Other"))))
+
+    mt = mt.checkpoint(
+        f"{tmp_dir}/ddd-elgh-ukbb/{CHROMOSOME}-split-multi_cohorts.mt",  overwrite=True)
+    print("Finished splitting and writing mt. ")
 
     intersection_table = hl.import_bed(
         intersection_bed, reference_genome='GRCh38')
@@ -106,7 +109,6 @@ if __name__ == "__main__":
     mt = mt.checkpoint(
         f"{tmp_dir}/ddd-elgh-ukbb/{CHROMOSOME}-sampleqc-unfiltered_sex_annotated.mt", overwrite=True)
 
-
     mt_union = hl.sample_qc(mt_union, name='sample_QC_Hail')
     pandadf2 = mt_union.cols().flatten()
     print("Outputting table of sample qc")
@@ -114,10 +116,6 @@ if __name__ == "__main__":
         f"{tmp_dir}/ddd-elgh-ukbb/{CHROMOSOME}_union_BED_sampleQC.tsv.bgz", header=True)
     mt_union = mt_union.checkpoint(
         f"{tmp_dir}/ddd-elgh-ukbb/{CHROMOSOME}-union_BED.mt", overwrite=True)
-
-
-
-    
     #
     # run sample_qc
     # plot various sample_qc per cohort -use intervalwgs threshold
