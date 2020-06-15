@@ -70,9 +70,10 @@ if __name__ == "__main__":
     mt_annotated = annotate_samples_with_cohort_info(mt, table_cohort)
     mt_annotated.write(
         f"{tmp_dir}/ddd-elgh-ukbb/{CHROMOSOME}_annotated.mt", overwrite=True)
-    mt = mt.key_rows_by('locus').distinct_by_row(
+
+    mt_annotated = mt_annotated.key_rows_by('locus').distinct_by_row(
     ).key_rows_by('locus', 'alleles')
-    mt_split = hl.split_multi_hts(mt, keep_star=False, left_aligned=False)
+    mt_split = hl.split_multi_hts(mt_annotated, keep_star=False, left_aligned=False)
     mt_split = mt_split.checkpoint(
         f"{tmp_dir}/ddd-elgh-ukbb/{CHROMOSOME}-split-multi_checkpoint.mt",  overwrite=True)
     print("Finished splitting and writing mt. ")
@@ -113,6 +114,10 @@ if __name__ == "__main__":
         f"{tmp_dir}/ddd-elgh-ukbb/{CHROMOSOME}_union_BED_sampleQC.tsv.bgz", header=True)
     mt_union = mt_union.checkpoint(
         f"{tmp_dir}/ddd-elgh-ukbb/{CHROMOSOME}-union_BED.mt", overwrite=True)
+
+
+
+    
     #
     # run sample_qc
     # plot various sample_qc per cohort -use intervalwgs threshold
