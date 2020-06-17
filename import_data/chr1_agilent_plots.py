@@ -112,17 +112,3 @@ if __name__ == "__main__":
 
     mt = mt.checkpoint(
         f"{tmp_dir}/ddd-elgh-ukbb/{CHROMOSOME}-sampleqc-unfiltered_annotated.mt", overwrite=True)
-
-    sample_qc_table1 = f"{tmp_dir}/ddd-elgh-ukbb/{CHROMOSOME}_agilent_sampleQC.tsv.bgz"
-
-    df_agilent = pd.read_csv(
-        sample_qc_table1, compression='gzip', delimiter="\t")
-
-    samples_per_cohort = df_agilent.groupby("cohort")["s"].count()
-    fig = px.bar(samples_per_cohort, x='s',
-                 text='s',
-                 labels={'s': 'Samples'}, height=1000).update_yaxes(categoryorder="category descending")
-    fig.update_layout(
-        title=f"Number of samples per cohort in dataset. (93674 samples in total)")
-    fig.write_html(
-        f"{temp_dir}/ddd-elgh-ukbb/plots/{CHROMOSOME}_new_cohorts.html")
