@@ -55,6 +55,23 @@ CHROMOSOMES = ["chr2",
                "chrY"
                ]
 
+
+def annotate_samples_with_cohort_info(mt: hl.MatrixTable, cohort_file) -> hl.MatrixTable:
+    '''
+
+    :param mt: matrixtable with cohort samples and variants
+    :param cohort_file: a txt file with no header line and 2 columns, 1st: for sampleID;  2nd: cohortname; example:/lustre/scratch115/projects/autozyg/new_autozyg_DDD_callset.April2019/sample_list.after_QC.ELGH_BiB_Birm_controls_only.with_cohort_labels.txt
+    :return: matrixtable with new column annotation
+    '''
+    # import the tab delimited file. Note that it is important for joins of tables to have defined keys in the hail tables
+    table_cohort = hl.import_table(cohort_file, key='sample')
+    # annotate the samples with a new attribute called cohort:
+    mt_result = mt.annotate_cols(cohort=table_cohort[mt.s].cohort)
+    return mt_result
+
+
+table_cohort = "s3a://DDD-ELGH-UKBB-exomes/samples_cohorts.tsv"
+
 if __name__ == "__main__":
     # need to create spark cluster first before intiialising hail
     sc = pyspark.SparkContext()
@@ -81,6 +98,16 @@ if __name__ == "__main__":
         mt = mt.union_rows(mt2)
 
     print("Now writing joined matrixtable to disk:")
+    # annotate with cohorts
+    mt_annotated = annotate_samples_with_cohort_info(mt, table_cohort)
 
-    mt.write(f"{tmp_dir}/ddd-elgh-ukbb/WGS-ddd-elgh-ukbb.mt", overwrite=True)
+    mt_annotated = mt_annotated.key_rows_by('locus').distinct_by_row(
+    ).key_rows_by('locus', 'alleles')
+    # mt_split = hl.split_multi_hts(
+    #    mt_annotated, keep_star=False, left_aligned=False)
+    # mt_split = mt_split.checkpoint(
+    #   f"{tmp_dir}/ddd-elgh-ukbb/{CHROMOSOME}-split-multi_cohorts.mt",  overwrite=True)
+
+    mt_annotated.write(
+        f"{tmp_dir}/ddd-elgh-ukbb/WES_annotated_cohorts.mt", overwrite=True)
     print(f"Wrote matrixtable for whole genome.")

@@ -92,7 +92,9 @@ if __name__ == "__main__":
 
     intersection_table = hl.import_bed(
         intersection_bed, reference_genome='GRCh38')
+    
     union_table = hl.import_bed(union_bed, reference_genome='GRCh38')
+    
     mt_intersection = mt.filter_rows(
         hl.is_defined(intersection_table[mt.locus]))
     mt_union = mt.filter_rows(hl.is_defined(union_table[mt.locus]))
