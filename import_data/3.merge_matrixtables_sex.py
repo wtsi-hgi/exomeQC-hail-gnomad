@@ -55,7 +55,7 @@ CHROMOSOMES = ["chr2",
                "chrY"
                ]
 
-SEX_CHROMOSOMES = ["chrX", "chrY"]
+SEX_CHROMOSOMES = ["chr20", "chrX", "chrY"]
 
 
 def annotate_samples_with_cohort_info(mt: hl.MatrixTable, cohort_file) -> hl.MatrixTable:
@@ -105,11 +105,11 @@ if __name__ == "__main__":
 
     mt_annotated = mt_annotated.key_rows_by('locus').distinct_by_row(
     ).key_rows_by('locus', 'alleles')
-    # mt_split = hl.split_multi_hts(
-    #    mt_annotated, keep_star=False, left_aligned=False)
+    mt_split = hl.split_multi_hts(
+        mt_annotated, keep_star=False, left_aligned=False)
     # mt_split = mt_split.checkpoint(
     #   f"{tmp_dir}/ddd-elgh-ukbb/{CHROMOSOME}-split-multi_cohorts.mt",  overwrite=True)
 
     mt_annotated.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/chr1_sex_chromosomes_cohorts.mt", overwrite=True)
+        f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_cohorts_split.mt", overwrite=True)
     print(f"Wrote matrixtable for whole genome.")
