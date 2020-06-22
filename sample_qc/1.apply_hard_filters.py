@@ -72,12 +72,12 @@ if __name__ == "__main__":
     #####################################################################
     CHROMOSOME = "WGS"
     mt = hl.read_matrix_table(
-         f"{temp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_cohorts_split.mt")
+        f"{temp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_cohorts_split.mt")
 
    # From gnomad pply hard filters:
     mt = mt.filter_rows((hl.len(mt.alleles) == 2) & hl.is_snp(mt.alleles[0], mt.alleles[1]) &
-                            (hl.agg.mean(mt.GT.n_alt_alleles()) / 2 > 0.001) &
-                            (hl.agg.fraction(hl.is_defined(mt.GT)) > 0.99))
+                        (hl.agg.mean(mt.GT.n_alt_alleles()) / 2 > 0.001) &
+                        (hl.agg.fraction(hl.is_defined(mt.GT)) > 0.99))
     mt.annotate_cols(callrate=hl.agg.fraction(hl.is_defined(mt.GT))).write(
         f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_annotated.mt", overwrite=True)
     print("Sex imputation:")
@@ -85,23 +85,24 @@ if __name__ == "__main__":
         mt, f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY", male_threshold=0.6).cols()
 
     qc_ht = qc_ht.annotate(ambiguous_sex=((qc_ht.f_stat >= 0.5) & (hl.is_defined(qc_ht.normalized_y_coverage) & (qc_ht.normalized_y_coverage <= 0.1))) |
-                                             (hl.is_missing(qc_ht.f_stat)) |
-                                             ((qc_ht.f_stat >= 0.4) & (qc_ht.f_stat <= 0.6) & (hl.is_defined(
-                                                 qc_ht.normalized_y_coverage) & (qc_ht.normalized_y_coverage > 0.1))),
-                               sex_aneuploidy=(qc_ht.f_stat < 0.4) & hl.is_defined(qc_ht.normalized_y_coverage) & (qc_ht.normalized_y_coverage > 0.1))
+                           (hl.is_missing(qc_ht.f_stat)) |
+                           ((qc_ht.f_stat >= 0.4) & (qc_ht.f_stat <= 0.6) & (hl.is_defined(
+                               qc_ht.normalized_y_coverage) & (qc_ht.normalized_y_coverage > 0.1))),
+                           sex_aneuploidy=(qc_ht.f_stat < 0.4) & hl.is_defined(qc_ht.normalized_y_coverage) & (qc_ht.normalized_y_coverage > 0.1))
 
     print("Annotating samples failing hard filters:")
     logger.info("Annotating samples failing hard filters...")
 
     sex_expr = (hl.case()
-                    .when(qc_ht.ambiguous_sex, "ambiguous_sex")
-                    .when(qc_ht.sex_aneuploidy, "sex_aneuploidy")
-                    .when(qc_ht.is_female, "female")
-                    .default("male"))
+                .when(qc_ht.ambiguous_sex, "ambiguous_sex")
+                .when(qc_ht.sex_aneuploidy, "sex_aneuploidy")
+                .when(qc_ht.is_female, "female")
+                .default("male"))
 
     qc_ht = qc_ht.annotate(
         sex=sex_expr, data_type='exomes').key_by('data_type', 's')
-    qc_ht.write(f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_sex.mt", 'hard_filters'), overwrite = True)
+    qc_ht.write(f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_sex.mt",
+                overwrite=True)
 
     # mt2_sex = mt2.select_entries(GT=hl.unphased_diploid_gt_index_call(mt2.GT.n_alt_alleles()))
     # imputed_sex = hl.impute_sex(mt_sampleqc.GT)
