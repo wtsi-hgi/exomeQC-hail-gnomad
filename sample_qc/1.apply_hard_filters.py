@@ -43,7 +43,7 @@ def annotate_sex(mt: hl.MatrixTable, out_internal_mt_prefix: str,
     :return: MatrixTable with imputed sex annotations stashed in column annotation 'sex_check'
     :rtype: MatrixTable
     """
-    mt = hl.filter_intervals(mt, [hl.parse_locus_interval('chrX')])
+    mt = hl.filter_intervals(mt, [hl.parse_locus_interval('chrY')])
     sex_ht = hl.impute_sex(mt.GT, aaf_threshold=0.05,
                            female_threshold=female_threshold, male_threshold=male_threshold)
     sex_ht.export(out_internal_mt_prefix + '.sex_check.txt.bgz')
