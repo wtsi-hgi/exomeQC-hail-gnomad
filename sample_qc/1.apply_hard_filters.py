@@ -85,8 +85,12 @@ if __name__ == "__main__":
     mt.annotate_cols(callrate=hl.agg.fraction(hl.is_defined(mt.GT))).write(
         f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_annotated.mt", overwrite=True)
     print("Sex imputation:")
-    qc_ht = annotate_sex(
-        mt, f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY", male_threshold=0.6).cols()
+
+    mt_sex = annotate_sex(
+        mt, f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY", male_threshold=0.6)
+    mt_sex.write(f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_sex.mt")
+
+    qc_ht = mt_sex.cols()
 
     qc_ht = qc_ht.annotate(ambiguous_sex=((qc_ht.f_stat >= 0.5) & (hl.is_defined(qc_ht.normalized_y_coverage) & (qc_ht.normalized_y_coverage <= 0.1))) |
                            (hl.is_missing(qc_ht.f_stat)) |
@@ -105,7 +109,7 @@ if __name__ == "__main__":
 
     qc_ht = qc_ht.annotate(
         sex=sex_expr, data_type='exomes').key_by('data_type', 's')
-    qc_ht.write(f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_sex.mt",
+    qc_ht.write(f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_sex_annotations.mt",
                 overwrite=True)
 
     # mt2_sex = mt2.select_entries(GT=hl.unphased_diploid_gt_index_call(mt2.GT.n_alt_alleles()))
