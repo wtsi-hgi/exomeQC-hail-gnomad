@@ -95,7 +95,7 @@ if __name__ == "__main__":
                 .default("male"))
 
     mt = mt.annotate_cols(
-        sex=sex_expr, data_type='exomes').key_by('data_type', 's')
+        sex=sex_expr, data_type='exomes')
     mt.write(f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_sex_annotations.mt",
              overwrite=True)
 
