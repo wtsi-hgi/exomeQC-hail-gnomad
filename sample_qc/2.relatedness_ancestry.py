@@ -107,18 +107,19 @@ if __name__ == "__main__":
     ###################### INPUT DATA  ##############################
     #####################################################################
     CHROMOSOME = "WGS"
-    mt = hl.read_matrix_table(
-        f"{temp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_sex_annotations.mt")
+    # mt = hl.read_matrix_table(
+    #    f"{temp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_sex_annotations.mt")
 
     # ld pruning
-    pruned_ht = hl.ld_prune(mt.GT, r2=0.1)
-    pruned_mt = mt.filter_rows(hl.is_defined(pruned_ht[mt.row_key]))
-    pruned_mt.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_ldpruned.mt", overwrite=True)
-
+    #pruned_ht = hl.ld_prune(mt.GT, r2=0.1)
+    #pruned_mt = mt.filter_rows(hl.is_defined(pruned_ht[mt.row_key]))
+    # pruned_mt.write(
+    #    f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_ldpruned.mt", overwrite=True)
+    pruned_mt = hl.read_matrix_table(
+        f"{temp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_ldpruned.mt")
     # PC relate
     eig, scores = hl.hwe_normalized_pca(
-        pruned_mt.GT, k=10, compute_loading=False)
+        pruned_mt.GT, k=10)
     scores.write(
         f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_pruned.pca_scores.ht", overwrite=True)
 
