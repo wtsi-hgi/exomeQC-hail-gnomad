@@ -6,6 +6,7 @@ import sys
 import re
 from pathlib import Path
 import logging
+from typing inport List, Tuple
 logging.basicConfig(format="%(levelname)s (%(name)s %(lineno)s): %(message)s")
 logger = logging.getLogger("unified_sample_qc_a")
 logger.setLevel(logging.INFO)
