@@ -118,8 +118,8 @@ if __name__ == "__main__":
     pruned_mt = hl.read_matrix_table(
         f"{temp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_ldpruned.mt")
     # PC relate
-    eig, scores = hl.hwe_normalized_pca(
-        pruned_mt.GT, k=10)
+    eig, scores, _ = hl.hwe_normalized_pca(
+        pruned_mt.GT, k=10, compute_loadings=False)
     scores.write(
         f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_pruned.pca_scores.ht", overwrite=True)
 
