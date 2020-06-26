@@ -118,6 +118,9 @@ if __name__ == "__main__":
     pruned_mt = hl.read_matrix_table(
         f"{temp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_ldpruned.mt")
     # PC relate
+    pruned_mt = pruned_mt.select_entries(
+        GT=hl.unphased_diploid_gt_index_call(mt1.GT.n_alt_alleles()))
+
     eig, scores, _ = hl.hwe_normalized_pca(
         pruned_mt.GT, k=10, compute_loadings=False)
     scores.write(
