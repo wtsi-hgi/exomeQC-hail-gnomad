@@ -145,7 +145,7 @@ if __name__ == "__main__":
     # Population pca
 
     plink_mt = pca_mt.annotate_cols(
-        uid=pca_mt.data_type + '_' + pca_mt.s).key_cols_by('uid')
+        uid=pca_mt.s).key_cols_by('uid')
     hl.export_plink(plink_mt, f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_unrelated.plink",
                     fam_id=plink_mt.uid, ind_id=plink_mt.uid)
     pca_evals, pca_scores, pca_loadings = hl.hwe_normalized_pca(
