@@ -37,19 +37,21 @@ df_ddd = pd.read_csv(DDD, delimiter="\t")
 
 df_elgh = pd.read_csv(elgh, delimiter="\t")
 df_elgh = df_elgh[["EGAID", "sex.assigned"]]
+
+df_u = pd.concat(df_ddd, df_elgh, keys=["EGAID"], ignore_index=True)
 # print(df_elgh.head())
 
 df_ukbb = pd.read_csv(ukbb, delimiter=" ")
 # print(df_ukbb.head())
 
 # merge1:
-df1 = pd.merge(df, df_ddd, how='left', left_on="s",
-               right_on="ega_id", left_index=True, indicator=True)
-df2 = pd.merge(df1, df_elgh, how='left', left_on="s",
-               right_on="EGAID",  left_index=True)
+df1 = pd.merge(df, df_u, how='left', left_on="s",
+               right_on="EGAID", left_index=True)
+# df2 = pd.merge(df1, df_elgh, how='left', left_on="s",
+#               right_on="EGAID",  left_index=True)
 # df3 = pd.merge(df2, df_ukbb, how='left', left_on="s",
 #               right_on="s",  left_index=True)
 # print(df3.head())
 
-df2.to_csv("/nfs/users/nfs_m/mercury/pa10/ddd-elgh-ukbb/sex_annotations/validation_sex_check.tsv",
+df1.to_csv("/nfs/users/nfs_m/mercury/pa10/ddd-elgh-ukbb/sex_annotations/validation_sex_check.tsv",
            sep="\t", index=False)
