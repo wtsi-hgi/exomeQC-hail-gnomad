@@ -7,6 +7,8 @@ import re
 from pathlib import Path
 import logging
 from typing import List, Tuple
+from bokeh.plotting import output_file, save, show
+
 logging.basicConfig(format="%(levelname)s (%(name)s %(lineno)s): %(message)s")
 logger = logging.getLogger("unified_sample_qc_a")
 logger.setLevel(logging.INFO)
@@ -166,9 +168,9 @@ if __name__ == "__main__":
 
     variants, samples = related_mt.count()
     print('Projecting population PCs for {} related samples...'.format(samples))
-    related_scores = pc_project(related_mt, pca_loadings)
-    relateds = related_mt.cols()
-    relateds = relateds.annotate(scores=related_scores[relateds.key].scores)
+    #related_scores = pc_project(related_mt, pca_loadings)
+    #relateds = related_mt.cols()
+    #relateds = relateds.annotate(scores=related_scores[relateds.key].scores)
 
     pca_mt.write(
         f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_pca.mt", overwrite=True)
