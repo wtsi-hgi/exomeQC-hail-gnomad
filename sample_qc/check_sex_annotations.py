@@ -46,3 +46,6 @@ df2 = pd.merge(df1, df_elgh, how='left', left_on="s",
 df3 = pd.merge(df2, df_ukbb, how='left', left_on="s",
                right_on="s",  left_index=True)
 print(df3.head())
+
+df3.to_csv("/nfs/users/nfs_m/mercury/pa10/ddd-elgh-ukbb/sex_annotations/validation_sex_check.tsv",
+           sep="\t", index=False)
