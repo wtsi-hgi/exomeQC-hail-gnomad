@@ -21,8 +21,11 @@ elgh = "/nfs/users/nfs_m/mercury/pa10/ddd-elgh-ukbb/sex_annotations/ELGH_samples
 # ABF5580478	2159967.cram	40.9141	43.196	4.37683	1	D00_20354	EGAN00001175140	Unknown	NULL	FALSE	0.101324891193629	female
 # ABF5580479	2159968.cram	47.3553	26.7831	29.3019	1	D01_16627	EGAN00001175141	Unknown	NULL	FALSE	1.09404437873136	male
 
-ukbb = "/nfs/users/nfs_m/mercury/pa10/ddd-elgh-ukbb/sex_annotations/UKBB_sex_at_recruitment_EGAN.txt"
-
+ukbb = "/nfs/users/nfs_m/mercury/pa10/ddd-elgh-ukbb/sex_annotations/UKBB_sex_at_recruitment.txt"
+# eid	31-0.0
+# 1000012	1
+# 1000029	1
+# 1000031	1
 df = pd.read_csv(hail_results, compression='gzip', delimiter="\t")
 print(df.head())
 #                 s is_female    f_stat  n_called  expected_homs  observed_homs
@@ -33,6 +36,7 @@ df_ddd = pd.read_csv(DDD, delimiter="\t")
 # print(df_ddd.head())
 
 df_elgh = pd.read_csv(elgh, delimiter="\t")
+df_elgh = df_elgh[["EGAID", "sex.assigned"]]
 # print(df_elgh.head())
 
 df_ukbb = pd.read_csv(ukbb, delimiter=" ")
@@ -40,12 +44,12 @@ df_ukbb = pd.read_csv(ukbb, delimiter=" ")
 
 # merge1:
 df1 = pd.merge(df, df_ddd, how='left', left_on="s",
-               right_on="ega_id", left_index=True)
+               right_on="ega_id", left_index=True, indicator=True)
 df2 = pd.merge(df1, df_elgh, how='left', left_on="s",
                right_on="EGAID",  left_index=True)
-df3 = pd.merge(df2, df_ukbb, how='left', left_on="s",
-               right_on="s",  left_index=True)
-print(df3.head())
+# df3 = pd.merge(df2, df_ukbb, how='left', left_on="s",
+#               right_on="s",  left_index=True)
+# print(df3.head())
 
-df3.to_csv("/nfs/users/nfs_m/mercury/pa10/ddd-elgh-ukbb/sex_annotations/validation_sex_check.tsv",
+df2.to_csv("/nfs/users/nfs_m/mercury/pa10/ddd-elgh-ukbb/sex_annotations/validation_sex_check.tsv",
            sep="\t", index=False)
