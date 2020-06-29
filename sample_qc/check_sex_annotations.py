@@ -39,7 +39,7 @@ df_elgh = pd.read_csv(elgh, delimiter="\t")
 df_elgh = df_elgh[["EGAID", "sex.assigned"]]
 
 df_u = pd.concat([df_ddd, df_elgh], keys=[
-                 "ega_id", "EGAID"], ignore_index=True)
+                 "ega_id", "EGAID"], ignore_index=True, sort=False)
 print(df_u.head())
 
 df_ukbb = pd.read_csv(ukbb, delimiter=" ")
