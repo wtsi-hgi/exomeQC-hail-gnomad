@@ -39,7 +39,10 @@ df_ukbb = pd.read_csv(ukbb, delimiter=" ")
 # print(df_ukbb.head())
 
 # merge1:
-df1 = pd.merge(df, df_ddd, how='left', left_on="s", right_on="ega_id")
-df2 = pd.merge(df1, df_elgh, how='left', left_on="s", right_on="EGAID")
-df3 = pd.merge(df2, df_ukbb, how='left', left_on="s", right_on="s")
+df1 = pd.merge(df, df_ddd, how='left', left_on="s",
+               right_on="ega_id", left_index=True)
+df2 = pd.merge(df1, df_elgh, how='left', left_on="s",
+               right_on="EGAID",  left_index=True)
+df3 = pd.merge(df2, df_ukbb, how='left', left_on="s",
+               right_on="s",  left_index=True)
 print(df3.head())
