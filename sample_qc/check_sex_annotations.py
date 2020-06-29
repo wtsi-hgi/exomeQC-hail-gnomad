@@ -30,13 +30,13 @@ print(df.head())
 # 1  EGAN00001006260     False  0.856640      1071         743.15           1024
 
 df_ddd = pd.read_csv(DDD, delimiter="\t")
-print(df_ddd.head())
+# print(df_ddd.head())
 
 df_elgh = pd.read_csv(elgh, delimiter="\t")
-print(df_elgh.head())
+# print(df_elgh.head())
 
 df_ukbb = pd.read_csv(ukbb, delimiter="\t")
-print(df_ukbb.head())
+# print(df_ukbb.head())
 
 # merge1:
 df1 = pd.merge(df, df_ddd, how='left', left_on="s", right_on="ega_id")
