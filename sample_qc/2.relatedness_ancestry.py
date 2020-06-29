@@ -125,18 +125,18 @@ if __name__ == "__main__":
 
     eig, scores, _ = hl.hwe_normalized_pca(
         pruned_mt.GT, k=10, compute_loadings=False)
-    scores.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_pruned.pca_scores.ht", overwrite=True)
+  #  scores.write(
+  #      f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_pruned.pca_scores.ht", overwrite=True)
 
     relatedness_ht = hl.pc_relate(pruned_mt.GT, min_individual_maf=0.05,
                                   scores_expr=scores[pruned_mt.col_key].scores, block_size=4096, min_kinship=0.05, statistics='kin2')
-    relatedness_ht.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_relatedness.ht", overwrite=True)
+   # relatedness_ht.write(
+   #     f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_relatedness.ht", overwrite=True)
     pairs = relatedness_ht.filter(relatedness_ht['kin'] > 0.125)
     related_samples_to_remove = hl.maximal_independent_set(
         pairs.i, pairs.j, keep=False)
-    related_samples_to_remove.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_related_samples_to_remove.ht", overwrite=True)
+   # related_samples_to_remove.write(
+   #     f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_related_samples_to_remove.ht", overwrite=True)
 
     pca_mt = pruned_mt.filter_cols(hl.is_defined(
         related_samples_to_remove[pruned_mt.col_key]), keep=False)
@@ -151,18 +151,18 @@ if __name__ == "__main__":
 
     plink_mt = pca_mt.annotate_cols(
         uid=pca_mt.s).key_cols_by('uid')
-    hl.export_plink(plink_mt, f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_unrelated.plink",
-                    fam_id=plink_mt.uid, ind_id=plink_mt.uid)
+    #hl.export_plink(plink_mt, f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_unrelated.plink",
+     #               fam_id=plink_mt.uid, ind_id=plink_mt.uid)
     pca_evals, pca_scores, pca_loadings = hl.hwe_normalized_pca(
         pca_mt.GT, k=20, compute_loadings=True)
     pca_af_ht = pca_mt.annotate_rows(
         pca_af=hl.agg.mean(pca_mt.GT.n_alt_alleles()) / 2).rows()
     pca_loadings = pca_loadings.annotate(
         pca_af=pca_af_ht[pca_loadings.key].pca_af)
-    pca_scores.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_pca_scores.ht", overwrite=True)
-    pca_loadings.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_pca_loadings.ht", overwrite=True)
+    #pca_scores.write(
+    #    f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_pca_scores.ht", overwrite=True)
+    #pca_loadings.write(
+    #    f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_pca_loadings.ht", overwrite=True)
 
     pca_mt = pca_mt.annotate_cols(scores=pca_scores[pca_mt.col_key].scores)
 
