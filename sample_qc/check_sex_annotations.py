@@ -35,7 +35,7 @@ df_ddd = pd.read_csv(DDD, delimiter="\t")
 df_elgh = pd.read_csv(elgh, delimiter="\t")
 # print(df_elgh.head())
 
-df_ukbb = pd.read_csv(ukbb, delimiter="\t")
+df_ukbb = pd.read_csv(ukbb, delimiter=" ")
 # print(df_ukbb.head())
 
 # merge1:
