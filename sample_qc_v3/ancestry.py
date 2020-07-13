@@ -169,8 +169,8 @@ if __name__ == "__main__":
     pca_evals, pca_scores, pca_loadings = run_pca_with_relateds(
         pruned_mt, related_samples_to_drop)
     pca_scores = pca_scores.annotate(known_pop="unk")
-    pca_scores.write(f"{tmp_dir}/ddd-elgh-ukbb/pca_scores.ht")
-    pca_loadings.write(f"{tmp_dir}/ddd-elgh-ukbb/pca_loadings.ht")
+    pca_scores.write(f"{tmp_dir}/ddd-elgh-ukbb/pca_scores.ht", overwrite=True)
+    pca_loadings.write(f"{tmp_dir}/ddd-elgh-ukbb/pca_loadings.ht", overwrite=True)
     #pca_scores = hl.read_table(f"{temp_dir}/ddd-elgh-ukbb/pca_scores.ht")
     #pca_loadings = hl.read_table(f"{temp_dir}/ddd-elgh-ukbb/pca_loadings.ht")
     logger.info("assign population pcs")
