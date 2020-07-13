@@ -170,7 +170,7 @@ if __name__ == "__main__":
         pruned_mt, related_samples_to_drop)
 
     mt = pruned_mt.annotate_cols(scores=pca_scores[pruned_mt.col_key].scores)
-    mt = mt.annotate_cols(loadings=pca_loadings[pruned_mt.col_key].loadings)
+    mt = mt.annotate_cols(loadings=pca_loadings[pruned_mt.s].loadings)
     mt = mt.annotate_cols(known_pop="unk")
     #pca_scores = pca_scores.annotate(known_pop="unk")
     #pca_scores.write(f"{tmp_dir}/ddd-elgh-ukbb/pca_scores.ht", overwrite=True)
