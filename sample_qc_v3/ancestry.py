@@ -116,6 +116,27 @@ def filter_to_autosomes(
     return hl.filter_intervals(t, [autosomes])
 
 
+project_root = Path(__file__).parent.parent
+print(project_root)
+
+s3credentials = os.path.join(
+    project_root, "hail_configuration_files/s3_credentials.json")
+print(s3credentials)
+
+storage = os.path.join(project_root, "hail_configuration_files/storage.json")
+
+thresholds = os.path.join(
+    project_root, "hail_configuration_files/thresholds.json")
+
+with open(f"{s3credentials}", 'r') as f:
+    credentials = json.load(f)
+
+with open(f"{storage}", 'r') as f:
+    storage = json.load(f)
+
+with open(f"{thresholds}", 'r') as f:
+    thresholds = json.load(f)
+
 if __name__ == "__main__":
     # need to create spark cluster first before intiialising hail
     sc = pyspark.SparkContext()
