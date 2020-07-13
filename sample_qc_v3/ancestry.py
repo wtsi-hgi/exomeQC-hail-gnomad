@@ -1,18 +1,21 @@
 import os
 import hail as hl
-import pandas as pd 
+import pandas as pd
 import pyspark
 import json
 import sys
 import re
 from pathlib import Path
 import logging
-from typing import List, Tuple
+from typing import Any, Counter, List, Optional, Tuple, Union
 from bokeh.plotting import output_file, save, show
+from gnomad_ancestry import pc_project, run_pca_with_relateds, assign_population_pcs
 
 logging.basicConfig(format="%(levelname)s (%(name)s %(lineno)s): %(message)s")
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+
+
 POP_NAMES = {
     "afr": "African/African-American",
     "ami": "Amish",
@@ -77,8 +80,40 @@ POP_COLORS = {
 }
 
 
+def get_reference_genome(
+    locus: Union[hl.expr.LocusExpression, hl.expr.IntervalExpression],
+    add_sequence: bool = False,
+) -> hl.ReferenceGenome:
+    """
+    Returns the reference genome associated with the input Locus expression
+    :param locus: Input locus
+    :param add_sequence: If set, the fasta sequence is added to the reference genome
+    :return: Reference genome
+    """
+    if isinstance(locus, hl.expr.LocusExpression):
+        ref = locus.dtype.reference_genome
+    else:
+        assert isinstance(locus, hl.expr.IntervalExpression)
+        ref = locus.dtype.point_type.reference_genome
+    if add_sequence:
+        ref = add_reference_sequence(ref)
+    return ref
 
 
+def filter_to_autosomes(
+    t: Union[hl.MatrixTable, hl.Table]
+) -> Union[hl.MatrixTable, hl.Table]:
+    """
+    Filters the Table or MatrixTable to autosomes only.
+    This assumes that the input contains a field named `locus` of type Locus
+    :param t: Input MT/HT
+    :return:  MT/HT autosomes
+    """
+    reference = get_reference_genome(t.locus)
+    autosomes = hl.parse_locus_interval(
+        f"{reference.contigs[0]}-{reference.contigs[21]}", reference_genome=reference
+    )
+    return hl.filter_intervals(t, [autosomes])
 
 
 if __name__ == "__main__":
@@ -95,7 +130,7 @@ if __name__ == "__main__":
     hadoop_config.set("fs.s3a.access.key", credentials["mer"]["access_key"])
     hadoop_config.set("fs.s3a.secret.key", credentials["mer"]["secret_key"])
 
-mt = hl.read_matrix_table(
+    # mt = hl.read_matrix_table(
     #    f"{temp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_sex_annotations.mt")
 
     # ld pruning
@@ -104,5 +139,17 @@ mt = hl.read_matrix_table(
     # pruned_mt.write(
     #    f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_ldpruned.mt", overwrite=True)
     pruned_mt = hl.read_matrix_table(
-        f"{temp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_ldpruned.mt")
+        f"{temp_dir}/ddd-elgh-ukbb/relatedness_ancestry/ddd-elgh-ukbb/chr1_chr20_XY_ldpruned.mt")
 
+    related_samples_to_drop = hl.read_table(
+        f"{temp_dir}/ddd-elgh-ukbb/relatedness_ancestry/ddd-elgh-ukbb/chr1_chr20_XY_related_samples_to_remove.ht")
+
+    logger.info("run_pca_with_relateds")
+    pca_evals, pca_scores, pca_loadings = run_pca_with_relateds(
+        pruned_mt, related_samples_to_drop)
+
+    pca_scores.write(f"{tmp_dir}/ddd-elgh-ukbb/pca_scores.ht")
+    pca_loadings.write(f"{tmp_dir}/ddd-elgh-ukbb/pca_loadings.ht")
+    logger.info("assign population pcs")
+    population_assignment_table = assign_population_pcs(
+        pca_scores, pca_loadings)
