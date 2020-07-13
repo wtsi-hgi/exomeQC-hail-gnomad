@@ -10,6 +10,7 @@ import pandas as pd
 # plot if they agree
 # list of non agreed
 hail_results = "/nfs/users/nfs_m/mercury/pa10/ddd-elgh-ukbb/sex_annotations/chr1_chr20_XY.sex_check.txt.bgz"
+cohorts=""
 DDD = "/nfs/users/nfs_m/mercury/pa10/ddd-elgh-ukbb/sex_annotations/DDD_ega_gender.txt"
 # ega_id	gender
 # EGAN00001351469	M
