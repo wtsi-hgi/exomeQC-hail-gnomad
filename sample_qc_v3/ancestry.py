@@ -166,11 +166,13 @@ if __name__ == "__main__":
         f"{temp_dir}/ddd-elgh-ukbb/relatedness_ancestry/ddd-elgh-ukbb/chr1_chr20_XY_related_samples_to_remove.ht")
 
     logger.info("run_pca_with_relateds")
-    pca_evals, pca_scores, pca_loadings = run_pca_with_relateds(
-        pruned_mt, related_samples_to_drop)
+    # pca_evals, pca_scores, pca_loadings = run_pca_with_relateds(
+    #    pruned_mt, related_samples_to_drop)
 
-    pca_scores.write(f"{tmp_dir}/ddd-elgh-ukbb/pca_scores.ht")
-    pca_loadings.write(f"{tmp_dir}/ddd-elgh-ukbb/pca_loadings.ht")
+    # pca_scores.write(f"{tmp_dir}/ddd-elgh-ukbb/pca_scores.ht")
+    # pca_loadings.write(f"{tmp_dir}/ddd-elgh-ukbb/pca_loadings.ht")
+    pca_scores = hl.read_table(f"{temp_dir}/ddd-elgh-ukbb/pca_scores.ht")
+    pca_loadings = hl.read_table(f"{temp_dir}/ddd-elgh-ukbb/pca_loadings.ht")
     logger.info("assign population pcs")
     population_assignment_table = assign_population_pcs(
         pca_scores, pca_loadings, known_col="known_pop")
