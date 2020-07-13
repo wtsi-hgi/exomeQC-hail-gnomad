@@ -134,8 +134,8 @@ if __name__ == "__main__":
     #    f"{temp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_sex_annotations.mt")
 
     # ld pruning
-    #pruned_ht = hl.ld_prune(mt.GT, r2=0.1)
-    #pruned_mt = mt.filter_rows(hl.is_defined(pruned_ht[mt.row_key]))
+    # pruned_ht = hl.ld_prune(mt.GT, r2=0.1)
+    # pruned_mt = mt.filter_rows(hl.is_defined(pruned_ht[mt.row_key]))
     # pruned_mt.write(
     #    f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_ldpruned.mt", overwrite=True)
     pruned_mt = hl.read_matrix_table(
@@ -153,3 +153,6 @@ if __name__ == "__main__":
     logger.info("assign population pcs")
     population_assignment_table = assign_population_pcs(
         pca_scores, pca_loadings)
+
+    population_assignment_table.write(
+        f"{tmp_dir}/ddd-elgh-ukbb/pop_assignments.ht")
