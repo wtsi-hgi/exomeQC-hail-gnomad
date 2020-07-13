@@ -173,7 +173,7 @@ if __name__ == "__main__":
     pca_loadings.write(f"{tmp_dir}/ddd-elgh-ukbb/pca_loadings.ht")
     logger.info("assign population pcs")
     population_assignment_table = assign_population_pcs(
-        pca_scores, pca_loadings)
+        pca_scores, pca_loadings, known_col="known_pop")
 
     population_assignment_table.write(
         f"{tmp_dir}/ddd-elgh-ukbb/pop_assignments.ht")
