@@ -116,6 +116,43 @@ def filter_to_autosomes(
     return hl.filter_intervals(t, [autosomes])
 
 
+def pc_project(
+    mt: hl.MatrixTable,
+    loadings_ht: hl.Table,
+    loading_location: str = "loadings",
+    af_location: str = "pca_af",
+) -> hl.Table:
+    """
+    Projects samples in `mt` on pre-computed PCs.
+
+    :param mt: MT containing the samples to project
+    :param loadings_ht: HT containing the PCA loadings and allele frequencies used for the PCA
+    :param loading_location: Location of expression for loadings in `loadings_ht`
+    :param af_location: Location of expression for allele frequency in `loadings_ht`
+    :return: Table with scores calculated from loadings in column `scores`
+    """
+
+    mt = mt.annotate_rows(
+        pca_loadings=loadings_ht[mt.row_key][loading_location],
+        pca_af=loadings_ht[mt.row_key][af_location],
+    )
+
+    mt = mt.filter_rows(
+        hl.is_defined(mt.pca_loadings)
+        & hl.is_defined(mt.pca_af)
+        & (mt.pca_af > 0)
+        & (mt.pca_af < 1)
+    )
+
+    gt_norm = (mt.GT.n_alt_alleles() - 2 * mt.pca_af) / hl.sqrt(
+        n_variants * 2 * mt.pca_af * (1 - mt.pca_af)
+    )
+
+    mt = mt.annotate_cols(scores=hl.agg.array_sum(mt.pca_loadings * gt_norm))
+
+    return mt.cols().select("scores")
+
+
 project_root = Path(__file__).parent.parent
 print(project_root)
 
