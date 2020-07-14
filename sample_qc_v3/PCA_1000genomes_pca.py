@@ -176,6 +176,6 @@ if __name__ == "__main__":
     #       f.write(str(val))
     # pca_scores.export(f"{temp_dir}/ddd-elgh-ukbb/pca_scores.tsv.bgz")
     # loadings_ht.export(f"{temp_dir}/ddd-elgh-ukbb/pca_loadings.tsv.bgz")
-    ht = hl.pc_project(
+    ht = pc_project(
         project_mt.GT, loadings_ht.loadings, loadings_ht.af)
     ht.write(f"{tmp_dir}/ddd-elgh-ukbb/pc_project_our_data.ht", overwrite=True)
