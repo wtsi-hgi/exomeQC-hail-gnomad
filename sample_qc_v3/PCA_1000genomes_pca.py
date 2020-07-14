@@ -134,8 +134,8 @@ def pc_project(
     n_variants = loadings_ht.count()
 
     mt = mt.annotate_rows(
-        pca_loadings=loadings_ht.loadings,
-        pca_af=loadings_ht.af,
+        pca_loadings=loadings_ht[mt.row_key][loading_location],
+        pca_af=loadings_ht[mt.row_key][af_location],
     )
 
     mt = mt.filter_rows(
@@ -216,4 +216,5 @@ if __name__ == "__main__":
     # loadings_ht.export(f"{temp_dir}/ddd-elgh-ukbb/pca_loadings.tsv.bgz")
     ht = pc_project(
         project_mt, loadings_ht, loadings_ht.loadings, loadings_ht.af)
+        
     ht.write(f"{tmp_dir}/ddd-elgh-ukbb/pc_project_our_data.ht", overwrite=True)
