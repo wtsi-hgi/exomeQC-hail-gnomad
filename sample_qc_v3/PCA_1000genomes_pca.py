@@ -134,8 +134,8 @@ def pc_project(
     n_variants = loadings_ht.count()
 
     mt = mt.annotate_rows(
-        pca_loadings=loadings_ht[mt.row_key][loading_location],
-        pca_af=loadings_ht[mt.row_key][af_location],
+        pca_loadings=loadings_ht.loadings,
+        pca_af=loadings_ht.af,
     )
 
     mt = mt.filter_rows(
