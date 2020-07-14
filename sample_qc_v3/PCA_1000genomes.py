@@ -151,6 +151,8 @@ if __name__ == "__main__":
     hadoop_config.set("fs.s3a.access.key", credentials["mer"]["access_key"])
     hadoop_config.set("fs.s3a.secret.key", credentials["mer"]["secret_key"])
 
+    bed_to_exclude_pca = hl.import_bed(
+        f"{temp_dir}/1000g/price_high_ld.bed.txt", reference_genome='GRCh38')
     project_mt = hl.read_matrix_table(
         f"{temp_dir}/ddd-elgh-ukbb/relatedness_ancestry/ddd-elgh-ukbb/chr1_chr20_XY_ldpruned.mt")
 
@@ -189,9 +191,12 @@ if __name__ == "__main__":
 
     # ld pruning
     logger.info("ld pruning and writing to disk")
-    pruned_ht = hl.ld_prune(mt_vqc_filtered.GT, r2=0.1)
+    pruned_ht = hl.ld_prune(mt_vqc_filtered.GT, r2=0.2, bp_window_size=500000)
+
     pruned_mt = mt_vqc_filtered.filter_rows(
         hl.is_defined(pruned_ht[mt_vqc_filtered.row_key]))
+    pruned_mt = pruned_mt.filter_rows(hl.is_defined(
+        bed_to_exclude_pca[mt.locus]), keep=False)
     pruned_mt.write(
         f"{tmp_dir}/ddd-elgh-ukbb/1000g_chr1_20_sn-s_filtered_ldpruned.mt", overwrite=True)
     # run pca
