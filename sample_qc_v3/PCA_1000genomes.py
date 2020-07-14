@@ -9,7 +9,7 @@ from pathlib import Path
 import logging
 from typing import Any, Counter, List, Optional, Tuple, Union
 from bokeh.plotting import output_file, save, show
-from gnomad_ancestry import pc_project, run_pca_with_relateds, assign_population_pcs
+from gnomad_ancestry import pc_project, run_pca_with_relateds
 
 logging.basicConfig(format="%(levelname)s (%(name)s %(lineno)s): %(message)s")
 logger = logging.getLogger(__name__)
@@ -116,9 +116,6 @@ def filter_to_autosomes(
     return hl.filter_intervals(t, [autosomes])
 
 
-
-
-
 project_root = Path(__file__).parent.parent
 print(project_root)
 
@@ -154,36 +151,47 @@ if __name__ == "__main__":
     hadoop_config.set("fs.s3a.access.key", credentials["mer"]["access_key"])
     hadoop_config.set("fs.s3a.secret.key", credentials["mer"]["secret_key"])
 
-    # mt = hl.read_matrix_table(
-    #    f"{temp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_sex_annotations.mt")
+    # read vcf to mt
+    chr1_vcf = f"{temo_dir}/1000g/CCDG_13607_B01_GRM_WGS_2019-02-19_chr1.recalibrated_variants.vcf.gz"
+    chr20_vcf = f"{temo_dir}/1000g/CCDG_13607_B01_GRM_WGS_2019-02-19_chr20.recalibrated_variants.vcf.gz"
+    mt_chr1 = hl.import_vcf(chr1_vcf, array_elements_required=False,
+                               force_bgz=True)
+    mt_chr20 = hl.import_vcf(chr20_vcf, array_elements_required=False,
+                               force_bgz=True)
+    # join mt
+    mt = mt_chr1.union_rows(mt_chr20)
+    mt.write(f"{tmp_dir}/ddd-elgh-ukbb/1000g_chr1_20.mt", overwrite=True)
+
+    # filter mt
+    mt = mt.filter_rows(hl.is_snp(mt.alleles[0], mt.alleles[1]))
+    mt = mt.filter_rows(~ hl.is_mnp(mt.alleles[0], mt.alleles[1]))
+    mt = mt.filter_rows(~ hl.is_indel(mt.alleles[0], mt.alleles[1]))
+    mt = mt.filter_rows(~ hl.is_complex(mt.alleles[0], mt.alleles[1]))
+
+    mt_vqc = hl.variant_qc(mt, name='variant_QC_Hail')
+    mt_vqc_filtered = mt_vqc.filter_rows(
+        (mt_vqc.variant_QC_Hail.call_rate >= 0.99) &
+        (mt_vqc.variant_QC_Hail.p_value_hwe >= 10 ** -6) &
+        (mt_vqc.variant_QC_Hail.AF[1] >= 0.05) &
+        (mt_vqc.variant_QC_Hail.AF[1] <= 0.95)
+        )
+
+    # maf > 0.05, pHWE > 1e-6, call rate > 0.99
+
+    # save mt
+    mt_vqc_filtered.write(
+        f"{tmp_dir}/ddd-elgh-ukbb/1000g_chr1_20_snps_filtered.mt", overwrite=True)
 
     # ld pruning
-    # pruned_ht = hl.ld_prune(mt.GT, r2=0.1)
-    # pruned_mt = mt.filter_rows(hl.is_defined(pruned_ht[mt.row_key]))
-    # pruned_mt.write(
-    #    f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_ldpruned.mt", overwrite=True)
-    pruned_mt = hl.read_matrix_table(
-        f"{temp_dir}/ddd-elgh-ukbb/relatedness_ancestry/ddd-elgh-ukbb/chr1_chr20_XY_ldpruned.mt")
-
-    related_samples_to_drop = hl.read_table(
-        f"{temp_dir}/ddd-elgh-ukbb/relatedness_ancestry/ddd-elgh-ukbb/chr1_chr20_XY_related_samples_to_remove.ht")
-
-    logger.info("run_pca_with_relateds")
-    pca_evals, pca_scores, pca_loadings = run_pca_with_relateds(
-        pruned_mt, related_samples_to_drop)
-
-    mt = pruned_mt.annotate_cols(scores=pca_scores[pruned_mt.col_key].scores)
-    #mt = mt.annotate_cols(loadings=pca_loadings[pruned_mt.s].loadings)
-    mt = mt.annotate_cols(known_pop="unk")
-    #pca_scores = pca_scores.annotate(known_pop="unk")
-    #pca_scores.write(f"{tmp_dir}/ddd-elgh-ukbb/pca_scores.ht", overwrite=True)
-    #pca_loadings.write(f"{tmp_dir}/ddd-elgh-ukbb/pca_loadings.ht", overwrite=True)
-    #pca_scores = hl.read_table(f"{temp_dir}/ddd-elgh-ukbb/pca_scores.ht")
-    #pca_loadings = hl.read_table(f"{temp_dir}/ddd-elgh-ukbb/pca_loadings.ht")
-    logger.info("assign population pcs")
-   # population_assignment_table = assign_population_pcs(
-    #    pca_scores, pca_loadings, known_col="known_pop")
-    population_assignment_table = assign_population_pcs(
-        mt.scores, pca_loadings, known_col="known_pop")
-    population_assignment_table.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/pop_assignments.ht")
+    pruned_ht = hl.ld_prune(mt_vqc_filtered.GT, r2=0.1)
+    pruned_mt = mt_vqc_filtered.filter_rows(
+        hl.is_defined(pruned_ht[mt_vqc_filtered.row_key]))
+    pruned_mt.write(
+        f"{tmp_dir}/ddd-elgh-ukbb/1000g_chr1_20_sn-s_filtered_ldpruned.mt", overwrite=True)
+    # run pca
+      logger.info("run pca")
+     pca_evals, pca_scores, pca_loadings = hl.hwe_normalized_pca(pruned_mt.GT, k=10)
+     pca_scores.write(f"{tmp_dir}/ddd-elgh-ukbb/100g_pca_scores.ht", overwrite=True)
+     pca_loadings.write(f"{tmp_dir}/ddd-elgh-ukbb/1000g_pca_loadings.ht", overwrite=True)
+     pca_evals.write(f"{tmp_dir}/ddd-elgh-ukbb/1000g_pca_evals.ht", overwrite=True)
+    
