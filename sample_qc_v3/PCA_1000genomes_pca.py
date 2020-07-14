@@ -218,3 +218,4 @@ if __name__ == "__main__":
         project_mt, loadings_ht, "loadings", "af")
 
     ht.write(f"{tmp_dir}/ddd-elgh-ukbb/pc_project_our_data.ht", overwrite=True)
+    ht.export(f"{temp_dir}/ddd-elgh-ukbb/pc_project_our_data.txt.bgz")
