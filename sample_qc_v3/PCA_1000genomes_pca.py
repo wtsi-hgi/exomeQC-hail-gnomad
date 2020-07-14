@@ -158,7 +158,7 @@ if __name__ == "__main__":
 
     #pruned_ht = hl.ld_prune(mt_vqc_filtered.GT, r2=0.2, bp_window_size=500000)
 
-    pruned_m = hl.read_matrix_table(
+    pruned_mt = hl.read_matrix_table(
         f"{temp_dir}/ddd-elgh-ukbb/1000g_chr1_20_snps_filtered_ldpruned.mt")
     # run pca
     logger.info("run pca")
