@@ -152,7 +152,7 @@ if __name__ == "__main__":
     hadoop_config.set("fs.s3a.secret.key", credentials["mer"]["secret_key"])
 
     # read vcf to mt
-    chr1_vcf = f"{temo_dir}/1000g/CCDG_13607_B01_GRM_WGS_2019-02-19_chr1.recalibrated_variants.vcf.gz"
+    chr1_vcf = f"{temo_dir}/1000g/chr1.recalibrated_variants.vcf.gz"
     chr20_vcf = f"{temo_dir}/1000g/CCDG_13607_B01_GRM_WGS_2019-02-19_chr20.recalibrated_variants.vcf.gz"
     mt_chr1 = hl.import_vcf(chr1_vcf, array_elements_required=False,
                                force_bgz=True)
