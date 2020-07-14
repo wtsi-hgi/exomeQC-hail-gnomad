@@ -151,6 +151,9 @@ if __name__ == "__main__":
     hadoop_config.set("fs.s3a.access.key", credentials["mer"]["access_key"])
     hadoop_config.set("fs.s3a.secret.key", credentials["mer"]["secret_key"])
 
+    project_mt = hl.read_matrix_table(
+        f"{temp_dir}/ddd-elgh-ukbb/relatedness_ancestry/ddd-elgh-ukbb/chr1_chr20_XY_ldpruned.mt")
+
     # read vcf to mt
     chr1_vcf = f"{temp_dir}/1000g/CCDG_13607_B01_GRM_WGS_2019-02-19_chr1.recalibrated_variants.vcf.gz"
     chr20_vcf = f"{temp_dir}/1000g/CCDG_13607_B01_GRM_WGS_2019-02-19_chr20.recalibrated_variants.vcf.gz"
@@ -191,11 +194,17 @@ if __name__ == "__main__":
         f"{tmp_dir}/ddd-elgh-ukbb/1000g_chr1_20_sn-s_filtered_ldpruned.mt", overwrite=True)
     # run pca
     logger.info("run pca")
-    pca_evals, pca_scores, pca_loadings = hl.hwe_normalized_pca(
-        pruned_mt.GT, k=10)
+    pca_evals, pca_scores, loadings_ht = hl.hwe_normalized_pca(
+        pruned_mt.GT, k=10, compute_loadings=True)
+    pruned_mt = pruned_mt.annotate_rows(
+        af=hl.agg.mean(pruned_mt.GT.n_alt_alleles()) / 2)
+    loadings_ht = loadings_ht.annotate(af=pruned_mt.rows()[loadings_ht.key].af)
     pca_scores.write(
         f"{tmp_dir}/ddd-elgh-ukbb/100g_pca_scores.ht", overwrite=True)
-    pca_loadings.write(
+    loadings_ht.write(
         f"{tmp_dir}/ddd-elgh-ukbb/1000g_pca_loadings.ht", overwrite=True)
     pca_evals.write(
         f"{tmp_dir}/ddd-elgh-ukbb/1000g_pca_evals.ht", overwrite=True)
+
+    ht = pc_project(project_mt.GT, loadings_ht.loadings, loadings_ht.af)
+    ht.write(f"{tmp_dir}/ddd-elgh-ukbb/pc_project_our_data.ht", overwrite=True)
