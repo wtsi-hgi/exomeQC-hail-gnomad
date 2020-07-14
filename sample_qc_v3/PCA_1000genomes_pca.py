@@ -131,6 +131,7 @@ def pc_project(
     :param af_location: Location of expression for allele frequency in `loadings_ht`
     :return: Table with scores calculated from loadings in column `scores`
     """
+    n_variants = loadings_ht.count()
 
     mt = mt.annotate_rows(
         pca_loadings=loadings_ht[mt.row_key][loading_location],
@@ -214,5 +215,5 @@ if __name__ == "__main__":
     # pca_scores.export(f"{temp_dir}/ddd-elgh-ukbb/pca_scores.tsv.bgz")
     # loadings_ht.export(f"{temp_dir}/ddd-elgh-ukbb/pca_loadings.tsv.bgz")
     ht = pc_project(
-        project_mt.GT, loadings_ht.loadings, loadings_ht.af)
+        project_mt, loadings_ht, loadings_ht.loadings, loadings_ht.af)
     ht.write(f"{tmp_dir}/ddd-elgh-ukbb/pc_project_our_data.ht", overwrite=True)
