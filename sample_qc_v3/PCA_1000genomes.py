@@ -155,9 +155,9 @@ if __name__ == "__main__":
     chr1_vcf = f"{temo_dir}/1000g/CCDG_13607_B01_GRM_WGS_2019-02-19_chr1.recalibrated_variants.vcf.gz"
     chr20_vcf = f"{temo_dir}/1000g/CCDG_13607_B01_GRM_WGS_2019-02-19_chr20.recalibrated_variants.vcf.gz"
     mt_chr1 = hl.import_vcf(chr1_vcf, array_elements_required=False,
-                               force_bgz=True)
+                            force_bgz=True)
     mt_chr20 = hl.import_vcf(chr20_vcf, array_elements_required=False,
-                               force_bgz=True)
+                             force_bgz=True)
     # join mt
     mt = mt_chr1.union_rows(mt_chr20)
     mt = hl.split_multi_hts(mt, keep_star=False)
@@ -175,7 +175,7 @@ if __name__ == "__main__":
         (mt_vqc.variant_QC_Hail.p_value_hwe >= 10 ** -6) &
         (mt_vqc.variant_QC_Hail.AF[1] >= 0.05) &
         (mt_vqc.variant_QC_Hail.AF[1] <= 0.95)
-        )
+    )
 
     # maf > 0.05, pHWE > 1e-6, call rate > 0.99
 
@@ -190,9 +190,12 @@ if __name__ == "__main__":
     pruned_mt.write(
         f"{tmp_dir}/ddd-elgh-ukbb/1000g_chr1_20_sn-s_filtered_ldpruned.mt", overwrite=True)
     # run pca
-      logger.info("run pca")
-     pca_evals, pca_scores, pca_loadings = hl.hwe_normalized_pca(pruned_mt.GT, k=10)
-     pca_scores.write(f"{tmp_dir}/ddd-elgh-ukbb/100g_pca_scores.ht", overwrite=True)
-     pca_loadings.write(f"{tmp_dir}/ddd-elgh-ukbb/1000g_pca_loadings.ht", overwrite=True)
-     pca_evals.write(f"{tmp_dir}/ddd-elgh-ukbb/1000g_pca_evals.ht", overwrite=True)
-    
+    logger.info("run pca")
+    pca_evals, pca_scores, pca_loadings = hl.hwe_normalized_pca(
+        pruned_mt.GT, k=10)
+    pca_scores.write(
+        f"{tmp_dir}/ddd-elgh-ukbb/100g_pca_scores.ht", overwrite=True)
+    pca_loadings.write(
+        f"{tmp_dir}/ddd-elgh-ukbb/1000g_pca_loadings.ht", overwrite=True)
+    pca_evals.write(
+        f"{tmp_dir}/ddd-elgh-ukbb/1000g_pca_evals.ht", overwrite=True)
