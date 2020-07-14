@@ -156,39 +156,8 @@ if __name__ == "__main__":
     project_mt = hl.read_matrix_table(
         f"{temp_dir}/ddd-elgh-ukbb/relatedness_ancestry/ddd-elgh-ukbb/chr1_chr20_XY_ldpruned.mt")
 
-    # read vcf to mt
-    chr1_vcf = f"{temp_dir}/1000g/CCDG_13607_B01_GRM_WGS_2019-02-19_chr1.recalibrated_variants.vcf.gz"
-    chr20_vcf = f"{temp_dir}/1000g/CCDG_13607_B01_GRM_WGS_2019-02-19_chr20.recalibrated_variants.vcf.gz"
-    mt_chr1 = hl.import_vcf(chr1_vcf, array_elements_required=False,
-                            force_bgz=True)
-    mt_chr20 = hl.import_vcf(chr20_vcf, array_elements_required=False,
-                             force_bgz=True)
-    # join mt
-    logger.info("writing mt ")
-    mt = mt_chr1.union_rows(mt_chr20)
-    mt = hl.split_multi_hts(mt, keep_star=False)
-    mt.write(f"{tmp_dir}/ddd-elgh-ukbb/1000g_chr1_20.mt", overwrite=True)
-    logger.info("wrote mt ")
-    # filter mt
-    mt = mt.filter_rows(hl.is_snp(mt.alleles[0], mt.alleles[1]))
-    mt = mt.filter_rows(~ hl.is_mnp(mt.alleles[0], mt.alleles[1]))
-    mt = mt.filter_rows(~ hl.is_indel(mt.alleles[0], mt.alleles[1]))
-    mt = mt.filter_rows(~ hl.is_complex(mt.alleles[0], mt.alleles[1]))
-
-    mt_vqc = hl.variant_qc(mt, name='variant_QC_Hail')
-    mt_vqc_filtered = mt_vqc.filter_rows(
-        (mt_vqc.variant_QC_Hail.call_rate >= 0.99) &
-        (mt_vqc.variant_QC_Hail.p_value_hwe >= 10 ** -6) &
-        (mt_vqc.variant_QC_Hail.AF[1] >= 0.05) &
-        (mt_vqc.variant_QC_Hail.AF[1] <= 0.95)
-    )
-    logger.info("done filtering writing mt")
-    # maf > 0.05, pHWE > 1e-6, call rate > 0.99
-
-    # save mt
-    mt_vqc_filtered.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/1000g_chr1_20_snps_filtered.mt", overwrite=True)
-
+    mt_vqc_filtered = hl.read_matrix_table(
+        f"{temp_dir}/ddd-elgh-ukbb/1000g_chr1_20_snps_filtered.mt")
     # ld pruning
     logger.info("ld pruning and writing to disk")
     #pruned_ht = hl.ld_prune(mt_vqc_filtered.GT, r2=0.2, bp_window_size=500000)
@@ -196,8 +165,10 @@ if __name__ == "__main__":
 
     pruned_mt = mt_vqc_filtered.filter_rows(
         hl.is_defined(pruned_ht[mt_vqc_filtered.row_key]))
+
     pruned_mt = pruned_mt.filter_rows(hl.is_defined(
-        bed_to_exclude_pca[mt.locus]), keep=False)
+        bed_to_exclude_pca[pruned_mt.locus]), keep=False)
+
     pruned_mt.write(
         f"{tmp_dir}/ddd-elgh-ukbb/1000g_chr1_20_snps_filtered_ldpruned.mt", overwrite=True)
     # run pca
