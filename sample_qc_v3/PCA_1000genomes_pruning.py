@@ -182,8 +182,9 @@ if __name__ == "__main__":
         f"{tmp_dir}/ddd-elgh-ukbb/100g_pca_scores.ht", overwrite=True)
     loadings_ht.write(
         f"{tmp_dir}/ddd-elgh-ukbb/1000g_pca_loadings.ht", overwrite=True)
-    pca_evals.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/1000g_pca_evals.ht", overwrite=True)
+    with open(f"{temp_dir}/ddd-elgh-ukbb/1000g_pca_evals.txt", 'w') as f:
+        for val in pca_evals:
+            f.write(str(val))
 
     ht = pc_project(project_mt.GT, loadings_ht.loadings, loadings_ht.af)
     ht.write(f"{tmp_dir}/ddd-elgh-ukbb/pc_project_our_data.ht", overwrite=True)

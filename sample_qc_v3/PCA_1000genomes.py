@@ -197,7 +197,7 @@ if __name__ == "__main__":
     pruned_mt = mt_vqc_filtered.filter_rows(
         hl.is_defined(pruned_ht[mt_vqc_filtered.row_key]))
     pruned_mt = pruned_mt.filter_rows(hl.is_defined(
-        bed_to_exclude_pca[mt.locus]), keep=False)
+        bed_to_exclude_pca[pruned_mt.locus]), keep=False)
     pruned_mt.write(
         f"{tmp_dir}/ddd-elgh-ukbb/1000g_chr1_20_snps_filtered_ldpruned.mt", overwrite=True)
     # run pca
@@ -211,8 +211,11 @@ if __name__ == "__main__":
         f"{tmp_dir}/ddd-elgh-ukbb/100g_pca_scores.ht", overwrite=True)
     loadings_ht.write(
         f"{tmp_dir}/ddd-elgh-ukbb/1000g_pca_loadings.ht", overwrite=True)
-    pca_evals.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/1000g_pca_evals.ht", overwrite=True)
+    with open(f"{temp_dir}/ddd-elgh-ukbb/1000g_pca_evals.txt", 'w') as f:
+        for val in pca_evals:
+            f.write(str(val))
+    # pca_evals.write(
+    #    f"{tmp_dir}/ddd-elgh-ukbb/1000g_pca_evals.ht", overwrite=True)
 
     ht = pc_project(project_mt.GT, loadings_ht.loadings, loadings_ht.af)
     ht.write(f"{tmp_dir}/ddd-elgh-ukbb/pc_project_our_data.ht", overwrite=True)
