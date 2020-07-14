@@ -162,10 +162,11 @@ if __name__ == "__main__":
     mt_chr20 = hl.import_vcf(chr20_vcf, array_elements_required=False,
                              force_bgz=True)
     # join mt
+    logger.info("writing mt ")
     mt = mt_chr1.union_rows(mt_chr20)
     mt = hl.split_multi_hts(mt, keep_star=False)
     mt.write(f"{tmp_dir}/ddd-elgh-ukbb/1000g_chr1_20.mt", overwrite=True)
-
+    logger.info("wrote mt ")
     # filter mt
     mt = mt.filter_rows(hl.is_snp(mt.alleles[0], mt.alleles[1]))
     mt = mt.filter_rows(~ hl.is_mnp(mt.alleles[0], mt.alleles[1]))
@@ -179,7 +180,7 @@ if __name__ == "__main__":
         (mt_vqc.variant_QC_Hail.AF[1] >= 0.05) &
         (mt_vqc.variant_QC_Hail.AF[1] <= 0.95)
     )
-
+    logger.info("done filtering writing mt")
     # maf > 0.05, pHWE > 1e-6, call rate > 0.99
 
     # save mt
@@ -187,6 +188,7 @@ if __name__ == "__main__":
         f"{tmp_dir}/ddd-elgh-ukbb/1000g_chr1_20_snps_filtered.mt", overwrite=True)
 
     # ld pruning
+    logger.info("ld pruning and writing to disk")
     pruned_ht = hl.ld_prune(mt_vqc_filtered.GT, r2=0.1)
     pruned_mt = mt_vqc_filtered.filter_rows(
         hl.is_defined(pruned_ht[mt_vqc_filtered.row_key]))
