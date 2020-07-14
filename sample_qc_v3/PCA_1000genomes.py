@@ -160,6 +160,7 @@ if __name__ == "__main__":
                                force_bgz=True)
     # join mt
     mt = mt_chr1.union_rows(mt_chr20)
+    mt = hl.split_multi_hts(mt, keep_star=False)
     mt.write(f"{tmp_dir}/ddd-elgh-ukbb/1000g_chr1_20.mt", overwrite=True)
 
     # filter mt
