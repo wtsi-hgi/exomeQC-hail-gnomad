@@ -165,12 +165,12 @@ if __name__ == "__main__":
     mt = mt.filter_rows(~ hl.is_complex(mt.alleles[0], mt.alleles[1]))
 
     mt_vqc = hl.variant_qc(mt, name='variant_QC_Hail')
-    mt_vqc_filtered = mt_vqc.filter_rows(
-        (mt_vqc.variant_QC_Hail.call_rate >= 0.99) &
-        (mt_vqc.variant_QC_Hail.p_value_hwe >= 10 ** -6) &
-        (mt_vqc.variant_QC_Hail.AF[1] >= 0.05) &
-        (mt_vqc.variant_QC_Hail.AF[1] <= 0.95)
-    )
+   # mt_vqc_filtered = mt_vqc.filter_rows(
+   #     (mt_vqc.variant_QC_Hail.call_rate >= 0.99) &
+   #     (mt_vqc.variant_QC_Hail.p_value_hwe >= 10 ** -6) &
+   #     (mt_vqc.variant_QC_Hail.AF[1] >= 0.05) &
+   #     (mt_vqc.variant_QC_Hail.AF[1] <= 0.95)
+   # )
     logger.info("done filtering writing mt")
     # maf > 0.05, pHWE > 1e-6, call rate > 0.99
 
