@@ -214,9 +214,13 @@ if __name__ == "__main__":
     #       f.write(str(val))
     # pca_scores.export(f"{temp_dir}/ddd-elgh-ukbb/pca_scores.tsv.bgz")
     # loadings_ht.export(f"{temp_dir}/ddd-elgh-ukbb/pca_loadings.tsv.bgz")
-    ht = pc_project(
-        project_mt, loadings_ht, "loadings", "af")
+   # ht = pc_project(
+    #    project_mt, loadings_ht, "loadings", "af")
 
-    ht.write(f"{tmp_dir}/ddd-elgh-ukbb/pc_project_our_data.ht", overwrite=True)
-    project_mt.annotate_cols(scores=ht[project_mt.s].scores)
-    ht.export(f"{temp_dir}/ddd-elgh-ukbb/pc_project_our_data.txt.bgz")
+    ht = pc_project(
+        pruned_mt, loadings_ht, "loadings", "af")
+
+    ht.write(f"{tmp_dir}/ddd-elgh-ukbb/pc_project_1kg.ht", overwrite=True)
+    mt = pruned_mt.annotate_cols(scores=ht[pruned_mt.s].scores)
+    mt.write(f"{tmp_dir}/ddd-elgh-ukbb/1kg_projected_scores.mt", overwrite=True)
+    ht.export(f"{temp_dir}/ddd-elgh-ukbb/pc_project_1kg.txt.bgz")
