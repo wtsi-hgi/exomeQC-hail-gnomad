@@ -175,10 +175,11 @@ if __name__ == "__main__":
     # maf > 0.05, pHWE > 1e-6, call rate > 0.99
 
     # save mt
-    mt_vqc_filtered.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/AKT_snps_filtered.mt", overwrite=True)
+   # mt_vqc_filtered.write(
+    #    f"{tmp_dir}/ddd-elgh-ukbb/AKT_snps_filtered.mt", overwrite=True)
 
     # ld pruning
+    mt_vqc_filtered = mt_vqc
     logger.info("ld pruning and writing to disk")
     #pruned_ht = hl.ld_prune(mt_vqc_filtered.GT, r2=0.2, bp_window_size=500000)
     pruned_ht = hl.ld_prune(mt_vqc_filtered.GT, r2=0.1)
