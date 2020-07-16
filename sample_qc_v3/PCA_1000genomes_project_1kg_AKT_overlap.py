@@ -230,7 +230,7 @@ if __name__ == "__main__":
     #    project_mt, loadings_ht, "loadings", "af")
 
     ht = pc_project(
-        project_mt.GT, loadings_ht, "loadings", "af")
+        project_mt, loadings_ht, "loadings", "af")
 
     ht.write(
         f"{tmp_dir}/ddd-elgh-ukbb/ourproject_1kg_AKT_scores.ht", overwrite=True)
