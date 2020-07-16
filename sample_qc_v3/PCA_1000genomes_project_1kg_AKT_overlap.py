@@ -205,7 +205,7 @@ if __name__ == "__main__":
     mt_1kg = mt_1kg_chr1_chr20.filter_rows(
         hl.is_defined(project_mt.rows()[mt_1kg_chr1_chr20.locus]))
     mt_1kg = mt_1kg.checkpoint(
-        f"{temp_dir}/ddd-elgh-ukbb/1000g_chr1_20_AKT_projectdata_overlap.mt")
+        f"{temp_dir}/ddd-elgh-ukbb/1000g_chr1_20_AKT_projectdata_overlap.mt", overwrite=True)
     #pruned_ht = hl.ld_prune(mt_vqc_filtered.GT, r2=0.2, bp_window_size=500000)
 
     # pruned_mt = hl.read_matrix_table(
