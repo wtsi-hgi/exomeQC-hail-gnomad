@@ -164,59 +164,60 @@ if __name__ == "__main__":
         f"{temp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1-20-XY_new_cohorts.mt")
     mt = hl.split_multi_hts(
         mt, keep_star=False, left_aligned=False)
-    mt.write(f"{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1-20-XY_new_cohorts_split_multi.mt"))
+    mt.write(
+        f"{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1-20-XY_new_cohorts_split_multi.mt")
     # ld pruning
-    pruned_ht=hl.ld_prune(mt.GT, r2 = 0.1)
-    pruned_mt=mt.filter_rows(hl.is_defined(pruned_ht[mt.row_key]))
+    pruned_ht = hl.ld_prune(mt.GT, r2=0.1)
+    pruned_mt = mt.filter_rows(hl.is_defined(pruned_ht[mt.row_key]))
     # remove pruned areas that need to be removed
-    pruned_mt=pruned_mt.filter_rows(hl.is_defined(
-        bed_to_exclude_pca[pruned_mt.locus]), keep = False)
+    pruned_mt = pruned_mt.filter_rows(hl.is_defined(
+        bed_to_exclude_pca[pruned_mt.locus]), keep=False)
 
     pruned_mt.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_ldpruned.mt", overwrite = True)
+        f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_ldpruned.mt", overwrite=True)
     # pruned_mt = hl.read_matrix_table(
     #    f"{temp_dir}/ddd-elgh-ukbb/relatedness_ancestry/ddd-elgh-ukbb/chr1_chr20_XY_ldpruned.mt")
 
     # filter matrixtable
     logger.info("wrote mt ")
     # filter mt
-    mt=pruned_mt
-    mt=mt.filter_rows(hl.is_snp(mt.alleles[0], mt.alleles[1]))
-    mt=mt.filter_rows(~ hl.is_mnp(mt.alleles[0], mt.alleles[1]))
-    mt=mt.filter_rows(~ hl.is_indel(mt.alleles[0], mt.alleles[1]))
-    mt=mt.filter_rows(~ hl.is_complex(mt.alleles[0], mt.alleles[1]))
+    mt = pruned_mt
+    mt = mt.filter_rows(hl.is_snp(mt.alleles[0], mt.alleles[1]))
+    mt = mt.filter_rows(~ hl.is_mnp(mt.alleles[0], mt.alleles[1]))
+    mt = mt.filter_rows(~ hl.is_indel(mt.alleles[0], mt.alleles[1]))
+    mt = mt.filter_rows(~ hl.is_complex(mt.alleles[0], mt.alleles[1]))
 
-    mt_vqc=hl.variant_qc(mt, name = 'variant_QC_Hail')
+    mt_vqc = hl.variant_qc(mt, name='variant_QC_Hail')
     # (mt_vqc.variant_QC_Hail.p_value_hwe >= 10 ** -6) & not to use this according to hcm.
-    mt_vqc_filtered=mt_vqc.filter_rows(
+    mt_vqc_filtered = mt_vqc.filter_rows(
         (mt_vqc.variant_QC_Hail.call_rate >= 0.99) &
         (mt_vqc.variant_QC_Hail.AF[1] >= 0.05) &
         (mt_vqc.variant_QC_Hail.AF[1] <= 0.95)
     )
     logger.info("done filtering writing mt")
 
-    related_samples_to_drop=hl.read_table(
+    related_samples_to_drop = hl.read_table(
         f"{temp_dir}/ddd-elgh-ukbb/relatedness_ancestry/ddd-elgh-ukbb/chr1_chr20_XY_related_samples_to_remove.ht")
 
     logger.info("run_pca_with_relateds")
-    pca_evals, pca_scores, pca_loadings=run_pca_with_relateds(
+    pca_evals, pca_scores, pca_loadings = run_pca_with_relateds(
         mt_vqc_filtered, related_samples_to_drop)
 
-    mt=mt_vqc_filtered.annotate_cols(
-        scores = pca_scores[pruned_mt.col_key].scores)
-    mt=mt.annotate_cols(loadings = pca_loadings[pruned_mt.s].loadings)
+    mt = mt_vqc_filtered.annotate_cols(
+        scores=pca_scores[pruned_mt.col_key].scores)
+    mt = mt.annotate_cols(loadings=pca_loadings[pruned_mt.s].loadings)
     # mt = mt.annotate_cols(known_pop="unk")
     # pca_scores = pca_scores.annotate(known_pop="unk")
     pca_scores.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/pca_scores.ht", overwrite = True)
+        f"{tmp_dir}/ddd-elgh-ukbb/pca_scores.ht", overwrite=True)
     pca_loadings.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/pca_loadings.ht", overwrite = True)
+        f"{tmp_dir}/ddd-elgh-ukbb/pca_loadings.ht", overwrite=True)
     # pca_scores = hl.read_table(f"{temp_dir}/ddd-elgh-ukbb/pca_scores.ht")
     # pca_loadings = hl.read_table(f"{temp_dir}/ddd-elgh-ukbb/pca_loadings.ht")
     logger.info("assign population pcs")
    # population_assignment_table = assign_population_pcs(
     #    pca_scores, pca_loadings, known_col="known_pop")
-    population_assignment_table=assign_population_pcs(
-        mt.scores, pca_loadings, known_col = "known_population")
+    population_assignment_table = assign_population_pcs(
+        mt.scores, pca_loadings, known_col="known_population")
     population_assignment_table.write(
         f"{tmp_dir}/ddd-elgh-ukbb/pop_assignments.ht")
