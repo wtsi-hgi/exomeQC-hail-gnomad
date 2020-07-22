@@ -160,14 +160,18 @@ if __name__ == "__main__":
     # annotate with cohorts and populations from s3 table.
     # save matrixtable
     # done the above on pca_RF jupyter notebook
+    # mt = hl.read_matrix_table(
+    #    f"{temp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1-20-XY_new_cohorts.mt")
+    # mt = hl.split_multi_hts(
+    #    mt, keep_star=False, left_aligned=False)
+    # mt.write(
+    #    f"{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1-20-XY_new_cohorts_split_multi.mt")
     mt = hl.read_matrix_table(
-        f"{temp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1-20-XY_new_cohorts.mt")
-    mt = hl.split_multi_hts(
-        mt, keep_star=False, left_aligned=False)
-    mt.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1-20-XY_new_cohorts_split_multi.mt")
+        f"{temp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1-20-XY_new_cohorts_split_multi.mt")
+
     # ld pruning
-    pruned_ht = hl.ld_prune(mt.GT, r2=0.1)
+    pruned_ht = hl.ld_prune(mt_vqc_filtered.GT, r2=0.2, bp_window_size=500000)
+    #pruned_ht = hl.ld_prune(mt.GT, r2=0.1)
     pruned_mt = mt.filter_rows(hl.is_defined(pruned_ht[mt.row_key]))
     # remove pruned areas that need to be removed
     pruned_mt = pruned_mt.filter_rows(hl.is_defined(
