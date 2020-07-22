@@ -201,9 +201,9 @@ if __name__ == "__main__":
 
     # intersect this with the data we have
     logger.info("intersecting with project mt")
-    project_mt = project_mt.key_rows_by("locus")
+    project_mt1 = project_mt.key_rows_by("locus")
     mt_1kg = mt_1kg_chr1_chr20.filter_rows(
-        hl.is_defined(project_mt.rows()[mt_1kg_chr1_chr20.locus]))
+        hl.is_defined(project_mt1.rows()[mt_1kg_chr1_chr20.locus]))
     mt_1kg = mt_1kg.checkpoint(
         f"{temp_dir}/ddd-elgh-ukbb/1000g_chr1_20_AKT_projectdata_overlap.mt", overwrite=True)
     #pruned_ht = hl.ld_prune(mt_vqc_filtered.GT, r2=0.2, bp_window_size=500000)
