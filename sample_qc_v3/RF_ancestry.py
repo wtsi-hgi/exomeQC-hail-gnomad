@@ -232,6 +232,6 @@ if __name__ == "__main__":
     #    pca_scores, pca_loadings, known_col="known_pop")
 
     population_assignment_table = assign_population_pcs(
-        mt.cols(), mt.scores, known_col="known_population")
+        mt.cols(), mt.scores, known_col="known_pop")
     population_assignment_table.write(
         f"{tmp_dir}/ddd-elgh-ukbb/pop_assignments.ht")
