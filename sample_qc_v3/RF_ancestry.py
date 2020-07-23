@@ -210,7 +210,8 @@ if __name__ == "__main__":
 
     mt = mt_vqc_filtered.annotate_cols(
         scores=pca_scores[mt_vqc_filtered.col_key].scores)
-    mt = mt.annotate_cols(loadings=pca_loadings[mt_vqc_filtered.s].loadings)
+    mt = mt.annotate_cols(
+        loadings=pca_loadings[mt_vqc_filtered.col_key].loadings)
     # mt = mt.annotate_cols(known_pop="unk")
     # pca_scores = pca_scores.annotate(known_pop="unk")
     pca_scores.write(
