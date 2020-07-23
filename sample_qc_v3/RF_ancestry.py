@@ -200,16 +200,15 @@ if __name__ == "__main__":
         f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_ldpruned_updated.mt", overwrite=True)
     # pruned_mt = hl.read_matrix_table(
     #    f"{temp_dir}/ddd-elgh-ukbb/relatedness_ancestry/ddd-elgh-ukbb/chr1_chr20_XY_ldpruned.mt")
-    pruned_mt.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/Sanger_chr1-20-XY_pruned_filtered.mt", overwrite=True)
 
-    related_samples_to_drop = hl.read_table(
-        f"{temp_dir}/ddd-elgh-ukbb/relatedness_ancestry/ddd-elgh-ukbb/chr1_chr20_XY_related_samples_to_remove.ht")
+    # related_samples_to_drop = hl.read_table(
+    #    f"{temp_dir}/ddd-elgh-ukbb/relatedness_ancestry/ddd-elgh-ukbb/chr1_chr20_XY_related_samples_to_remove.ht")
 
     logger.info("run_pca_with_relateds")
-    pca_evals, pca_scores, pca_loadings = run_pca_with_relateds(
-        pruned_mt, related_samples_to_drop, autosomes_only=True)
-
+    # pca_evals, pca_scores, pca_loadings = run_pca_with_relateds(
+    #    pruned_mt, related_samples_to_drop, autosomes_only=True)
+    pca_evals, pca_scores, pca_loadings = hl.hwe_normalized_pca(
+        pruned_mt.GT, k=10, compute_loadings=True)
     pca_scores = pca_scores.annotate(
         known_pop=pruned_mt.cols()[pca_scores.s].known_pop)
     # mt = mt.annotate_cols(
