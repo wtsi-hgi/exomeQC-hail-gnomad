@@ -169,7 +169,7 @@ if __name__ == "__main__":
     #    f"{temp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1-20-XY_new_cohorts.mt")
     #mt = hl.split_multi_hts(    mt, keep_star=False, left_aligned=False)
     mt.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/Sanger_chr1-20-XY_new_cohorts_split_multi_ld_pruned.mt", overwrit)
+        f"{tmp_dir}/ddd-elgh-ukbb/Sanger_chr1-20-XY_new_cohorts_split_multi_ld_pruned.mt", overwrite=True)
     # filter matrixtable
     logger.info("wrote mt ")
     # filter mt
