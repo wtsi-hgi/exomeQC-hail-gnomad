@@ -172,9 +172,9 @@ if __name__ == "__main__":
     #    pca_scores, pca_loadings, known_col="known_pop")
 
     pop_ht, pop_clf = assign_population_pcs(
-        pca_scores, pca_scores.scores, known_col="known_pop", n_estimators=500)
+        pca_scores, pca_scores.scores, known_col="known_pop", n_estimators=50000)
     pop_ht.write(
         f"{tmp_dir}/ddd-elgh-ukbb/pop_assignments.ht", overwrite=True)
     pop_ht.export(f"{temp_dir}/ddd-elgh-ukbb/pop_assignments.tsv.gz")
     filename = f"{temp_dir}/ddd-elgh-ukbb/RF_model.pkl"
-    pickle.dump(pop_clf, open(filename, 'wb')) 
+    pickle.dump(pop_clf, open(filename, 'wb'))
