@@ -186,7 +186,7 @@ if __name__ == "__main__":
     # ld pruning
     pruned_ht = hl.ld_prune(mt_vqc_filtered.GT, r2=0.2, bp_window_size=500000)
     #pruned_ht = hl.ld_prune(mt.GT, r2=0.1)
-    pruned_mt = mmt_vqc_filtered.filter_rows(
+    pruned_mt = mt_vqc_filtered.filter_rows(
         hl.is_defined(pruned_ht[mt.row_key]))
     # remove pruned areas that need to be removed
     pruned_mt = pruned_mt.filter_rows(hl.is_defined(
