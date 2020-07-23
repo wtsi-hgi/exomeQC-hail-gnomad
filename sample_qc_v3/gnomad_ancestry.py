@@ -1,9 +1,13 @@
+import pandas as pd
+import hail as hl
 import logging
 import random
 from typing import Any, Counter, List, Optional, Tuple, Union
 
-import hail as hl
-import pandas as pd
+logging.basicConfig(format="%(levelname)s (%(name)s %(lineno)s): %(message)s")
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
 
 POP_NAMES = {
     "afr": "African/African-American",
