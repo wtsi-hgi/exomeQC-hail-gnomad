@@ -212,6 +212,10 @@ if __name__ == "__main__":
 
     mt = mt_vqc_filtered.annotate_cols(
         scores=pca_scores[mt_vqc_filtered.col_key].scores)
+        
+    pca_scores = pca_scores.annotate(
+        known_pop=mt.cols()[pca_scores.s].known_pop)
+
     mt.write(
         f"{tmp_dir}/ddd-elgh-ukbb/Sanger_chr1-20-XY_pca_scores.mt", overwrite=True)
     # mt = mt.annotate_cols(
@@ -232,6 +236,6 @@ if __name__ == "__main__":
     #    pca_scores, pca_loadings, known_col="known_pop")
 
     population_assignment_table = assign_population_pcs(
-        mt.cols(), mt.scores, known_col="known_pop")
+        pca_scores, pca_scores.scores, known_col="known_pop")
     population_assignment_table.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/pop_assignments.ht")
+        f"{tmp_dir}/ddd-elgh-ukbb/pop_assignments_RF.ht")

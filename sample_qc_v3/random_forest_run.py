@@ -163,13 +163,14 @@ if __name__ == "__main__":
     # mt = mt.annotate_cols(known_pop="unk")
     # pca_scores = pca_scores.annotate(known_pop="unk")
 
-    pca_scores = hl.read_table(f"{temp_dir}/ddd-elgh-ukbb/pca_scores.ht")
+    pca_scores = hl.read_table(
+        f"{temp_dir}/ddd-elgh-ukbb/pca_scores_known_pop.ht.ht")
     pca_loadings = hl.read_table(f"{temp_dir}/ddd-elgh-ukbb/pca_loadings.ht")
     logger.info("assign population pcs")
    # population_assignment_table = assign_population_pcs(
     #    pca_scores, pca_loadings, known_col="known_pop")
 
     population_assignment_table = assign_population_pcs(
-        mt.cols(), mt.scores, known_col="known_pop")
+        pca_scores, pca_scores.scores, known_col="known_pop")
     population_assignment_table.write(
         f"{tmp_dir}/ddd-elgh-ukbb/pop_assignments.ht")
