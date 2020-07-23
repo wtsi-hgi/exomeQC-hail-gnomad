@@ -210,8 +210,8 @@ def assign_population_pcs(
     else:
         pop_pc_pd = pop_pca_scores
 
-    train_data = pop_pc_pd.loc[~pop_pc_pd[known_col].isnull()]
-
+    #train_data = pop_pc_pd.loc[~pop_pc_pd[known_col].isnull()]
+    train_data = pop_pc_pd.loc[~pop_pc_pd[known_col] == ""]
     N = len(train_data)
 
     # Split training data into subsamples for fitting and evaluating
