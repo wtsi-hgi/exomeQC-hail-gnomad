@@ -155,7 +155,7 @@ def assign_population_pcs(
     fit: Any = None,  # Type should be RandomForestClassifier but we do not want to import sklearn.RandomForestClassifier outside
     seed: int = 42,
     prop_train: float = 0.8,
-    n_estimators: int = 1000,
+    n_estimators: int = 100,
     min_prob: float = 0.9,
     output_col: str = "pop",
     missing_label: str = "oth",
