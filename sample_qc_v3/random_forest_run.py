@@ -172,7 +172,7 @@ if __name__ == "__main__":
     #    pca_scores, pca_loadings, known_col="known_pop")
 
     pop_ht, pop_clf = assign_population_pcs(
-        pca_scores, pca_scores.scores, known_col="known_pop", n_estimators=500, prop_train=0.9)
+        pca_scores, pca_scores.scores, known_col="known_pop", n_estimators=100, prop_train=0.8)
     pop_ht.write(
         f"{tmp_dir}/ddd-elgh-ukbb/pop_assignments_test.ht", overwrite=True)
     pop_ht.export(f"{temp_dir}/ddd-elgh-ukbb/pop_assignments_test.tsv.gz")
