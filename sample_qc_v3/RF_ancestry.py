@@ -200,16 +200,20 @@ if __name__ == "__main__":
     #    f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_ldpruned.mt", overwrite=True)
     # pruned_mt = hl.read_matrix_table(
     #    f"{temp_dir}/ddd-elgh-ukbb/relatedness_ancestry/ddd-elgh-ukbb/chr1_chr20_XY_ldpruned.mt")
+    mt_vqc_filtered.write(
+        f"{tmp_dir}/ddd-elgh-ukbb/Sanger_chr1-20-XY_pruned_filtered.mt", overwrite=True)
 
     related_samples_to_drop = hl.read_table(
         f"{temp_dir}/ddd-elgh-ukbb/relatedness_ancestry/ddd-elgh-ukbb/chr1_chr20_XY_related_samples_to_remove.ht")
 
     logger.info("run_pca_with_relateds")
     pca_evals, pca_scores, pca_loadings = run_pca_with_relateds(
-        mt_vqc_filtered, related_samples_to_drop)
+        mt_vqc_filtered, related_samples_to_drop, autosomes_only=True)
 
     mt = mt_vqc_filtered.annotate_cols(
         scores=pca_scores[mt_vqc_filtered.col_key].scores)
+    mt.write(
+        f"{tmp_dir}/ddd-elgh-ukbb/Sanger_chr1-20-XY_pca_scores.mt", overwrite=True)
     # mt = mt.annotate_cols(
     #    loadings=pca_loadings[mt_vqc_filtered.col_key].loadings)
     # mt = mt.annotate_cols(known_pop="unk")
@@ -218,6 +222,9 @@ if __name__ == "__main__":
         f"{tmp_dir}/ddd-elgh-ukbb/pca_scores.ht", overwrite=True)
     pca_loadings.write(
         f"{tmp_dir}/ddd-elgh-ukbb/pca_loadings.ht", overwrite=True)
+    with open(f"{temp_dir}/ddd-elgh-ukbb/pca_evals.txt", 'w') as f:
+        for val in pca_evals:
+            f.write(str(val))
     # pca_scores = hl.read_table(f"{temp_dir}/ddd-elgh-ukbb/pca_scores.ht")
     # pca_loadings = hl.read_table(f"{temp_dir}/ddd-elgh-ukbb/pca_loadings.ht")
     logger.info("assign population pcs")
@@ -225,6 +232,6 @@ if __name__ == "__main__":
     #    pca_scores, pca_loadings, known_col="known_pop")
 
     population_assignment_table = assign_population_pcs(
-        mt.scores, pca_loadings, known_col="known_population")
+        mt.cols(), mt.scores, known_col="known_population")
     population_assignment_table.write(
         f"{tmp_dir}/ddd-elgh-ukbb/pop_assignments.ht")
