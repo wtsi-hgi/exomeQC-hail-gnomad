@@ -162,13 +162,7 @@ if __name__ == "__main__":
     #    loadings=pca_loadings[mt_vqc_filtered.col_key].loadings)
     # mt = mt.annotate_cols(known_pop="unk")
     # pca_scores = pca_scores.annotate(known_pop="unk")
-    pca_scores.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/pca_scores.ht", overwrite=True)
-    pca_loadings.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/pca_loadings.ht", overwrite=True)
-    with open(f"{temp_dir}/ddd-elgh-ukbb/pca_evals.txt", 'w') as f:
-        for val in pca_evals:
-            f.write(str(val))
+
     pca_scores = hl.read_table(f"{temp_dir}/ddd-elgh-ukbb/pca_scores.ht")
     pca_loadings = hl.read_table(f"{temp_dir}/ddd-elgh-ukbb/pca_loadings.ht")
     logger.info("assign population pcs")
