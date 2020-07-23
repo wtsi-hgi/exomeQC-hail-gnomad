@@ -186,21 +186,21 @@ if __name__ == "__main__":
         (mt_vqc.variant_QC_Hail.AF[1] >= 0.05) &
         (mt_vqc.variant_QC_Hail.AF[1] <= 0.95)
     )
-    logger.info("done filtering writing mt")
-    # ld pruning
-    #pruned_ht = hl.ld_prune(mt_vqc_filtered.GT, r2=0.2, bp_window_size=500000)
-    #pruned_ht = hl.ld_prune(mt.GT, r2=0.1)
-    # pruned_mt = mt_vqc_filtered.filter_rows(
-    #    hl.is_defined(pruned_ht[mt.row_key]))
-    # remove pruned areas that need to be removed
     mt_vqc_filtered = mt_vqc_filtered.filter_rows(hl.is_defined(
         bed_to_exclude_pca[mt_vqc_filtered.locus]), keep=False)
+    logger.info("done filtering writing mt")
+    # ld pruning
+    pruned_ht = hl.ld_prune(mt_vqc_filtered.GT, r2=0.2, bp_window_size=500000)
+    #pruned_ht = hl.ld_prune(mt.GT, r2=0.1)
+    pruned_mt = mt_vqc_filtered.filter_rows(
+        hl.is_defined(pruned_ht[mt_vqc_filtered.row_key]))
+    # remove pruned areas that need to be removed
 
-    # pruned_mt.write(
-    #    f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_ldpruned.mt", overwrite=True)
+    pruned_mt.write(
+        f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_ldpruned_updated.mt", overwrite=True)
     # pruned_mt = hl.read_matrix_table(
     #    f"{temp_dir}/ddd-elgh-ukbb/relatedness_ancestry/ddd-elgh-ukbb/chr1_chr20_XY_ldpruned.mt")
-    mt_vqc_filtered.write(
+    pruned_mt.write(
         f"{tmp_dir}/ddd-elgh-ukbb/Sanger_chr1-20-XY_pruned_filtered.mt", overwrite=True)
 
     related_samples_to_drop = hl.read_table(
@@ -208,25 +208,19 @@ if __name__ == "__main__":
 
     logger.info("run_pca_with_relateds")
     pca_evals, pca_scores, pca_loadings = run_pca_with_relateds(
-        mt_vqc_filtered, related_samples_to_drop, autosomes_only=True)
+        pruned_mt, related_samples_to_drop, autosomes_only=True)
 
-    mt = mt_vqc_filtered.annotate_cols(
-        scores=pca_scores[mt_vqc_filtered.col_key].scores)
-        
     pca_scores = pca_scores.annotate(
-        known_pop=mt.cols()[pca_scores.s].known_pop)
-
-    mt.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/Sanger_chr1-20-XY_pca_scores.mt", overwrite=True)
+        known_pop=pruned_mt.cols()[pca_scores.s].known_pop)
     # mt = mt.annotate_cols(
     #    loadings=pca_loadings[mt_vqc_filtered.col_key].loadings)
     # mt = mt.annotate_cols(known_pop="unk")
     # pca_scores = pca_scores.annotate(known_pop="unk")
     pca_scores.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/pca_scores.ht", overwrite=True)
+        f"{tmp_dir}/ddd-elgh-ukbb/pca_scores_after_pruning.ht", overwrite=True)
     pca_loadings.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/pca_loadings.ht", overwrite=True)
-    with open(f"{temp_dir}/ddd-elgh-ukbb/pca_evals.txt", 'w') as f:
+        f"{tmp_dir}/ddd-elgh-ukbb/pca_loadings_after_pruning.ht", overwrite=True)
+    with open(f"{temp_dir}/ddd-elgh-ukbb/pca_evals_after_pruning.txt", 'w') as f:
         for val in pca_evals:
             f.write(str(val))
     # pca_scores = hl.read_table(f"{temp_dir}/ddd-elgh-ukbb/pca_scores.ht")
@@ -236,6 +230,6 @@ if __name__ == "__main__":
     #    pca_scores, pca_loadings, known_col="known_pop")
 
     population_assignment_table = assign_population_pcs(
-        pca_scores, pca_scores.scores, known_col="known_pop")
+        pca_scores, pca_scores.scores, known_col="known_pop", n_estimators=1000)
     population_assignment_table.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/pop_assignments_RF.ht")
+        f"{tmp_dir}/ddd-elgh-ukbb/pop_assignments_RF_pruning.ht")
