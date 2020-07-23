@@ -159,18 +159,22 @@ if __name__ == "__main__":
     # drop cohorts
     # annotate with cohorts and populations from s3 table.
     # save matrixtable
+    mt = hl.read_matrix_table(
+        f"{temp_dir}/ddd-elgh-ukbb/relatedness_ancestry/ddd-elgh-ukbb/chr1_chr20_XY_ldpruned.mt")
+    mt = mt.annotate_cols(cohort=cohorts_pop[mt.s].cohort)
+    mt = mt.annotate_cols(known_pop=cohorts_pop[mt.s].known_population)
+    mt = mt.annotate_cols(gVCF=cohorts_pop[mt.s].gVCF_ID)
     # done the above on pca_RF jupyter notebook
     # mt = hl.read_matrix_table(
     #    f"{temp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1-20-XY_new_cohorts.mt")
-    # mt = hl.split_multi_hts(
-    #    mt, keep_star=False, left_aligned=False)
-    # mt.write(
-    #    f"{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1-20-XY_new_cohorts_split_multi.mt")
+    #mt = hl.split_multi_hts(    mt, keep_star=False, left_aligned=False)
+    mt.write(
+        f"{tmp_dir}/ddd-elgh-ukbb/Sanger_chr1-20-XY_new_cohorts_split_multi_ld_pruned.mt")
     # filter matrixtable
     logger.info("wrote mt ")
     # filter mt
-    mt = hl.read_matrix_table(
-        f"{temp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1-20-XY_new_cohorts_split_multi.mt")
+    # mt = hl.read_matrix_table(
+    #    f"{temp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1-20-XY_new_cohorts_split_multi.mt")
     mt = mt.filter_rows(hl.is_snp(mt.alleles[0], mt.alleles[1]))
     mt = mt.filter_rows(~ hl.is_mnp(mt.alleles[0], mt.alleles[1]))
     mt = mt.filter_rows(~ hl.is_indel(mt.alleles[0], mt.alleles[1]))
@@ -184,16 +188,16 @@ if __name__ == "__main__":
     )
     logger.info("done filtering writing mt")
     # ld pruning
-    pruned_ht = hl.ld_prune(mt_vqc_filtered.GT, r2=0.2, bp_window_size=500000)
+    #pruned_ht = hl.ld_prune(mt_vqc_filtered.GT, r2=0.2, bp_window_size=500000)
     #pruned_ht = hl.ld_prune(mt.GT, r2=0.1)
-    pruned_mt = mt_vqc_filtered.filter_rows(
-        hl.is_defined(pruned_ht[mt.row_key]))
+    # pruned_mt = mt_vqc_filtered.filter_rows(
+    #    hl.is_defined(pruned_ht[mt.row_key]))
     # remove pruned areas that need to be removed
-    pruned_mt = pruned_mt.filter_rows(hl.is_defined(
-        bed_to_exclude_pca[pruned_mt.locus]), keep=False)
+    mt_vqc_filtered = mt_vqc_filtered.filter_rows(hl.is_defined(
+        bed_to_exclude_pca[mt_vqc_filtered.locus]), keep=False)
 
-    pruned_mt.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_ldpruned.mt", overwrite=True)
+    # pruned_mt.write(
+    #    f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_ldpruned.mt", overwrite=True)
     # pruned_mt = hl.read_matrix_table(
     #    f"{temp_dir}/ddd-elgh-ukbb/relatedness_ancestry/ddd-elgh-ukbb/chr1_chr20_XY_ldpruned.mt")
 
