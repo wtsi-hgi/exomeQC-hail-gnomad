@@ -164,7 +164,7 @@ if __name__ == "__main__":
     # pca_scores = pca_scores.annotate(known_pop="unk")
 
     pca_scores = hl.read_table(
-        f"{temp_dir}/ddd-elgh-ukbb/pca_scores_known_pop.ht.ht")
+        f"{temp_dir}/ddd-elgh-ukbb/pca_scores_known_pop.ht")
     pca_loadings = hl.read_table(f"{temp_dir}/ddd-elgh-ukbb/pca_loadings.ht")
     logger.info("assign population pcs")
    # population_assignment_table = assign_population_pcs(
