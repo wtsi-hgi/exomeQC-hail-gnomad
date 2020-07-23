@@ -5,6 +5,7 @@ import pyspark
 import json
 import sys
 import re
+import pickle
 from pathlib import Path
 import logging
 from typing import Any, Counter, List, Optional, Tuple, Union
@@ -175,3 +176,5 @@ if __name__ == "__main__":
     pop_ht.write(
         f"{tmp_dir}/ddd-elgh-ukbb/pop_assignments.ht", overwrite=True)
     pop_ht.export(f"{temp_dir}/ddd-elgh-ukbb/pop_assignments.tsv.gz")
+    filename = f"{temp_dir}/ddd-elgh-ukbb/RF_model.pkl"
+    pickle.dump(pop_clf, open(filename, 'wb')) 
