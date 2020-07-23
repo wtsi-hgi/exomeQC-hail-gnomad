@@ -170,7 +170,8 @@ if __name__ == "__main__":
    # population_assignment_table = assign_population_pcs(
     #    pca_scores, pca_loadings, known_col="known_pop")
 
-    population_assignment_table = assign_population_pcs(
+    pop_ht, pop_clf = assign_population_pcs(
         pca_scores, pca_scores.scores, known_col="known_pop")
-    population_assignment_table.write(
+    pop_ht.write(
         f"{tmp_dir}/ddd-elgh-ukbb/pop_assignments.ht")
+    pop_ht.export(f"{temp_dir}/ddd-elgh-ukbb/pop_assignments.tsv.gz")
