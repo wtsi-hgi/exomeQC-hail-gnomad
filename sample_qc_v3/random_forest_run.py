@@ -173,5 +173,5 @@ if __name__ == "__main__":
     pop_ht, pop_clf = assign_population_pcs(
         pca_scores, pca_scores.scores, known_col="known_pop")
     pop_ht.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/pop_assignments.ht")
+        f"{tmp_dir}/ddd-elgh-ukbb/pop_assignments.ht", overwrite=True)
     pop_ht.export(f"{temp_dir}/ddd-elgh-ukbb/pop_assignments.tsv.gz")
