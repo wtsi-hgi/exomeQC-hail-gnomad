@@ -209,8 +209,8 @@ if __name__ == "__main__":
         mt_vqc_filtered, related_samples_to_drop)
 
     mt = mt_vqc_filtered.annotate_cols(
-        scores=pca_scores[pruned_mt.col_key].scores)
-    mt = mt.annotate_cols(loadings=pca_loadings[pruned_mt.s].loadings)
+        scores=pca_scores[mt_vqc_filtered.col_key].scores)
+    mt = mt.annotate_cols(loadings=pca_loadings[mt_vqc_filtered.s].loadings)
     # mt = mt.annotate_cols(known_pop="unk")
     # pca_scores = pca_scores.annotate(known_pop="unk")
     pca_scores.write(
@@ -222,6 +222,7 @@ if __name__ == "__main__":
     logger.info("assign population pcs")
    # population_assignment_table = assign_population_pcs(
     #    pca_scores, pca_loadings, known_col="known_pop")
+
     population_assignment_table = assign_population_pcs(
         mt.scores, pca_loadings, known_col="known_population")
     population_assignment_table.write(
