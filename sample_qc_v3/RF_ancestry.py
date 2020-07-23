@@ -228,7 +228,10 @@ if __name__ == "__main__":
    # population_assignment_table = assign_population_pcs(
     #    pca_scores, pca_loadings, known_col="known_pop")
 
-    population_assignment_table = assign_population_pcs(
-        pca_scores, pca_scores.scores, known_col="known_pop", n_estimators=1000)
-    population_assignment_table.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/pop_assignments_RF_pruning.ht")
+    pop_ht, pop_clf = assign_population_pcs(
+        pca_scores, pca_scores.scores, known_col="known_pop", n_estimators=100, prop_train=0.8)
+    pop_ht.write(
+        f"{tmp_dir}/ddd-elgh-ukbb/pop_assignments_test.ht", overwrite=True)
+    pop_ht.export(f"{temp_dir}/ddd-elgh-ukbb/pop_assignments_test.tsv.gz")
+    filename = f"{temp_dir}/ddd-elgh-ukbb/RF_model.pkl"
+    pickle.dump(pop_clf, open(filename, 'wb'))
