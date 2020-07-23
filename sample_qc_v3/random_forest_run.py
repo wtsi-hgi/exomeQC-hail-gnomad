@@ -157,7 +157,7 @@ if __name__ == "__main__":
         "s3a://DDD-ELGH-UKBB-exomes/ancestry/sanger_cohort_known_populations_ukbb.tsv", delimiter="\t").key_by('s')
 
     mt = hl.read_matrix_table(
-        f"{temp_dir}/ddd-elgh-ukbb/Sanger_chr1-20-XY_pca_scores.mt", overwrite=True)
+        f"{temp_dir}/ddd-elgh-ukbb/Sanger_chr1-20-XY_pca_scores.mt")
     # mt = mt.annotate_cols(
     #    loadings=pca_loadings[mt_vqc_filtered.col_key].loadings)
     # mt = mt.annotate_cols(known_pop="unk")
