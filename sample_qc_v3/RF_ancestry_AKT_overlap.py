@@ -128,10 +128,10 @@ if __name__ == "__main__":
 
     mt_1kg_chr1_chr20 = hl.read_matrix_table(
         f"{temp_dir}/ddd-elgh-ukbb/relatedness_ancestry/ancestry_work/1000g_chr1_20_AKT_overlap.mt")
-    mt_vqc_filtered = mt_vqc_filtered.key_rows_by("locus")
+    #mt_vqc_filtered1 = mt_vqc_filtered.key_rows_by("locus")
     mt_1kg_chr1_chr20 = mt_1kg_chr1_chr20.key_rows_by("locus")
     mt_vqc_filtered = mt_vqc_filtered.filter_rows(
-        hl.is_defined(mt_1kg_chr1_chr20.rows()[mt_vqc_filtered.locus]))
+        hl.is_defined(mt_1kg_chr1_chr20.rows()[mt_vqc_filtered1.locus]))
     logger.info("done filtering writing mt")
     # ld pruning
     pruned_ht = hl.ld_prune(mt_vqc_filtered.GT, r2=0.2, bp_window_size=500000)
