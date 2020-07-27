@@ -92,17 +92,18 @@ if __name__ == "__main__":
     cohorts_pop = hl.import_table(
         "s3a://DDD-ELGH-UKBB-exomes/ancestry/sanger_cohort_known_populations_ukbb.tsv", delimiter="\t").key_by('s')
 
-  
-    pca_scores = hl.read_table(f"{temp_dir}/ddd-elgh-ukbb/pca_scores_after_pruning.ht")
+    pca_scores = hl.read_table(
+        f"{temp_dir}/ddd-elgh-ukbb/pca_scores_after_pruning.ht")
     # pca_loadings = hl.read_table(f"{temp_dir}/ddd-elgh-ukbb/pca_loadings.ht")
     logger.info("assign population pcs")
    # population_assignment_table = assign_population_pcs(
     #    pca_scores, pca_loadings, known_col="known_pop")
-    
+
     pop_ht, pop_clf = assign_population_pcs(
-        pca_scores, pca_scores.scores, known_col="known_pop", n_estimators=100, prop_train=0.8)
+        pca_scores, pca_scores.scores, known_col="known_pop", n_estimators=100, prop_train=0.8, min_prob=0.5)
     pop_ht.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/pop_assignments_test.ht", overwrite=True)
-    pop_ht.export(f"{temp_dir}/ddd-elgh-ukbb/pop_assignments_test.tsv.gz")
-    filename = f"{temp_dir}/ddd-elgh-ukbb/RF_model.pkl"
-    pickle.dump(pop_clf, open(filename, 'wb'))
+        f"{tmp_dir}/ddd-elgh-ukbb/pop_assignments_test_minprob.ht", overwrite=True)
+    pop_ht.export(
+        f"{temp_dir}/ddd-elgh-ukbb/pop_assignments_test_minprob.tsv.gz")
+    #filename = f"{temp_dir}/ddd-elgh-ukbb/RF_model.pkl"
+    #pickle.dump(pop_clf, open(filename, 'wb'))
