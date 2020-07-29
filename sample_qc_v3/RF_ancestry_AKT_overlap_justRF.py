@@ -89,21 +89,22 @@ if __name__ == "__main__":
 
     bed_to_exclude_pca = hl.import_bed(
         f"{temp_dir}/1000g/price_high_ld.bed.txt", reference_genome='GRCh38')
+
     cohorts_pop = hl.import_table(
-        "s3a://DDD-ELGH-UKBB-exomes/ancestry/sanger_cohort_known_populations_ukbb.tsv", delimiter="\t").key_by('s')
+        "s3a://DDD-ELGH-UKBB-exomes/ancestry/sanger_cohort_known_populations_ukbb_elgh_labels.tsv", delimiter="\t").key_by('s')
 
     pca_scores = hl.read_table(
-        f"{temp_dir}/ddd-elgh-ukbb/pca_scores_after_pruning.ht")
+        f"{temp_dir}/ddd-elgh-ukbb/elgh_labels/pop_assignments_test.ht")
     # pca_loadings = hl.read_table(f"{temp_dir}/ddd-elgh-ukbb/pca_loadings.ht")
     logger.info("assign population pcs")
    # population_assignment_table = assign_population_pcs(
     #    pca_scores, pca_loadings, known_col="known_pop")
 
     pop_ht, pop_clf = assign_population_pcs(
-        pca_scores, pca_scores.scores[0:3], known_col="known_pop", n_estimators=100, prop_train=0.8, min_prob=0.5)
+        pca_scores, pca_scores.scores, known_col="known_pop", n_estimators=100, prop_train=0.8, min_prob=0.5)
     pop_ht.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/pop_assignments_test_minprob_PC1-PC2-PC3.ht", overwrite=True)
+        f"{tmp_dir}/ddd-elgh-ukbb/pop_assignments_test_minprob_0.5.ht", overwrite=True)
     pop_ht.export(
-        f"{temp_dir}/ddd-elgh-ukbb/pop_assignments_test_minprob.tsv.gz")
+        f"{temp_dir}/ddd-elgh-ukbb/pop_assignments_elgh_labels.tsv.gz")
     #filename = f"{temp_dir}/ddd-elgh-ukbb/RF_model.pkl"
     #pickle.dump(pop_clf, open(filename, 'wb'))
