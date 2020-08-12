@@ -203,8 +203,6 @@ if __name__ == "__main__":
     # run function on metrics including heterozygosity  for superpops:
     strata = {}
     strata['assigned_superpop'] = pop_ht.assigned_superpop
-    pop_ht = hl.read_table(
-        f"{tmp_dir}/ddd-elgh-ukbb/mt_pops_superpops_sampleqc.ht")
     pop_filter_ht_superpop = compute_stratified_metrics_filter(
         pop_ht, qc_metrics, strata)
 
