@@ -187,7 +187,7 @@ if __name__ == "__main__":
         'sample_qc.r_het_hom_var': pop_ht.sample_qc.r_het_hom_var
     }]
     pop_filter_ht = compute_stratified_metrics_filter(
-        pop_ht, qc_metrics, {'assigned_pop': pop_ht.assigned_pop})
+        pop_ht, qc_metrics, [{'assigned_pop': pop_ht.assigned_pop}])
     pop_ht = pop_ht.annotate_globals(hl.eval(pop_filter_ht.globals))
     pop_ht = pop_ht.annotate(**pop_filter_ht[pop_ht.key]).persist()
 
@@ -200,7 +200,7 @@ if __name__ == "__main__":
     pop_ht_superpop = hl.read_table(
         f"{tmp_dir}/ddd-elgh-ukbb/mt_pops_superpops_sampleqc.ht")
     pop_filter_ht = compute_stratified_metrics_filter(
-        pop_ht_superpop, qc_metrics, {'assigned_superpop': pop_ht.assigned_superpop})
+        pop_ht_superpop, qc_metrics, [{'assigned_superpop': pop_ht.assigned_superpop}])
     pop_ht_superpop = pop_ht_superpop.annotate_globals(
         hl.eval(pop_filter_ht.globals))
     pop_ht_superpop = pop_ht_superpop.annotate(
