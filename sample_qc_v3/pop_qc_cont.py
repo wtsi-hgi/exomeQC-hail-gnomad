@@ -180,7 +180,7 @@ if __name__ == "__main__":
     qc_metrics = ['heterozygosity_rate', 'n_snp', 'r_ti_tv',
                   'r_insertion_deletion', 'n_insertion', 'n_deletion', 'r_het_hom_var']
     pop_filter_ht = compute_stratified_metrics_filter(
-        pop_ht, qc_metrics, pop_ht.assigned_pop)
+        pop_ht, {'qc_metrics': qc_metrics}, {'assigned_pop': pop_ht.assigned_pop})
     pop_ht = pop_ht.annotate_globals(hl.eval(pop_filter_ht.globals))
     pop_ht = pop_ht.annotate(**pop_filter_ht[pop_ht.key]).persist()
 
