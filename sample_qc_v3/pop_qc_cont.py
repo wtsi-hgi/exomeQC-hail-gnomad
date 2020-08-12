@@ -177,8 +177,8 @@ if __name__ == "__main__":
     pop_ht = hl.read_table(
         f"{tmp_dir}/ddd-elgh-ukbb/mt_pops_superpops_sampleqc.ht")
     # run function on metrics including heterozygosity first for pops:
-    qc_metrics = ['heterozygosity_rate', 'n_snp', 'r_ti_tv',
-                  'r_insertion_deletion', 'n_insertion', 'n_deletion', 'r_het_hom_var']
+    qc_metrics = [sample_qc.heterozygosity_rate, sample_qc.n_snp, sample_qc.r_ti_tv,
+                  sample_qc.r_insertion_deletion, sampleqc.n_insertion, sampleqc.n_deletion, sample_qc.r_het_hom_var]
     pop_filter_ht = compute_stratified_metrics_filter(
         pop_ht, {'qc_metrics': qc_metrics}, {'assigned_pop': pop_ht.assigned_pop})
     pop_ht = pop_ht.annotate_globals(hl.eval(pop_filter_ht.globals))
