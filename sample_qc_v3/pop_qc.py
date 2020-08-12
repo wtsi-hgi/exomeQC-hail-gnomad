@@ -10,7 +10,7 @@ import sys
 import re
 from pathlib import Path
 import logging
-from typing import Any, Counter, List, Optional, Tuple, Union, Dict, Iterable,
+from typing import Any, Counter, List, Optional, Tuple, Union, Dict, Iterable
 
 from bokeh.plotting import output_file, save, show
 from gnomad_filtering import compute_stratified_metrics_filter
