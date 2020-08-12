@@ -2,7 +2,8 @@ import pandas as pd
 import hail as hl
 import logging
 import random
-from typing import Any, Counter, List, Optional, Tuple, Union
+from typing import Any, Counter, List, Optional, Tuple, Union, Dict, Iterable
+
 
 def compute_stratified_metrics_filter(
     ht: hl.Table,
@@ -38,7 +39,8 @@ def compute_stratified_metrics_filter(
         return hl.set(
             hl.filter(
                 lambda x: hl.is_defined(x),
-                [hl.or_missing(ht[f"fail_{metric}"], metric) for metric in qc_metrics],
+                [hl.or_missing(ht[f"fail_{metric}"], metric)
+                 for metric in qc_metrics],
             )
         )
 
@@ -67,7 +69,8 @@ def compute_stratified_metrics_filter(
                 _localize=False,
             )
         )
-        metrics_stats_expr = ht.qc_metrics_stats[hl.tuple([ht[x] for x in strata])]
+        metrics_stats_expr = ht.qc_metrics_stats[hl.tuple(
+            [ht[x] for x in strata])]
     else:
         ht = ht.annotate_globals(
             qc_metrics_stats=ht.aggregate(agg_expr, _localize=False)
@@ -82,4 +85,3 @@ def compute_stratified_metrics_filter(
     ht = ht.transmute(**fail_exprs)
     stratified_filters = make_filters_expr(ht, qc_metrics)
     return ht.annotate(**{filter_name: stratified_filters})
-
