@@ -161,7 +161,7 @@ if __name__ == "__main__":
     # do sample_qc
     # calculate and annotate with metric heterozygosity
     mt_with_sampleqc = hl.sample_qc(mt, name='sample_qc')
-    mt_with_sampleqc = hl.sample_qc(mt, name='sample_qc')
+
     mt_with_sampleqc = mt_with_sampleqc.annotate_cols(sample_qc=mt_with_sampleqc.sample_qc.annotate(
         heterozygosity_rate=mt_with_sampleqc.sample_qc.n_het/mt_with_sampleqc.sample_qc.n_called))
     # save sample_qc and heterozygosity table as ht table
