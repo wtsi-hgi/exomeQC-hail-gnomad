@@ -12,7 +12,7 @@ from pathlib import Path
 import logging
 from typing import Any, Counter, List, Optional, Tuple, Union
 from bokeh.plotting import output_file, save, show
-from gnomad_ancestry import pc_project, run_pca_with_relateds, assign_population_pcs
+from gnomad_filtering import compute_stratified_metrics_filter
 
 logging.basicConfig(format="%(levelname)s (%(name)s %(lineno)s): %(message)s")
 logger = logging.getLogger(__name__)
@@ -55,7 +55,7 @@ def filter_to_autosomes(
     return hl.filter_intervals(t, [autosomes])
 
 
-def compute_stratified_metrics_filter(ht: hl.Table, qc_metrics: List[str], strata: List[str] = None) -> hl.Table:
+'''def compute_stratified_metrics_filter(ht: hl.Table, qc_metrics: List[str], strata: List[str] = None) -> hl.Table:
     """
     Compute median, MAD, and upper and lower thresholds for each metric used in pop- and platform-specific outlier filtering
 
@@ -102,7 +102,7 @@ def compute_stratified_metrics_filter(ht: hl.Table, qc_metrics: List[str], strat
     ht = ht.transmute(**fail_exprs)
     pop_platform_filters = make_pop_filters_expr(ht, qc_metrics)
     return ht.annotate(pop_platform_filters=pop_platform_filters)
-
+'''
 
 project_root = Path(__file__).parent.parent
 print(project_root)
@@ -180,7 +180,7 @@ if __name__ == "__main__":
     pop_ht = pop_ht.annotate(**pop_filter_ht[pop_ht.key]).persist()
 
     checkpoint = pop_ht.aggregate(hl.agg.count_where(
-        hl.len(pop_ht.pop_platform_filters) == 0))
+        hl.len(pop_ht.qc_metrics_filters) == 0))
     logger.info(f'{checkpoint} exome samples found passing pop filtering')
     pop_ht.write(f"{tmp_dir}/ddd-elgh-ukbb/mt_pops_QC_filters.ht")
 
@@ -195,7 +195,7 @@ if __name__ == "__main__":
         **pop_filter_ht[pop_ht_superpop.key]).persist()
 
     checkpoint = pop_ht_superpop.aggregate(hl.agg.count_where(
-        hl.len(pop_ht_superpop.pop_platform_filters) == 0))
+        hl.len(pop_ht_superpop.qc_metrics_filters) == 0))
     logger.info(f'{checkpoint} exome samples found passing Superpop filtering')
     pop_ht_superpop.write(
         f"{tmp_dir}/ddd-elgh-ukbb/mt_superpops_QC_filters.ht")
