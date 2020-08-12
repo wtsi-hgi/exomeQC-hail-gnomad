@@ -166,9 +166,9 @@ if __name__ == "__main__":
         heterozygosity_rate=mt_with_sampleqc.sample_qc.n_het/mt_with_sampleqc.sample_qc.n_called))
     # save sample_qc and heterozygosity table as ht table
     mt_with_sampleqc.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/mt_pops_superpops_sampleqc.mt")
+        f"{tmp_dir}/ddd-elgh-ukbb/mt_pops_superpops_sampleqc.mt", overwrite=True)
     mt_with_sampleqc.cols().write(
-        f"{tmp_dir}/ddd-elgh-ukbb/mt_pops_superpops_sampleqc.ht")
+        f"{tmp_dir}/ddd-elgh-ukbb/mt_pops_superpops_sampleqc.ht",  overwrite=True)
     pop_ht = hl.read_table(
         f"{tmp_dir}/ddd-elgh-ukbb/mt_pops_superpops_sampleqc.ht")
     # run function on metrics including heterozygosity first for pops:
