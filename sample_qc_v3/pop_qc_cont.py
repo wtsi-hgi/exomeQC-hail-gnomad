@@ -190,26 +190,22 @@ if __name__ == "__main__":
     }
     pop_filter_ht = compute_stratified_metrics_filter(
         pop_ht, qc_metrics, strata)
-    pop_ht = pop_ht.annotate_globals(hl.eval(pop_filter_ht.globals))
-    pop_ht = pop_ht.annotate(**pop_filter_ht[pop_ht.key]).persist()
 
-    checkpoint = pop_ht.aggregate(hl.agg.count_where(
-        hl.len(pop_ht.qc_metrics_filters) == 0))
-    logger.info(f'{checkpoint} exome samples found passing pop filtering')
-    pop_ht.write(f"{tmp_dir}/ddd-elgh-ukbb/mt_pops_QC_filters.ht")
+    #pop_ht = pop_ht.annotate_globals(hl.eval(pop_filter_ht.globals))
+    #pop_ht = pop_ht.annotate(**pop_filter_ht[pop_ht.key]).persist()
+
+    # checkpoint = pop_ht.aggregate(hl.agg.count_where(
+    #   hl.len(pop_ht.qc_metrics_filters) == 0))
+    #logger.info(f'{checkpoint} exome samples found passing pop filtering')
+    pop_filter_ht.write(f"{tmp_dir}/ddd-elgh-ukbb/mt_pops_QC_filters.ht")
 
     # run function on metrics including heterozygosity  for superpops:
+    strata = {}
+    strata['assigned_superpop'] = pop_ht.assigned_superpop
     pop_ht_superpop = hl.read_table(
         f"{tmp_dir}/ddd-elgh-ukbb/mt_pops_superpops_sampleqc.ht")
-    pop_filter_ht = compute_stratified_metrics_filter(
-        pop_ht_superpop, qc_metrics, [{'assigned_superpop': pop_ht.assigned_superpop}])
-    pop_ht_superpop = pop_ht_superpop.annotate_globals(
-        hl.eval(pop_filter_ht.globals))
-    pop_ht_superpop = pop_ht_superpop.annotate(
-        **pop_filter_ht[pop_ht_superpop.key]).persist()
+    pop_filter_ht_superpop = compute_stratified_metrics_filter(
+        pop_ht_superpop, qc_metrics, strata)
 
-    checkpoint = pop_ht_superpop.aggregate(hl.agg.count_where(
-        hl.len(pop_ht_superpop.qc_metrics_filters) == 0))
-    logger.info(f'{checkpoint} exome samples found passing Superpop filtering')
-    pop_ht_superpop.write(
+    pop_filter_ht_superpop.write(
         f"{tmp_dir}/ddd-elgh-ukbb/mt_superpops_QC_filters.ht")
