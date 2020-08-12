@@ -197,15 +197,16 @@ if __name__ == "__main__":
     # checkpoint = pop_ht.aggregate(hl.agg.count_where(
     #   hl.len(pop_ht.qc_metrics_filters) == 0))
     #logger.info(f'{checkpoint} exome samples found passing pop filtering')
-    pop_filter_ht.write(f"{tmp_dir}/ddd-elgh-ukbb/mt_pops_QC_filters.ht")
+    pop_filter_ht.write(
+        f"{tmp_dir}/ddd-elgh-ukbb/mt_pops_QC_filters.ht", overwrite=True)
 
     # run function on metrics including heterozygosity  for superpops:
     strata = {}
     strata['assigned_superpop'] = pop_ht.assigned_superpop
-    pop_ht_superpop = hl.read_table(
+    pop_ht = hl.read_table(
         f"{tmp_dir}/ddd-elgh-ukbb/mt_pops_superpops_sampleqc.ht")
     pop_filter_ht_superpop = compute_stratified_metrics_filter(
         pop_ht_superpop, qc_metrics, strata)
 
     pop_filter_ht_superpop.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/mt_superpops_QC_filters.ht")
+        f"{tmp_dir}/ddd-elgh-ukbb/mt_superpops_QC_filters.ht", overwrite=True)
