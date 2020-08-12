@@ -171,7 +171,7 @@ if __name__ == "__main__":
     mt_with_sampleqc.cols().write(
         f"{tmp_dir}/ddd-elgh-ukbb/mt_pops_superpops_sampleqc.ht",  overwrite=True)
     '''
-
+    strata = {}
     mt_with_sampleqc = hl.read_matrix_table(
         f"{tmp_dir}/ddd-elgh-ukbb/mt_pops_superpops_sampleqc.mt")
     pop_ht = hl.read_table(
