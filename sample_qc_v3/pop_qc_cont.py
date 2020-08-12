@@ -206,7 +206,7 @@ if __name__ == "__main__":
     pop_ht = hl.read_table(
         f"{tmp_dir}/ddd-elgh-ukbb/mt_pops_superpops_sampleqc.ht")
     pop_filter_ht_superpop = compute_stratified_metrics_filter(
-        pop_ht_superpop, qc_metrics, strata)
+        pop_ht, qc_metrics, strata)
 
     pop_filter_ht_superpop.write(
         f"{tmp_dir}/ddd-elgh-ukbb/mt_superpops_QC_filters.ht", overwrite=True)
