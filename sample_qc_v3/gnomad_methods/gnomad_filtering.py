@@ -3,7 +3,7 @@ import hail as hl
 import logging
 import random
 from typing import Any, Counter, List, Optional, Tuple, Union, Dict, Iterable
-from gnomad_gen_stats import get_median_and_mad_expr, merge_stats_counters_expr
+from gnomad_methods.gnomad_gen_stats import get_median_and_mad_expr, merge_stats_counters_expr
 
 
 def compute_stratified_metrics_filter(
@@ -20,7 +20,7 @@ def compute_stratified_metrics_filter(
 
     :param ht: HT containing relevant sample QC metric annotations
     :param qc_metrics: list of metrics (name and expr) for which to compute the critical values for filtering outliers
-    :param strata: List of annotations used for stratification. These metrics should be discrete types!
+    :param strata: List of annotations used for stratification. These metrics should be discrete types!git a
     :param lower_threshold: Lower MAD threshold
     :param upper_threshold: Upper MAD threshold
     :param metric_threshold: Can be used to specify different (lower, upper) thresholds for one or more metrics
