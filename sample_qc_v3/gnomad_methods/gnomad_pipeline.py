@@ -57,19 +57,19 @@ def get_qc_mt(
             "The LD-prune step of this function requires non-preemptible workers only!"
         )
 
-    qc_mt = filter_low_conf_regions(
-        mt,
-        filter_lcr=filter_lcr,
-        filter_decoy=filter_decoy,
-        filter_segdup=filter_segdup,
-        filter_exome_low_coverage_regions=filter_exome_low_coverage_regions,
-        high_conf_regions=high_conf_regions,
-    )
+   # qc_mt = filter_low_conf_regions(
+   #     mt,
+   #     filter_lcr=filter_lcr,
+   #     filter_decoy=filter_decoy,
+   #     filter_segdup=filter_segdup,
+   #     filter_exome_low_coverage_regions=filter_exome_low_coverage_regions,
+   #     high_conf_regions=high_conf_regions,
+   # )
 
-    if adj_only:
-        qc_mt = filter_to_adj(
-            qc_mt
-        )  # TODO: Make sure that this works fine before call rate filtering
+    # if adj_only:
+    #    qc_mt = filter_to_adj(
+    #        qc_mt
+    #    )  # TODO: Make sure that this works fine before call rate filtering
 
     qc_mt = filter_rows_for_qc(
         qc_mt,
