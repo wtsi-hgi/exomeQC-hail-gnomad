@@ -161,7 +161,7 @@ def get_qc_mt(
     #    )  # TODO: Make sure that this works fine before call rate filtering
 
     qc_mt = filter_rows_for_qc(
-        qc_mt,
+        mt,
         min_af,
         min_callrate,
         min_inbreeding_coeff_threshold,
