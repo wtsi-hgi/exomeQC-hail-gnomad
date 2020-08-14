@@ -17,7 +17,7 @@ from typing import Any, Counter, List, Optional, Tuple, Union, Dict, Iterable
 
 from bokeh.plotting import output_file, save, show
 from gnomad_methods.gnomad_filtering import compute_stratified_metrics_filter
-from sample_qc_v3.gnomad_methods.gnomad_pipeline import get_qc_mt
+from gnomad_methods.gnomad_pipeline import get_qc_mt
 logging.basicConfig(format="%(levelname)s (%(name)s %(lineno)s): %(message)s")
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
