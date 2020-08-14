@@ -1,6 +1,12 @@
 import hail as hl
 from gnomad_methods.gnomad_utils_filtering import filter_low_conf_regions, filter_to_adj
 from typing import Dict, List, Optional, Union
+import functools
+import logging
+import operator
+logging.basicConfig(format="%(levelname)s (%(name)s %(lineno)s): %(message)s")
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 def get_qc_mt(
