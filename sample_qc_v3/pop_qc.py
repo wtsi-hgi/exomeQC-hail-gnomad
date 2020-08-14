@@ -13,7 +13,7 @@ import logging
 from typing import Any, Counter, List, Optional, Tuple, Union, Dict, Iterable
 
 from bokeh.plotting import output_file, save, show
-from gnomad_filtering import compute_stratified_metrics_filter
+from sample_qc_v3.gnomad_methods.gnomad_filtering import compute_stratified_metrics_filter
 
 logging.basicConfig(format="%(levelname)s (%(name)s %(lineno)s): %(message)s")
 logger = logging.getLogger(__name__)
@@ -55,55 +55,6 @@ def filter_to_autosomes(
     )
     return hl.filter_intervals(t, [autosomes])
 
-
-'''def compute_stratified_metrics_filter(ht: hl.Table, qc_metrics: List[str], strata: List[str] = None) -> hl.Table:
-    """
-    Compute median, MAD, and upper and lower thresholds for each metric used in pop- and platform-specific outlier filtering
-
-    :param MatrixTable ht: HT containing relevant sample QC metric annotations
-    :param list qc_metrics: list of metrics for which to compute the critical values for filtering outliers
-    :param list of str strata: List of annotations used for stratification. These metrics should be discrete types!
-    :return: Table grouped by pop and platform, with upper and lower threshold values computed for each sample QC metric
-    :rtype: Table
-    """
-
-    def make_pop_filters_expr(ht: hl.Table, qc_metrics: List[str]) -> hl.expr.SetExpression:
-        return hl.set(hl.filter(lambda x: hl.is_defined(x),
-                                [hl.or_missing(ht[f'fail_{metric}'], metric) for metric in qc_metrics]))
-
-    ht = ht.select(*strata, **ht.sample_qc.select(*qc_metrics)
-                   ).key_by('s').persist()
-
-    def get_metric_expr(ht, metric):
-        metric_values = hl.agg.collect(ht[metric])
-        metric_median = hl.median(metric_values)
-        metric_mad = 1.4826 * hl.median(hl.abs(metric_values - metric_median))
-        return hl.struct(
-            median=metric_median,
-            mad=metric_mad,
-            upper=metric_median + 4 * metric_mad if metric != 'callrate' else 1,
-            lower=metric_median - 4 * metric_mad if metric != 'callrate' else 0.99
-        )
-
-    agg_expr = hl.struct(**{metric: get_metric_expr(ht, metric)
-                            for metric in qc_metrics})
-    if strata:
-        ht = ht.annotate_globals(metrics_stats=ht.aggregate(
-            hl.agg.group_by(hl.tuple([ht[x] for x in strata]), agg_expr)))
-    else:
-        ht = ht.annotate_globals(metrics_stats={(): ht.aggregate(agg_expr)})
-
-    strata_exp = hl.tuple([ht[x] for x in strata]) if strata else hl.tuple([])
-
-    fail_exprs = {
-        f'fail_{metric}':
-            (ht[metric] >= ht.metrics_stats[strata_exp][metric].upper) |
-            (ht[metric] <= ht.metrics_stats[strata_exp][metric].lower)
-        for metric in qc_metrics}
-    ht = ht.transmute(**fail_exprs)
-    pop_platform_filters = make_pop_filters_expr(ht, qc_metrics)
-    return ht.annotate(pop_platform_filters=pop_platform_filters)
-'''
 
 project_root = Path(__file__).parent.parent
 print(project_root)
