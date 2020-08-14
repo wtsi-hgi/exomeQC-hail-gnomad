@@ -1,3 +1,7 @@
+import hail as hl
+from gnomad_methods.gnomad_utils_filtering import filter_low_conf_regions, filter_to_adj
+
+
 def get_qc_mt(
     mt: hl.MatrixTable,
     adj_only: bool = True,
@@ -112,7 +116,7 @@ def annotate_sex(
 ) -> hl.Table:
     """
     Imputes sample sex based on X-chromosome heterozygosity and sex chromosome ploidy.
- 
+
     Returns Table with the following fields:
         - s (str): Sample
         - chr20_mean_dp (float32): Sample's mean coverage over chromosome 20.
@@ -154,7 +158,8 @@ def annotate_sex(
     x_contigs = get_reference_genome(mt.locus).x_contigs
     logger.info(f"Filtering mt to biallelic SNPs in X contigs: {x_contigs}")
     if "was_split" in list(mt.row):
-        mt = mt.filter_rows((~mt.was_split) & hl.is_snp(mt.alleles[0], mt.alleles[1]))
+        mt = mt.filter_rows((~mt.was_split) & hl.is_snp(
+            mt.alleles[0], mt.alleles[1]))
     else:
         mt = mt.filter_rows(
             (hl.len(mt.alleles) == 2) & hl.is_snp(mt.alleles[0], mt.alleles[1])
@@ -186,7 +191,8 @@ def annotate_sex(
     sex_ht = sex_ht.annotate(**ploidy_ht[sex_ht.key])
 
     logger.info("Inferring sex karyotypes")
-    x_ploidy_cutoffs, y_ploidy_cutoffs = get_ploidy_cutoffs(sex_ht, f_stat_cutoff)
+    x_ploidy_cutoffs, y_ploidy_cutoffs = get_ploidy_cutoffs(
+        sex_ht, f_stat_cutoff)
     sex_ht = sex_ht.annotate_globals(
         x_ploidy_cutoffs=hl.struct(
             upper_cutoff_X=x_ploidy_cutoffs[0],
