@@ -1,6 +1,8 @@
 import hail as hl
 from gnomad_methods.gnomad_utils_filtering import filter_low_conf_regions, filter_to_adj
 from gnomad_methods.reference_genome import get_reference_genome
+from gnomad_methods.utils_annotations import bi_allelic_site_inbreeding_expr, bi_allelic_expr
+
 from typing import Dict, List, Optional, Union
 import functools
 import logging
