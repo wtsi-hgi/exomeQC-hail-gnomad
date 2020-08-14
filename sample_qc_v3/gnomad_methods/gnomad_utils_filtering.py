@@ -2,6 +2,7 @@ import functools
 import logging
 import operator
 from typing import Dict, List, Optional, Union
+import hail as hl
 
 
 def filter_to_adj(mt: hl.MatrixTable) -> hl.MatrixTable:
