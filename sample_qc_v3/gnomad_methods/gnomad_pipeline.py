@@ -1,5 +1,6 @@
 import hail as hl
 from gnomad_methods.gnomad_utils_filtering import filter_low_conf_regions, filter_to_adj
+from typing import Dict, List, Optional, Union
 
 
 def get_qc_mt(
