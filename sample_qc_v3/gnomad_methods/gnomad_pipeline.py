@@ -1,5 +1,6 @@
 import hail as hl
 from gnomad_methods.gnomad_utils_filtering import filter_low_conf_regions, filter_to_adj
+from gnomad_methods.reference_genome import get_reference_genome
 from typing import Dict, List, Optional, Union
 import functools
 import logging
