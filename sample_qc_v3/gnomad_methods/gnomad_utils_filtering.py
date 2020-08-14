@@ -3,6 +3,7 @@ import logging
 import operator
 from typing import Dict, List, Optional, Union
 import hail as hl
+from gnomad_methods.reference_genome import get_reference_genome
 
 
 def filter_to_adj(mt: hl.MatrixTable) -> hl.MatrixTable:
