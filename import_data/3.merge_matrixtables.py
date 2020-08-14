@@ -99,15 +99,14 @@ if __name__ == "__main__":
 
     print("Now writing joined matrixtable to disk:")
     # annotate with cohorts
-    mt_annotated = annotate_samples_with_cohort_info(mt, table_cohort)
+    #mt_annotated = annotate_samples_with_cohort_info(mt, table_cohort)
 
-    mt_annotated = mt_annotated.key_rows_by('locus').distinct_by_row(
-    ).key_rows_by('locus', 'alleles')
-    # mt_split = hl.split_multi_hts(
-    #    mt_annotated, keep_star=False, left_aligned=False)
+    # mt_annotated = mt_annotated.key_rows_by('locus').distinct_by_row(
+    # ).key_rows_by('locus', 'alleles')
+    mt_split = hl.split_multi_hts(mt, keep_star=False, left_aligned=False)
     # mt_split = mt_split.checkpoint(
     #   f"{tmp_dir}/ddd-elgh-ukbb/{CHROMOSOME}-split-multi_cohorts.mt",  overwrite=True)
 
-    mt_annotated.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/WES_annotated_cohorts.mt", overwrite=True)
+    mt_split.write(
+        f"{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_split.mt", overwrite=True)
     print(f"Wrote matrixtable for whole genome.")
