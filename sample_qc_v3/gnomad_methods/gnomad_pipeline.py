@@ -10,6 +10,95 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
+def filter_rows_for_qc(
+    mt: hl.MatrixTable,
+    min_af: Optional[float] = 0.001,
+    min_callrate: Optional[float] = 0.99,
+    min_inbreeding_coeff_threshold: Optional[float] = -0.8,
+    min_hardy_weinberg_threshold: Optional[float] = 1e-8,
+    apply_hard_filters: bool = True,
+    bi_allelic_only: bool = True,
+    snv_only: bool = True,
+) -> hl.MatrixTable:
+    """
+    Annotates rows with `sites_callrate`, `site_inbreeding_coeff` and `af`, then applies thresholds.
+    AF and callrate thresholds are taken from gnomAD QC; inbreeding coeff, MQ, FS and QD filters are taken from GATK best practices
+
+    .. note::
+
+        This function expect the typical ``info`` annotation of type struct with fields ``MQ``, ``FS`` and ``QD``
+        if applying hard filters.
+
+    :param mt: Input MT
+    :param min_af: Minimum site AF to keep. Not applied if set to ``None``.
+    :param min_callrate: Minimum site call rate to keep. Not applied if set to ``None``.
+    :param min_inbreeding_coeff_threshold: Minimum site inbreeding coefficient to keep. Not applied if set to ``None``.
+    :param min_hardy_weinberg_threshold: Minimum site HW test p-value to keep. Not applied if set to ``None``.
+    :paramapply_hard_filters: Whether to apply standard GAKT default site hard filters: QD >= 2, FS <= 60 and MQ >= 30
+    :parambi_allelic_only: Whether to only keep bi-allelic sites or include multi-allelic sites too
+    :paramsnv_only: Whether to only keep SNVs or include other variant types
+    :return: annotated and filtered table
+    """
+    annotation_expr = {}
+
+    if min_af is not None:
+        annotation_expr["af"] = hl.agg.mean(mt.GT.n_alt_alleles()) / 2
+    if min_callrate is not None:
+        annotation_expr["site_callrate"] = hl.agg.fraction(
+            hl.is_defined(mt.GT))
+    if min_inbreeding_coeff_threshold is not None:
+        annotation_expr["site_inbreeding_coeff"] = bi_allelic_site_inbreeding_expr(
+            mt.GT
+        )
+    if min_hardy_weinberg_threshold is not None:
+        annotation_expr["hwe"] = hl.agg.hardy_weinberg_test(mt.GT)
+
+    if annotation_expr:
+        mt = mt.annotate_rows(**annotation_expr)
+
+    filter_expr = []
+    if min_af is not None:
+        filter_expr.append((mt.af > min_af))
+    if min_callrate is not None:
+        filter_expr.append((mt.site_callrate > min_callrate))
+    if min_inbreeding_coeff_threshold is not None:
+        filter_expr.append(
+            (mt.site_inbreeding_coeff > min_inbreeding_coeff_threshold))
+    if min_hardy_weinberg_threshold is not None:
+        filter_expr.append((mt.hwe.p_value > min_hardy_weinberg_threshold))
+    if snv_only:
+        filter_expr.append(hl.is_snp(mt.alleles[0], mt.alleles[1]))
+    if bi_allelic_only:
+        filter_expr.append(bi_allelic_expr(mt))
+
+    if apply_hard_filters:
+        if "info" in mt.row_value:
+            if "QD" in mt.info:
+                filter_expr.append((mt.info.QD >= 2))
+            else:
+                logger.warning(
+                    "Could not apply QD hard filter, as `info.QD` not found in schema."
+                )
+            if "FS" in mt.info:
+                filter_expr.append((mt.info.FS <= 60))
+            else:
+                logger.warning(
+                    "Could not apply FS hard filter, as `info.FS` not found in schema."
+                )
+            if "MQ" in mt.info:
+                filter_expr.append((mt.info.MQ >= 30))
+            else:
+                logger.warning(
+                    "Could not apply MQ hard filter, as `info.MQ` not found in schema."
+                )
+        else:
+            logger.warning(
+                "Could not apply hard filters as `info` not found in schema."
+            )
+
+    return mt.filter_rows(functools.reduce(operator.iand, filter_expr))
+
+
 def get_qc_mt(
     mt: hl.MatrixTable,
     adj_only: bool = True,
