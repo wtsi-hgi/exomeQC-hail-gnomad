@@ -103,7 +103,8 @@ if __name__ == "__main__":
 
     # mt_annotated = mt_annotated.key_rows_by('locus').distinct_by_row(
     # ).key_rows_by('locus', 'alleles')
-    mt_split = hl.split_multi_hts(mt, keep_star=False, left_aligned=False)
+    mt_split = hl.split_multi_hts(
+        mt, keep_star=False, left_aligned=False, permit_shuffle=True)
     # mt_split = mt_split.checkpoint(
     #   f"{tmp_dir}/ddd-elgh-ukbb/{CHROMOSOME}-split-multi_cohorts.mt",  overwrite=True)
 
