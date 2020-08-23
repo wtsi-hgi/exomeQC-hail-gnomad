@@ -89,7 +89,7 @@ if __name__ == "__main__":
 
     print("Reading all matrixtables and joining them")
     mt = hl.read_matrix_table(f"{s3mt}/chr1.mt")
-    mt = mt.checkpoint(f"{tmp_dir}/ddd-elgh-ukbb/chr1.mt", overwrite=True)
+    #mt = mt.checkpoint(f"{tmp_dir}/ddd-elgh-ukbb/chr1.mt", overwrite=True)
     for chromosome in CHROMOSOMES:
         mt2 = hl.read_matrix_table(f"{s3mt}/{chromosome}.mt")
         print(f"Saving {chromosome} mt")
