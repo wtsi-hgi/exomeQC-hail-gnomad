@@ -31,15 +31,7 @@ partitions = 1000
 
 
 CHROMOSOMES = [
-    "chr5",
-    "chr6",
-    "chr7",
-    "chr8",
-    "chr9",
-    "chr12",
-    "chr13",
-    "chr14",
-    "cdhr15",
+    "chr15",
     "chr16",
     "chr17",
     "chr18",
