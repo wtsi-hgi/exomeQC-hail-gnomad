@@ -97,7 +97,7 @@ if __name__ == "__main__":
         "s3a://DDD-ELGH-UKBB-exomes/ancestry/sanger_cohort_known_populations_ukbb_elgh_labels_updated.tsv", delimiter="\t").key_by('s')
 
     pruned_mt = hl.read_matrix_table(
-        f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_ldpruned_updated.mt")
+        f"{temp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_ldpruned.mt")
 
     logger.info("run_pca_with_relateds")
     # pca_evals, pca_scores, pca_loadings = run_pca_with_relateds(
