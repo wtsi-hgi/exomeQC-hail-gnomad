@@ -13,7 +13,6 @@ import logging
 from typing import Any, Counter, List, Optional, Tuple, Union
 from bokeh.plotting import output_file, save, show
 from gnomad_methods.gnomad_ancestry import pc_project, run_pca_with_relateds, assign_population_pcs
-from sample_qc_v3 import gnomad_methods
 
 logging.basicConfig(format="%(levelname)s (%(name)s %(lineno)s): %(message)s")
 logger = logging.getLogger(__name__)
