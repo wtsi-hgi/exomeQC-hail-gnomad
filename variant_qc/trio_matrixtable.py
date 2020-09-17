@@ -59,3 +59,4 @@ if __name__ == "__main__":
     fam = "s3a://DDD-ELGH-UKBB-exomes/trios/DDD_trios.fam"
     pedigree = hl.Pedigree.read(fam)
     trio_dataset = hl.trio_matrix(mt, pedigree, complete_trios=True)
+    trio_dataset.write(f'{tmp_dir}/ddd-elgh-ukbb/mt_trios.mt', overwrite=True)
