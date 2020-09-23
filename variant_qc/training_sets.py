@@ -72,7 +72,7 @@ if __name__ == "__main__":
         f'{tmp_dir}/ddd-elgh-ukbb/Sanger_omni_TP.mt', overwrite=True)
     mt_mills = mt2.filter_rows(hl.is_defined(mills_ht[mt2.locus]), keep=True)
     mt_mills = mt_mills.checkpoint(
-        f'{tmp_dir}/ddd-elgh-ukbb/Sanger_omni_TP.mt', voerwrite=True)
+        f'{tmp_dir}/ddd-elgh-ukbb/Sanger_omni_TP.mt', overwrite=True)
     mt_1000g = mt2.filter_rows(hl.is_defined(
         thousand_genomes_ht[mt2.locus]), keep=True)
     mt_1000g = mt_1000g.checkpoint(
