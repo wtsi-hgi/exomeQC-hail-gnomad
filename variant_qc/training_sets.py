@@ -83,4 +83,4 @@ if __name__ == "__main__":
 
     print(mt_omni.count())
     print(mt_mills.count())
-    print(mt_1000g.coount())
+    print(mt_1000g.count())
