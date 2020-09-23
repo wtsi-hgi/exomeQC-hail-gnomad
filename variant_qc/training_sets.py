@@ -56,28 +56,28 @@ if __name__ == "__main__":
     # read matrixtable = remove the
     mt2 = hl.read_matrix_table(
         f'{temp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1-20-XY_new_cohorts_split_multi.mt')
-    mt2_hard_filter_fail = mt2.filter_rows(
-        (mt2.info.QD < 2) | (mt2.info.FS > 60) | (mt2.info.MQ < 30))
-    mt2_hard_filter_fail = mt2_hard_filter_fail.checkpoint(
-        f'{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_variants_fail_hard_filter.mt', overwrite=True)
-    print(mt2.count())
-    print(mt2_hard_filter_fail.count())
+    # mt2_hard_filter_fail = mt2.filter_rows(
+    #    (mt2.info.QD < 2) | (mt2.info.FS > 60) | (mt2.info.MQ < 30))
+    # mt2_hard_filter_fail = mt2_hard_filter_fail.checkpoint(
+    #    f'{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_variants_fail_hard_filter.mt', overwrite=True)
+    # print(mt2.count())
+    # print(mt2_hard_filter_fail.count())
 
     omni = "s3a://gnomad-training-sets/1000G_omni2.5.hg38.ht"
-    omni_ht = hl.read_table(omni)
+    omni_ht = hl.read_table(omni, )
     mills = "s3a://gnomad-training-sets/Mills_and_1000G_gold_standard.indels.hg38.ht"
     mills_ht = hl.read_table(mills)
     thousand_genomes = "s3a://gnomad-training-sets/1000G_phase1.snps.high_confidence.hg38.ht/"
     thousand_genomes_ht = hl.read_table(thousand_genomes)
 
-    mt_omni = mt2.filter_rows(hl.is_defined(omni_ht[mt2.locus]), keep=True)
+    mt_omni = mt2.filter_rows(hl.is_defined(omni_ht[mt2.row_key]), keep=True)
     mt_omni = mt_omni.checkpoint(
         f'{tmp_dir}/ddd-elgh-ukbb/Sanger_omni_TP.mt', overwrite=True)
-    mt_mills = mt2.filter_rows(hl.is_defined(mills_ht[mt2.locus]), keep=True)
+    mt_mills = mt2.filter_rows(hl.is_defined(mills_ht[mt2.row_key]), keep=True)
     mt_mills = mt_mills.checkpoint(
         f'{tmp_dir}/ddd-elgh-ukbb/Sanger_omni_TP.mt', overwrite=True)
     mt_1000g = mt2.filter_rows(hl.is_defined(
-        thousand_genomes_ht[mt2.locus]), keep=True)
+        thousand_genomes_ht[mt2.row_key]), keep=True)
     mt_1000g = mt_1000g.checkpoint(
         f'{tmp_dir}/ddd-elgh-ukbb/Sanger_1000g_TP.mt', overwrite=True)
 
