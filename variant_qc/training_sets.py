@@ -64,7 +64,7 @@ if __name__ == "__main__":
     # print(mt2_hard_filter_fail.count())
 
     omni = "s3a://gnomad-training-sets/1000G_omni2.5.hg38.ht"
-    omni_ht = hl.read_table(omni, )
+    omni_ht = hl.read_table(omni)
     mills = "s3a://gnomad-training-sets/Mills_and_1000G_gold_standard.indels.hg38.ht"
     mills_ht = hl.read_table(mills)
     thousand_genomes = "s3a://gnomad-training-sets/1000G_phase1.snps.high_confidence.hg38.ht/"
