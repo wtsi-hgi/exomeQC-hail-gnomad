@@ -13,14 +13,8 @@ import logging
 from typing import Any, Counter, List, Optional, Tuple, Union
 from bokeh.plotting import output_file, save, show
 from gnomad.resources.grch38 import gnomad
-from gnomad.utils.filtering import filter_to_autosomes
-from gnomad.utils.annotations import annotate_adj, bi_allelic_expr
-from gnomad.sample_qc.relatedness import (
-    SIBLINGS,
-    generate_sib_stats_expr,
-    generate_trio_stats_expr,
-)
-
+from gnomad.resources.grch38 import gnomad
+import gnomad.resources.grch38 as grch38_resources
 logging.basicConfig(format="%(levelname)s (%(name)s %(lineno)s): %(message)s")
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -46,41 +40,6 @@ with open(f"{storage}", 'r') as f:
 with open(f"{thresholds}", 'r') as f:
     thresholds = json.load(f)
 
-
-def generate_trio_stats(
-    mt: hl.MatrixTable, autosomes_only: bool = True, bi_allelic_only: bool = True
-) -> hl.Table:
-    """
-    Default function to run `generate_trio_stats_expr` to get trio stats stratified by raw and adj
-    .. note::
-        Expects that `mt` is it a trio matrix table that was annotated with adj and if dealing with
-        a sparse MT `hl.experimental.densify` must be run first.
-        By default this pipeline function will filter `mt` to only autosomes and bi-allelic sites.
-    :param mt: A Trio Matrix Table returned from `hl.trio_matrix`. Must be dense
-    :param autosomes_only: If set, only autosomal intervals are used.
-    :param bi_allelic_only: If set, only bi-allelic sites are used for the computation
-    :return: Table with trio stats
-    """
-    if autosomes_only:
-        mt = filter_to_autosomes(mt)
-    if bi_allelic_only:
-        mt = mt.filter_rows(bi_allelic_expr(mt))
-
-    logger.info(f"Generating trio stats using {mt.count_cols()} trios.")
-    trio_adj = mt.proband_entry.adj & mt.father_entry.adj & mt.mother_entry.adj
-
-    ht = mt.select_rows(
-        **generate_trio_stats_expr(
-            mt,
-            transmitted_strata={"raw": True, "adj": trio_adj},
-            de_novo_strata={"raw": True, "adj": trio_adj},
-            ac_strata={"raw": True, "adj": trio_adj},
-        )
-    ).rows()
-
-    return ht
-
-
 if __name__ == "__main__":
     # need to create spark cluster first before intiialising hail
     sc = pyspark.SparkContext()
@@ -95,16 +54,13 @@ if __name__ == "__main__":
 
     hadoop_config.set("fs.s3a.access.key", credentials["mer"]["access_key"])
     hadoop_config.set("fs.s3a.secret.key", credentials["mer"]["secret_key"])
-
+    hadoop_config.set("fs.gs.impl", "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem")
+    hadoop_config.set("fs.AbstractFileSystem.gs.impl", "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS")
     # read matrixtable = remove the
     mt = hl.read_matrix_table(
-        f'{temp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1-20-XY_sampleQC_FILTERED.mt')
+        f'{temp_dir}/ddd-elgh-ukbb/filtering/mt_pops_superpops_sampleqc.mt')
     fam = "s3a://DDD-ELGH-UKBB-exomes/trios/DDD_trios.fam"
     pedigree = hl.Pedigree.read(fam)
     trio_dataset = hl.trio_matrix(mt, pedigree, complete_trios=True)
-    trio_dataset.checkpoint(
-        f'{tmp_dir}/ddd-elgh-ukbb/mt_trios.mt', overwrite=True)
-    trio_stats_ht = generate_trio_stats(
-        trio_dataset, autosomes_only=True, bi_allelic_only=True)
-    trio_stats_ht.write(
-        f'{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_trios_stats.ht', overwrite=True)
+    trio_dataset.write(f'{tmp_dir}/ddd-elgh-ukbb/mt_trios.mt', overwrite=True)
+    
