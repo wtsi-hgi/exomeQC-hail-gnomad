@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-
+import numpy as np 
 '''
 A text file with no header line, and one line per sample with the following six fields:
 
@@ -57,6 +57,8 @@ df_pat = df_pat.rename(columns={"ega_id": "father"})
 df_pat = df_pat.drop(
     columns=["decipher_id_y", "person_stable_id", "sanger_id", "is_proband", "gender"])
 df = df_pat.rename(columns={"decipher_id_x": "decipher_id"})
+df['proband_gender'] = np.where(df['proband_gender'] == 'M', 1,2)
+
 df.to_csv("DDD_trios_sangerIDs.tsv", sep="\t", index=False)
 df_fam = df
 df_fam["phenotype"] = 1

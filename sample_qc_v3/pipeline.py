@@ -85,3 +85,4 @@ if __name__ == "__main__":
         f"{tmp_dir}/ddd-elgh-ukbb/Sanger_chr1-20-XY_new_cohorts_pops_QC_ready.mt")
 
     # ready for REF_ancestry AKT_overlap_updated_labels_August2020 and then pop_qc.py
+    
