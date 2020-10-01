@@ -99,11 +99,13 @@ if __name__ == "__main__":
     # read matrixtable = remove the
     mt = hl.read_matrix_table(
         f'{temp_dir}/ddd-elgh-ukbb/filtering/Sanger_cohorts_chr1-20-XY_sampleQC_FILTERED.mt')
+    mt_adj= annotate_adj(mt)
+
     fam = "s3a://DDD-ELGH-UKBB-exomes/trios/DDD_trios.fam"
     pedigree = hl.Pedigree.read(fam)
-    trio_dataset = hl.trio_matrix(mt, pedigree, complete_trios=True)
+    trio_dataset = hl.trio_matrix(mt_adj, pedigree, complete_trios=True)
     trio_dataset.checkpoint(
-        f'{tmp_dir}/ddd-elgh-ukbb/mt_trios.mt', overwrite=True)
+        f'{tmp_dir}/ddd-elgh-ukbb/mt_trios_adj.mt', overwrite=True)
     trio_stats_ht = generate_trio_stats(
         trio_dataset, autosomes_only=True, bi_allelic_only=True)
     trio_stats_ht.write(
