@@ -145,10 +145,30 @@ if __name__ == "__main__":
     truthset_table = hl.read_table(
         f'{temp_dir}/ddd-elgh-ukbb/training_sets/truthset_table.ht')
     trio_stats_table = hl.read_table(
-        f'{temp_dir}/ddd-elgh-ukbb/Sanger_cohorts_trios_stats.ht')
+        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_trios_stats.ht')
     group = "raw"
     mt = hl.read_matrix_table(
         f'{temp_dir}/ddd-elgh-ukbb/filtering/Sanger_cohorts_chr1-20-XY_sampleQC_FILTERED.mt')
+
+    mt = hl.variant_qc(mt)
+
+    mt_inbreeding = mt.annotate_cols(
+        IB=hl.agg.inbreeding(mt.GT, mt.variant_qc.AF[1]))
+
+    mt_allele_counts = mt.annotate_rows(
+        gt_stats=hl.agg.call_stats(mt.GT, mt.alleles))
+    allele_data_ht = generate_allele_data(mt)
+    ht_inbreeding = mt.cols()
+    ht_allele_counts = mt.rows()
+
+    ht_inbreeding.write(
+        f'{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_inbreeding.ht', overwrite=True)
+    ht_allele_counts.write(
+        f'{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_qc_ac.ht', overwrite=True)
+    allele_data_ht.write(
+        f'{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_allele_data.ht', overwrite=True)
+
+   '''
     ht = mt.rows()
     ht = ht.transmute(**ht.info)
     ht = ht.select("FS", "MQ", "QD", *INFO_FEATURES)
@@ -157,3 +177,4 @@ if __name__ == "__main__":
         f'{temp_dir}/ddd-elgh-ukbb/training_sets/truthset_table.ht')
     trio_stats_ht = trio_stats_table.select(
         f"n_transmitted_{group}", f"ac_children_{group}")
+'''
