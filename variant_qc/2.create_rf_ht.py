@@ -193,7 +193,7 @@ if __name__ == "__main__":
         ~hl.is_nan(mt.info.InbreedingCoeff), mt.info.InbreedingCoeff))
     ht = mt.rows()
     ht = ht.transmute(**ht.info)
-    ht = ht.select("FS", "MQ", "QD", *INFO_FEATURES)
+    ht = ht.select("FS", "MQ", "QD", "InbreedingCoeff", *INFO_FEATURES)
 
     # mt_inbreeding = mt.annotate_cols(
     #    IB=hl.agg.inbreeding(mt.GT, mt.variant_qc.AF[1]))
