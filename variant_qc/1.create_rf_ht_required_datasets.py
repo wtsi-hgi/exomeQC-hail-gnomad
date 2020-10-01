@@ -168,7 +168,7 @@ if __name__ == "__main__":
     allele_data_ht.write(
         f'{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_allele_data.ht', overwrite=True)
 
-   '''
+    """
     ht = mt.rows()
     ht = ht.transmute(**ht.info)
     ht = ht.select("FS", "MQ", "QD", *INFO_FEATURES)
@@ -177,4 +177,4 @@ if __name__ == "__main__":
         f'{temp_dir}/ddd-elgh-ukbb/training_sets/truthset_table.ht')
     trio_stats_ht = trio_stats_table.select(
         f"n_transmitted_{group}", f"ac_children_{group}")
-'''
+    """
