@@ -189,6 +189,8 @@ if __name__ == "__main__":
         f'{temp_dir}/ddd-elgh-ukbb/filtering/Sanger_cohorts_chr1-20-XY_sampleQC_FILTERED.mt')
     mt = mt.select_entries(
         GT=hl.unphased_diploid_gt_index_call(mt.GT.n_alt_alleles()))
+    mt = mt.annotate_rows(InbreedingCoeff=hl.or_missing(
+        ~hl.is_nan(mt.info.InbreedingCoeff), mt.info.InbreedingCoeff))
     ht = mt.rows()
     ht = ht.transmute(**ht.info)
     ht = ht.select("FS", "MQ", "QD", *INFO_FEATURES)
