@@ -321,5 +321,42 @@ if __name__ == "__main__":
         default=5,
         type=int,
     )
+    training_params = parser.add_argument_group("Training data parameters")
+    training_params.add_argument(
+        "--adj", help="Use adj genotypes.", action="store_true"
+    )
+    training_params.add_argument(
+        "--vqsr_training", help="Use VQSR training examples", action="store_true"
+    )
+    training_params.add_argument(
+        "--vqsr_type",
+        help="If a string is provided the VQSR training annotations will be used for training.",
+        default="alleleSpecificTrans",
+        choices=["classic", "alleleSpecific", "alleleSpecificTrans"],
+        type=str,
+    )
+    training_params.add_argument(
+        "--no_transmitted_singletons",
+        help="Do not use transmitted singletons for training.",
+        action="store_true",
+    )
+    training_params.add_argument(
+        "--no_inbreeding_coeff",
+        help="Train RF without inbreeding coefficient as a feature.",
+        action="store_true",
+    )
+
+    finalize_params = parser.add_argument_group("Finalize RF Table parameters")
+    finalize_params.add_argument(
+        "--snp_cutoff", help="Percentile to set RF cutoff", type=float, default=90.0
+    )
+    finalize_params.add_argument(
+        "--indel_cutoff", help="Percentile to set RF cutoff", type=float, default=80.0
+    )
+    finalize_params.add_argument(
+        "--treat_cutoff_as_prob",
+        help="If set snp_cutoff and indel_cutoff will be probability rather than percentile ",
+        action="store_true",
+    )
     args = parser.parse_args()
     main(args)
