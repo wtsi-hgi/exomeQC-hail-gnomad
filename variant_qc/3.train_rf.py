@@ -5,6 +5,7 @@ import os
 import argparse
 import hail as hl
 import pandas as pd
+import numpy
 import pyspark
 import json
 import sys
