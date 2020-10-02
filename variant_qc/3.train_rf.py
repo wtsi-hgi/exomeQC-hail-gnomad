@@ -253,6 +253,30 @@ def get_run_data(
 def main(args):
 
     print("main")
+    ht = hl.read_table(
+        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_table_for_RF_by_variant_type.ht')
+
+    run_hash = str(uuid.uuid4())[:8]
+    rf_runs = get_rf_runs(f'{tmp_dir}/ddd-elgh-ukbb/')
+    while run_hash in rf_runs:
+        run_hash = str(uuid.uuid4())[:8]
+    ht_result, rf_model = train_rf(ht, args)
+    print("Writing out ht_training data")
+    ht_result = ht_result.checkpoint(
+        f'{tmp_dir}/ddd-elgh-ukbb/Sanger_RF_training_data.ht', overwrite=True)
+    rf_runs[run_hash] = get_run_data(
+        transmitted_singletons=True,
+
+        features_importance=hl.eval(ht.features_importance),
+        test_results=hl.eval(ht.test_results),
+    )
+
+    with hl.hadoop_open(f'{plot_dir}/ddd-elgh-ukbb/variant_qc/rf_runs.json', "w") as f:
+        json.dump(rf_runs, f)
+
+    logger.info("Saving RF model")
+    save_model(
+        rf_model, f'{tmp_dir}/ddd-elgh-ukbb/rf_model.model')
 
 
 if __name__ == "__main__":
@@ -297,28 +321,5 @@ if __name__ == "__main__":
         default=5,
         type=int,
     )
-
-    ht = hl.read_table(
-        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_table_for_RF_by_variant_type.ht')
-
-    run_hash = str(uuid.uuid4())[:8]
-    rf_runs = get_rf_runs(f'{tmp_dir}/ddd-elgh-ukbb/')
-    while run_hash in rf_runs:
-        run_hash = str(uuid.uuid4())[:8]
-    ht_result, rf_model = train_rf(ht, rf_params)
-    print("Writing out ht_training data")
-    ht_result = ht_result.checkpoint(
-        f'{tmp_dir}/ddd-elgh-ukbb/Sanger_RF_training_data.ht', overwrite=True)
-    rf_runs[run_hash] = get_run_data(
-        transmitted_singletons=True,
-
-        features_importance=hl.eval(ht.features_importance),
-        test_results=hl.eval(ht.test_results),
-    )
-
-    with hl.hadoop_open(f'{plot_dir}/ddd-elgh-ukbb/variant_qc/rf_runs.json', "w") as f:
-        json.dump(rf_runs, f)
-
-    logger.info("Saving RF model")
-    save_model(
-        rf_model, f'{tmp_dir}/ddd-elgh-ukbb/rf_model.model')
+    args = parser.parse_args()
+    main(args)
