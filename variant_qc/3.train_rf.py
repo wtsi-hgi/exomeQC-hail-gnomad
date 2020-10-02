@@ -249,27 +249,6 @@ def get_run_data(
     return run_data
 
 
-def get_rf(
-    data: str = "rf_result",
-    run_hash: Optional[str] = None,
-) -> Union[str, TableResource]:
-    """
-    Gets the path to the desired RF data.
-    Data can take the following values:
-        - 'training': path to the training data for a given run
-        - 'model': path to pyspark pipeline RF model
-        - 'rf_result' (default): path to HT containing result of RF filtering
-    :param str data: One of 'training', 'model' or 'rf_result' (default)
-    :param str run_hash: Hash of RF run to load
-    :return: Path to desired RF data
-    """
-
-    if data == "model":
-        return f"{VARIANT_QC_ROOT}/models/{run_hash}/{data}.model"
-    else:
-        return TableResource(f"{VARIANT_QC_ROOT}/models/{run_hash}/{data}.ht")
-
-
 if __name__ == "__main__":
     # need to create spark cluster first before intiialising hail
     sc = pyspark.SparkContext()
@@ -290,7 +269,7 @@ if __name__ == "__main__":
         f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_table_for_RF_by_variant_type.ht')
 
     run_hash = str(uuid.uuid4())[:8]
-    rf_runs = get_rf_runs(rf_run_hash_path())
+    rf_runs = get_rf_runs(f'{tmp_dir}/ddd-elgh-ukbb/')
     while run_hash in rf_runs:
         run_hash = str(uuid.uuid4())[:8]
     ht_result, rf_model = train_rf(ht)
