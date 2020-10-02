@@ -272,6 +272,31 @@ if __name__ == "__main__":
     n_partitions = 500
     parser = argparse.ArgumentParser()
     rf_params = parser.add_argument_group("Random Forest Parameters")
+    rf_params.add_argument(
+        "--fp_to_tp",
+        help="Ratio of FPs to TPs for training the RF model. If 0, all training examples are used. (default=1.0)",
+        default=1.0,
+        type=float,
+    )
+    rf_params.add_argument(
+        "--test_intervals",
+        help='The specified interval(s) will be held out for testing and evaluation only. (default to "chr20")',
+        nargs="+",
+        type=str,
+        default="chr20",
+    )
+    rf_params.add_argument(
+        "--num_trees",
+        help="Number of trees in the RF model. (default=500)",
+        default=500,
+        type=int,
+    )
+    rf_params.add_argument(
+        "--max_depth",
+        help="Maxmimum tree depth in the RF model. (default=5)",
+        default=5,
+        type=int,
+    )
 
     ht = hl.read_table(
         f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_table_for_RF_by_variant_type.ht')
