@@ -270,7 +270,7 @@ def main(args):
     rf_runs[run_hash] = get_run_data(
         transmitted_singletons=True,
 
-        features_importance=hl.eval(ht.features_importance),
+        # features_importance=hl.eval(ht.features_importance),
         test_results=hl.eval(ht.test_results),
     )
 
