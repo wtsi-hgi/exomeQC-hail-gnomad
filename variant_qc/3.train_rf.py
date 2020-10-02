@@ -26,18 +26,6 @@ from gnomad.variant_qc.random_forest import (
     save_model,
 )
 
-from gnomad_qc.v3.resources import (
-    allele_data,
-    fam_stats,
-    freq,
-    get_checkpoint_path,
-    get_filters,
-    get_info,
-    get_rf,
-    get_rf_annotated,
-    qc_ac,
-    rf_run_hash_path,
-)
 
 from hail import Table
 
@@ -158,6 +146,23 @@ def generate_allele_data(mt: hl.MatrixTable) -> hl.Table:
     return ht
 
 
+def save_model(
+    rf_pipeline: pyspark.ml.PipelineModel, out_path: str, overwrite: bool = False
+) -> None:
+    """
+    Saves a Random Forest pipeline model.
+    :param rf_pipeline: Pipeline to save
+    :param out_path: Output path
+    :param overwrite: If set, will overwrite existing file(s) at output location
+    :return: Nothing
+    """
+    logger.info("Saving model to %s" % out_path)
+    if overwrite:
+        rf_pipeline.write().overwrite().save(out_path)
+    else:
+        rf_pipeline.save(out_path)
+
+
 def train_rf(ht, args):
     features = FEATURES
     test_intervals = args.test_intervals
@@ -244,6 +249,27 @@ def get_run_data(
     return run_data
 
 
+def get_rf(
+    data: str = "rf_result",
+    run_hash: Optional[str] = None,
+) -> Union[str, TableResource]:
+    """
+    Gets the path to the desired RF data.
+    Data can take the following values:
+        - 'training': path to the training data for a given run
+        - 'model': path to pyspark pipeline RF model
+        - 'rf_result' (default): path to HT containing result of RF filtering
+    :param str data: One of 'training', 'model' or 'rf_result' (default)
+    :param str run_hash: Hash of RF run to load
+    :return: Path to desired RF data
+    """
+
+    if data == "model":
+        return f"{VARIANT_QC_ROOT}/models/{run_hash}/{data}.model"
+    else:
+        return TableResource(f"{VARIANT_QC_ROOT}/models/{run_hash}/{data}.ht")
+
+
 if __name__ == "__main__":
     # need to create spark cluster first before intiialising hail
     sc = pyspark.SparkContext()
@@ -283,7 +309,4 @@ if __name__ == "__main__":
 
     logger.info("Saving RF model")
     save_model(
-        rf_model, get_rf(data="model", run_hash=run_hash), overwrite=True,
-    )
-    with hl.hadoop_open(f'{plot_dir}/ddd-elgh-ukbb/variant_qc/rf_model.txt', "w") as f:
-        f.write(rf_model)
+        rf_model, f'{tmp_dir}/ddd-elgh-ukbb/rf_model.model')
