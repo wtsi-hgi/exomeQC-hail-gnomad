@@ -30,6 +30,7 @@ from gnomad.variant_qc.random_forest import (
 
 
 from hail import Table
+os.environ['PYSPARK_PYTHON'] = sys.executable
 
 logging.basicConfig(format="%(levelname)s (%(name)s %(lineno)s): %(message)s")
 logger = logging.getLogger(__name__)
