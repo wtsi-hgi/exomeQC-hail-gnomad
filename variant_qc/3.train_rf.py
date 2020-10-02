@@ -2,6 +2,7 @@
 # 16/09/2020
 #  trio matrixtable creation from fam file
 import os
+import argparse
 import hail as hl
 import pandas as pd
 import pyspark
@@ -249,6 +250,11 @@ def get_run_data(
     return run_data
 
 
+def main(args):
+
+    print("main")
+
+
 if __name__ == "__main__":
     # need to create spark cluster first before intiialising hail
     sc = pyspark.SparkContext()
@@ -264,6 +270,8 @@ if __name__ == "__main__":
     hadoop_config.set("fs.s3a.access.key", credentials["mer"]["access_key"])
     hadoop_config.set("fs.s3a.secret.key", credentials["mer"]["secret_key"])
     n_partitions = 500
+    parser = argparse.ArgumentParser()
+    rf_params = parser.add_argument_group("Random Forest Parameters")
 
     ht = hl.read_table(
         f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_table_for_RF_by_variant_type.ht')
@@ -272,7 +280,7 @@ if __name__ == "__main__":
     rf_runs = get_rf_runs(f'{tmp_dir}/ddd-elgh-ukbb/')
     while run_hash in rf_runs:
         run_hash = str(uuid.uuid4())[:8]
-    ht_result, rf_model = train_rf(ht)
+    ht_result, rf_model = train_rf(ht, rf_params)
     print("Writing out ht_training data")
     ht_result = ht_result.checkpoint(
         f'{tmp_dir}/ddd-elgh-ukbb/Sanger_RF_training_data.ht', overwrite=True)
