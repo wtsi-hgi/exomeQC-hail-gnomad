@@ -311,9 +311,9 @@ def main(args):
             rf_model, f'{tmp_dir}/ddd-elgh-ukbb/rf_model.model')
 
     if args.apply_rf:
-        train_model = f'{tmp_dir}/ddd-elgh-ukbb/rf_model.model'
+        train_model = f'{temp_dir}/ddd-elgh-ukbb/variant_qc/rf_model.model'
         ht_training = hl.read_table(
-            f'{temp_dir}/ddd-elgh-ukbb/Sanger_RF_training_data.ht')
+            f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_RF_training_data.ht')
         print("apply_rf")
         logger.info(f"Applying RF model...")
         rf_model = load_model(get_rf(train_model))
