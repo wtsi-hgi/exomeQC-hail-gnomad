@@ -349,7 +349,15 @@ if __name__ == "__main__":
     hadoop_config.set("fs.s3a.secret.key", credentials["mer"]["secret_key"])
     n_partitions = 500
     parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "--run_hash",
+        help="Run hash. Created by --train_rf and only needed for --apply_rf without running --train_rf",
+        required=False,
+    )
+
     actions = parser.add_argument_group("Actions")
+
     actions.add_argument(
         "--list_rf_runs",
         help="Lists all previous RF runs, along with their hash, parameters and testing results.",
