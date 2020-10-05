@@ -1,6 +1,6 @@
 from gnomad.variant_qc.evaluation import add_rank
 from gnomad.utils.annotations import add_variant_type
-from gnomad_qc.v2.resources.variant_qc import *
+#from gnomad_qc.v2.resources.variant_qc import *
 import argparse
 import sys
 import logging
