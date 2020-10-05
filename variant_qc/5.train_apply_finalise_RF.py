@@ -460,7 +460,7 @@ def main(args):
             get_score_quantile_bins(args.run_hash, aggregated=True).path
         ):
             sys.exit(
-                f"Could not find binned HT for RF  run {args.run_hash} ({aggregated_bin_path}). Please run create_ranked_scores.py for that hash."
+                f"Could not find binned HT for RF  run {args.run_hash} (). Please run create_ranked_scores.py for that hash."
             )
         aggregated_bin_ht = get_score_quantile_bins(
             args.run_hash, aggregated=True).ht()
@@ -480,7 +480,7 @@ def main(args):
         )
         # This column is added by the RF module based on a 0.5 threshold which doesn't correspond to what we use
         ht = ht.drop(ht[PREDICTION_COL])
-        ht.write(get_final_rf().path, args.overwrite)
+        ht.write(f'{tmp_dir}/rf_final.ht', overwrite=True)
 
 
 if __name__ == "__main__":
