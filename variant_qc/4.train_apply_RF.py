@@ -316,21 +316,18 @@ def main(args):
         run_hash = args.run_hash
 
     if args.apply_rf:
-        train_model = f'{temp_dir}/ddd-elgh-ukbb/variant_qc/rf_model.model'
-        ht_training = hl.read_table(
-            f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_RF_training_data.ht')
-        print("apply_rf")
-        logger.info(f"Applying RF model...")
-        rf_model = load_model(get_rf(train_model))
-        ht = get_rf(ht_training)
+
+        logger.info(f"Applying RF model {run_hash}...")
+        rf_model = load_model(get_rf(data="model", run_hash=run_hash))
+        ht = get_rf(data="training", run_hash=run_hash).ht()
         features = hl.eval(ht.features)
         ht = apply_rf_model(ht, rf_model, features, label=LABEL_COL)
 
         logger.info("Finished applying RF model")
-        #ht = ht.annotate_globals(rf_hash=run_hash)
+        ht = ht.annotate_globals(rf_hash=run_hash)
         ht = ht.checkpoint(
-            get_rf(f'{tmp_dir}/ddd-elgh-ukbb/Sanger_RF_training_data.ht', overwrite=True,
-                   ))
+            get_rf("rf_result", run_hash=run_hash).path, overwrite=args.overwrite,
+        )
 
         ht_summary = ht.group_by(
             "tp", "fp", TRAIN_COL, LABEL_COL, PREDICTION_COL
