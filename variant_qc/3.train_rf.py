@@ -268,8 +268,9 @@ def main(args):
     ht_result = ht_result.checkpoint(
         f'{tmp_dir}/ddd-elgh-ukbb/Sanger_RF_training_data.ht', overwrite=True)
     rf_runs[run_hash] = get_run_data(
+        vqsr_training=False,
         transmitted_singletons=True,
-        adj=args.adj,
+        adj=False,
         features_importance=hl.eval(ht_result.features_importance),
         test_results=hl.eval(ht_result.test_results),
     )
