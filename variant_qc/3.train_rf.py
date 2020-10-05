@@ -271,7 +271,7 @@ def main(args):
         transmitted_singletons=True,
 
         # features_importance=hl.eval(ht.features_importance),
-        test_results=hl.eval(ht.test_results),
+        # test_results=hl.eval(ht.test_results),
     )
 
     with hl.hadoop_open(f'{plot_dir}/ddd-elgh-ukbb/variant_qc/rf_runs.json', "w") as f:
