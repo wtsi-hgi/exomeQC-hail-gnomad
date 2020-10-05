@@ -326,7 +326,7 @@ def main(args):
         logger.info("Finished applying RF model")
         ht = ht.annotate_globals(rf_hash=run_hash)
         ht = ht.checkpoint(
-            get_rf("rf_result", run_hash=run_hash).path, overwrite=args.overwrite,
+            get_rf("rf_result", run_hash=run_hash).path, overwrite=True,
         )
 
         ht_summary = ht.group_by(
