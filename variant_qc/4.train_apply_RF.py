@@ -104,9 +104,9 @@ def get_rf(
     """
 
     if data == "model":
-        return f"{VARIANT_QC_ROOT}/models/{run_hash}/{data}.model"
+        return f"{tmp_dir}/models/{run_hash}/{data}.model"
     else:
-        return TableResource(f"{VARIANT_QC_ROOT}/models/{run_hash}/{data}.ht")
+        return TableResource(f"{tmp_dir}/models/{run_hash}/{data}.ht")
 
 
 def get_rf_runs(rf_json_fp: str) -> Dict:
@@ -284,6 +284,7 @@ def main(args):
     print("main")
     ht = hl.read_table(
         f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_table_for_RF_by_variant_type.ht')
+
     if args.train_rf:
 
         run_hash = str(uuid.uuid4())[:8]
@@ -293,7 +294,8 @@ def main(args):
         ht_result, rf_model = train_rf(ht, args)
         print("Writing out ht_training data")
         ht_result = ht_result.checkpoint(
-            f'{tmp_dir}/ddd-elgh-ukbb/Sanger_RF_training_data.ht', overwrite=True)
+            get_rf(data="training", run_hash=run_hash).path, overwrite=True)
+        # f'{tmp_dir}/ddd-elgh-ukbb/Sanger_RF_training_data.ht', overwrite=True)
         rf_runs[run_hash] = get_run_data(
             vqsr_training=False,
             transmitted_singletons=True,
@@ -308,7 +310,10 @@ def main(args):
 
         logger.info("Saving RF model")
         save_model(
-            rf_model, f'{tmp_dir}/ddd-elgh-ukbb/rf_model.model')
+            rf_model, get_rf(data="model", run_hash=run_hash), overwrite=True)
+        # f'{tmp_dir}/ddd-elgh-ukbb/rf_model.model')
+    else:
+        run_hash = args.run_hash
 
     if args.apply_rf:
         train_model = f'{temp_dir}/ddd-elgh-ukbb/variant_qc/rf_model.model'
