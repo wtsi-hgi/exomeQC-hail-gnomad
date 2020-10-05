@@ -270,6 +270,7 @@ def main(args):
     rf_runs[run_hash] = get_run_data(
         vqsr_training=False,
         transmitted_singletons=True,
+        test_intervals=args.test_intervals,
         adj=False,
         features_importance=hl.eval(ht_result.features_importance),
         test_results=hl.eval(ht_result.test_results),
