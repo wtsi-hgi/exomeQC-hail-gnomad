@@ -20,6 +20,8 @@ from gnomad.resources.grch38 import gnomad
 from gnomad.utils.annotations import unphase_call_expr, add_variant_type
 from gnomad.variant_qc.pipeline import create_binned_ht, score_bin_agg, train_rf_model
 from gnomad.utils.file_utils import file_exists
+from gnomad.resources.resource_utils import TableResource, MatrixTableResource
+
 from gnomad.variant_qc.random_forest import (
     apply_rf_model,
     load_model,
@@ -81,6 +83,30 @@ FEATURES = [
 
 TRUTH_DATA = ["hapmap", "omni", "mills", "kgp_phase1_hc"]
 INBREEDING_COEFF_HARD_CUTOFF = -0.3
+tmp_dir = "hdfs://spark-master:9820/"
+temp_dir = "file:///home/ubuntu/data/tmp"
+plot_dir = "/home/ubuntu/data/tmp"
+
+
+def get_rf(
+    data: str = "rf_result",
+    run_hash: Optional[str] = None,
+) -> Union[str, TableResource]:
+    """
+    Gets the path to the desired RF data.
+    Data can take the following values:
+        - 'training': path to the training data for a given run
+        - 'model': path to pyspark pipeline RF model
+        - 'rf_result' (default): path to HT containing result of RF filtering
+    :param str data: One of 'training', 'model' or 'rf_result' (default)
+    :param str run_hash: Hash of RF run to load
+    :return: Path to desired RF data
+    """
+
+    if data == "model":
+        return f"{VARIANT_QC_ROOT}/models/{run_hash}/{data}.model"
+    else:
+        return TableResource(f"{VARIANT_QC_ROOT}/models/{run_hash}/{data}.ht")
 
 
 def get_rf_runs(rf_json_fp: str) -> Dict:
@@ -285,16 +311,33 @@ def main(args):
             rf_model, f'{tmp_dir}/ddd-elgh-ukbb/rf_model.model')
 
     if args.apply_rf:
+        train_model = f'{tmp_dir}/ddd-elgh-ukbb/rf_model.model'
+        ht_training = hl.read_table(
+            f'{temp_dir}/ddd-elgh-ukbb/Sanger_RF_training_data.ht')
         print("apply_rf")
+        logger.info(f"Applying RF model...")
+        rf_model = load_model(get_rf(train_model))
+        ht = get_rf(ht_training)
+        features = hl.eval(ht.features)
+        ht = apply_rf_model(ht, rf_model, features, label=LABEL_COL)
+
+        logger.info("Finished applying RF model")
+        #ht = ht.annotate_globals(rf_hash=run_hash)
+        ht = ht.checkpoint(
+            get_rf(f'{tmp_dir}/ddd-elgh-ukbb/Sanger_RF_training_data.ht', overwrite=True,
+                   ))
+
+        ht_summary = ht.group_by(
+            "tp", "fp", TRAIN_COL, LABEL_COL, PREDICTION_COL
+        ).aggregate(n=hl.agg.count())
+        ht_summary.show(n=20)
 
 
 if __name__ == "__main__":
     # need to create spark cluster first before intiialising hail
     sc = pyspark.SparkContext()
     # Define the hail persistent storage directory
-    tmp_dir = "hdfs://spark-master:9820/"
-    temp_dir = "file:///home/ubuntu/data/tmp"
-    plot_dir = "/home/ubuntu/data/tmp"
+
     hl.init(sc=sc, tmp_dir=tmp_dir, default_reference="GRCh38")
     # s3 credentials required for user to access the datasets in farm flexible compute s3 environment
     # you may use your own here from your .s3fg file in your home directory
