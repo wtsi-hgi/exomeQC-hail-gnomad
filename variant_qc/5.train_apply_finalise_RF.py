@@ -456,12 +456,12 @@ def main(args):
         #freq_ht = freq.ht()
         #freq = freq_ht[ht.key]
 
-        if not file_exists(
-            get_score_quantile_bins(args.run_hash, aggregated=True).path
-        ):
-            sys.exit(
-                f"Could not find binned HT for RF  run {args.run_hash} (). Please run create_ranked_scores.py for that hash."
-            )
+        # if not file_exists(
+        #    get_score_quantile_bins(args.run_hash, aggregated=True).path
+        # ):
+        #    sys.exit(
+        #        f"Could not find binned HT for RF  run {args.run_hash} (). Please run create_ranked_scores.py for that hash."
+        #    )
         aggregated_bin_ht = get_score_quantile_bins(
             args.run_hash, aggregated=True).ht()
 
