@@ -501,7 +501,7 @@ def main(args):
 
     if args.finalize:
         ht = get_rf("rf_result", run_hash=args.run_hash).ht()
-        ht = create_quantile_bin_ht(ht, vqsr=False, overwrite=True)
+        ht = create_quantile_bin_ht(ht, vqsr=False, n_bins=100, overwrite=True)
         #freq_ht = freq.ht()
         #freq = freq_ht[ht.key]
 
