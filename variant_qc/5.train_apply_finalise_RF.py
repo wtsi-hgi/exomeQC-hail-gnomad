@@ -462,7 +462,7 @@ def main(args):
         #    sys.exit(
         #        f"Could not find binned HT for RF  run {args.run_hash} (). Please run create_ranked_scores.py for that hash."
         #    )
-        aggregated_bin_ht = get_score_quantile_bins(ht)
+        aggregated_bin_ht = get_score_quantile_bins(ht, aggregated=True)
 
         ht = generate_final_rf_ht(
             ht,
