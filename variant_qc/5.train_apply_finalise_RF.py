@@ -33,54 +33,6 @@ from gnomad.variant_qc.random_forest import (
 )
 
 
-def create_quantile_bin_ht(
-    model_id: str, n_bins: int, vqsr: bool = False, overwrite: bool = False
-) -> None:
-    """
-    Creates a table with quantile bin annotations added for a RF run and writes it to its correct location in
-    annotations.
-    :param model_id: Which data/run hash is being created
-    :param n_bins: Number of bins to bin the data into
-    :param vqsr: Set True is `model_id` refers to a VQSR filtering model
-    :param overwrite: Should output files be overwritten if present
-    :return: Nothing
-    """
-    logger.info(f"Annotating {model_id} HT with quantile bins using {n_bins}")
-    info_ht = get_info(split=True).ht()
-    if vqsr:
-        rf_ht = get_rf_annotated().ht()
-        ht = get_filters(model_id, split=True).ht()
-
-        ht = ht.filter(
-            ~info_ht[ht.key].lowqual & ~hl.is_infinite(ht.info.VQSLOD)
-        )  # TODO: switch to use AS_lowqual?
-        ht = ht.annotate(
-            **rf_ht[ht.key],
-            info=info_ht[ht.key].info,
-            score=ht.info.VQSLOD,
-            positive_train_site=ht.info.POSITIVE_TRAIN_SITE,
-            negative_train_site=ht.info.NEGATIVE_TRAIN_SITE,
-            culprit=ht.info.culprit,
-        )
-
-    else:
-        ht = get_rf("rf_result", run_hash=model_id).ht()
-        ht = ht.annotate(
-            info=info_ht[ht.key].info,
-            positive_train_site=ht.tp,
-            negative_train_site=ht.fp,
-            score=ht.rf_probability["TP"],
-        )
-
-    ht = ht.filter(ht.ac_raw > 0)
-
-    bin_ht = create_binned_ht(ht, n_bins)
-    bin_ht.write(
-        get_score_quantile_bins(
-            model_id, aggregated=False).path, overwrite=overwrite
-    )
-
-
 os.environ['PYSPARK_PYTHON'] = sys.executable
 
 logging.basicConfig(format="%(levelname)s (%(name)s %(lineno)s): %(message)s")
@@ -240,6 +192,56 @@ def save_model(
         rf_pipeline.write().overwrite().save(out_path)
     else:
         rf_pipeline.save(out_path)
+
+
+def create_quantile_bin_ht(
+    model_id: str, n_bins: int, vqsr: bool = False, overwrite: bool = False
+) -> None:
+    """
+    Creates a table with quantile bin annotations added for a RF run and writes it to its correct location in
+    annotations.
+    :param model_id: Which data/run hash is being created
+    :param n_bins: Number of bins to bin the data into
+    :param vqsr: Set True is `model_id` refers to a VQSR filtering model
+    :param overwrite: Should output files be overwritten if present
+    :return: Nothing
+    """
+    logger.info(f"Annotating {model_id} HT with quantile bins using {n_bins}")
+    ht = get_rf("rf_result", run_hash=model_id).ht()
+    #info_ht = get_info(split=True).ht()
+    if vqsr:
+        print("vqsr: to do ")
+        #rf_ht = get_rf_annotated().ht()
+        #ht = get_filters(model_id, split=True).ht()
+
+        # ht = ht.filter(
+        #    ~info_ht[ht.key].lowqual & ~hl.is_infinite(ht.info.VQSLOD)
+        # )  # TODO: switch to use AS_lowqual?
+        # ht = ht.annotate(
+        #    **rf_ht[ht.key],
+        #    info=info_ht[ht.key].info,
+        #    score=ht.info.VQSLOD,
+        #    positive_train_site=ht.info.POSITIVE_TRAIN_SITE,
+        #    negative_train_site=ht.info.NEGATIVE_TRAIN_SITE,
+        #    culprit=ht.info.culprit,
+        # )
+
+    else:
+        ht = get_rf("rf_result", run_hash=model_id).ht()
+        ht = ht.annotate(
+            positive_train_site=ht.tp,
+            negative_train_site=ht.fp,
+            score=ht.rf_probability["TP"],
+        )
+
+    ht = ht.filter(ht.ac_raw > 0)
+
+    bin_ht = create_binned_ht(ht, n_bins)
+    bin_ht.write(
+        get_score_quantile_bins(
+            model_id, aggregated=False).path, overwrite=overwrite
+    )
+    return bin_ht
 
 
 def train_rf(ht, args):
