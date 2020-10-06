@@ -234,7 +234,7 @@ def create_quantile_bin_ht(
             score=ht.rf_probability["TP"],
         )
 
-    ht = ht.filter(ht.ac_raw > 0)
+    #ht = ht.filter(ht.ac_raw > 0)
 
     bin_ht = create_binned_ht(ht, n_bins)
     bin_ht.write(
