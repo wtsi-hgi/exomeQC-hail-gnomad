@@ -502,7 +502,7 @@ def main(args):
         ht_summary.show(n=20)
 
     if args.finalize:
-        ht = get_rf("rf_result", run_hash=args.run_hash).ht()
+        ht = hl.read_table(f'{tmp_dir}/models/{run_hash}/rf_result.ht')
         ht = create_quantile_bin_ht(ht, vqsr=False, n_bins=100, overwrite=True)
         #freq_ht = freq.ht()
         #freq = freq_ht[ht.key]
