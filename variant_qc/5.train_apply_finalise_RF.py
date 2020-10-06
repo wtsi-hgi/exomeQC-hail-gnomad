@@ -207,7 +207,7 @@ def create_quantile_bin_ht(
     :return: Nothing
     """
     logger.info(f"Annotating {model_id} HT with quantile bins using {n_bins}")
-    ht = get_rf("rf_result", run_hash=model_id).ht()
+    ht = hl.read_table(f'{tmp_dir}/models/{model_id}/rf_result.ht')
     #info_ht = get_info(split=True).ht()
     if vqsr:
         print("vqsr: to do ")
@@ -503,7 +503,8 @@ def main(args):
 
     if args.finalize:
         ht = hl.read_table(f'{tmp_dir}/models/{run_hash}/rf_result.ht')
-        ht = create_quantile_bin_ht(ht, vqsr=False, n_bins=100, overwrite=True)
+        ht = create_quantile_bin_ht(
+            ht, model_id=run_hash, vqsr=False, n_bins=100, overwrite=True)
         #freq_ht = freq.ht()
         #freq = freq_ht[ht.key]
 
