@@ -322,8 +322,14 @@ if __name__ == "__main__":
     allele_counts_ht = hl.read_table(
         f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_qc_ac.ht')
 
+    mt = hl.read_matrix_table(
+        f'{temp_dir}/ddd-elgh-ukbb/filtering/Sanger_cohorts_chr1-20-XY_sampleQC_FILTERED.mt')
+    mt = annotate_adj(mt)
+    mt_freq = annotate_freq(mt)
 
-mt = hl.read_matrix_table(
-    f'{temp_dir}/ddd-elgh-ukbb/filtering/Sanger_cohorts_chr1-20-XY_sampleQC_FILTERED.mt')
-mt = annotate_adj(mt)
-mt_freq = annotate_freq(mt)
+    mt_freq = mt_freq.checkpoint(
+        f'{tmp_dir}/Sanger_cohorts_chr1-20-XY_sampleQC_FILTERED_FREQ_adj.mt', overwrite=True)
+    ht_freq = mt_freq.rows()
+    ht_freq.describe()
+    ht_freq.write(
+        f'{tmp_dir}/Sanger_cohorts_chr1-20-XY_sampleQC_FILTERED_FREQ_adj.ht', overwrite=True)
