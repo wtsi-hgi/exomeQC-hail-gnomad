@@ -326,7 +326,8 @@ if __name__ == "__main__":
         f'{temp_dir}/ddd-elgh-ukbb/filtering/Sanger_cohorts_chr1-20-XY_sampleQC_FILTERED.mt')
     mt = annotate_adj(mt)
     mt_freq = annotate_freq(mt)
-
+    print("repartitioning:")
+    mt_freq = mt_freq.repartition(1000, shuffle=False)
     mt_freq = mt_freq.checkpoint(
         f'{tmp_dir}/Sanger_cohorts_chr1-20-XY_sampleQC_FILTERED_FREQ_adj.mt', overwrite=True)
     ht_freq = mt_freq.rows()
