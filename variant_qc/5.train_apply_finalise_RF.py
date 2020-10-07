@@ -501,8 +501,8 @@ def main(args):
 
     if args.finalize:
         ht = hl.read_table(f'{tmp_dir}/models/{run_hash}/rf_result.ht')
-        ht = create_grouped_bin_ht(
-            model_id=run_hash, overwrite=True)
+        # ht = create_grouped_bin_ht(
+        #    model_id=run_hash, overwrite=True)
         #freq_ht = freq.ht()
         #freq = freq_ht[ht.key]
 
