@@ -8,6 +8,7 @@ import hail as hl
 import pandas as pd
 import numpy as np
 import pyspark
+from pprint import pformat
 import json
 import sys
 import re
@@ -194,54 +195,51 @@ def save_model(
         rf_pipeline.save(out_path)
 
 
-def create_quantile_bin_ht(
-    model_id: str, n_bins: int, vqsr: bool = False, overwrite: bool = False
-) -> None:
+def create_grouped_bin_ht(model_id: str, overwrite: bool = False) -> None:
     """
-    Creates a table with quantile bin annotations added for a RF run and writes it to its correct location in
-    annotations.
-    :param model_id: Which data/run hash is being created
-    :param n_bins: Number of bins to bin the data into
-    :param vqsr: Set True is `model_id` refers to a VQSR filtering model
-    :param overwrite: Should output files be overwritten if present
-    :return: Nothing
+    Creates binned data from a quantile bin annotated Table grouped by bin_id (rank, bi-allelic, etc.), contig, snv,
+    bi_allelic and singleton containing the information needed for evaluation plots.
+    :param str model_id: Which data/run hash is being created
+    :param bool overwrite: Should output files be overwritten if present
+    :return: None
+    :rtype: None
     """
-    logger.info(f"Annotating {model_id} HT with quantile bins using {n_bins}")
-    ht = hl.read_table(f'{tmp_dir}/models/{model_id}/rf_result.ht')
-    #info_ht = get_info(split=True).ht()
-    if vqsr:
-        print("vqsr: to do ")
-        #rf_ht = get_rf_annotated().ht()
-        #ht = get_filters(model_id, split=True).ht()
 
-        # ht = ht.filter(
-        #    ~info_ht[ht.key].lowqual & ~hl.is_infinite(ht.info.VQSLOD)
-        # )  # TODO: switch to use AS_lowqual?
-        # ht = ht.annotate(
-        #    **rf_ht[ht.key],
-        #    info=info_ht[ht.key].info,
-        #    score=ht.info.VQSLOD,
-        #    positive_train_site=ht.info.POSITIVE_TRAIN_SITE,
-        #    negative_train_site=ht.info.NEGATIVE_TRAIN_SITE,
-        #    culprit=ht.info.culprit,
-        # )
+    ht = get_score_quantile_bins(model_id, aggregated=False).ht()
 
-    else:
-        ht = get_rf("rf_result", run_hash=model_id).ht()
-        ht = ht.annotate(
-            positive_train_site=ht.tp,
-            negative_train_site=ht.fp,
-            score=ht.rf_probability["TP"],
+    # Count variants for ranking
+    count_expr = {
+        x: hl.agg.filter(
+            hl.is_defined(ht[x]),
+            hl.agg.counter(
+                hl.cond(hl.is_snp(ht.alleles[0],
+                                  ht.alleles[1]), "snv", "indel")
+            ),
         )
+        for x in ht.row
+        if x.endswith("bin")
+    }
+    bin_variant_counts = ht.aggregate(hl.struct(**count_expr))
+    logger.info(
+        f"Found the following variant counts:\n {pformat(bin_variant_counts)}")
+    ht = ht.annotate_globals(bin_variant_counts=bin_variant_counts)
 
-    #ht = ht.filter(ht.ac_raw > 0)
+    trio_stats_ht = fam_stats.ht()
 
-    bin_ht = create_binned_ht(ht, n_bins)
-    bin_ht.write(
-        get_score_quantile_bins(
-            model_id, aggregated=False).path, overwrite=overwrite
+    logger.info(f"Creating grouped bin table...")
+    grouped_binned_ht = compute_grouped_binned_ht(
+        ht, checkpoint_path=get_checkpoint_path(f"grouped_bin_{model_id}"),
     )
-    return bin_ht
+
+    logger.info(f"Aggregating grouped bin table...")
+    agg_ht = grouped_binned_ht.aggregate(
+        **score_bin_agg(grouped_binned_ht, fam_stats_ht=trio_stats_ht)
+    )
+
+    agg_ht.write(
+        get_score_quantile_bins(
+            model_id, aggregated=True).path, overwrite=overwrite,
+    )
 
 
 def train_rf(ht, args):
@@ -503,8 +501,8 @@ def main(args):
 
     if args.finalize:
         ht = hl.read_table(f'{tmp_dir}/models/{run_hash}/rf_result.ht')
-        ht = create_quantile_bin_ht(
-            model_id=run_hash, vqsr=False, n_bins=100, overwrite=True)
+        ht = create_grouped_bin_ht(
+            model_id=run_hash, overwrite=True)
         #freq_ht = freq.ht()
         #freq = freq_ht[ht.key]
 
