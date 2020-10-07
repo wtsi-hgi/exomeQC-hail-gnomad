@@ -512,7 +512,7 @@ def main(args):
         #    sys.exit(
         #        f"Could not find binned HT for RF  run {args.run_hash} (). Please run create_ranked_scores.py for that hash."
         #    )
-        aggregated_bin_ht = get_score_quantile_bins(ht, aggregated=True)
+        #aggregated_bin_ht = get_score_quantile_bins(ht, aggregated=True)
 
         ht = generate_final_rf_ht(
             ht,
@@ -522,9 +522,10 @@ def main(args):
             #     freq.freq[1].AF == 0),
             snp_cutoff=args.snp_cutoff,
             indel_cutoff=args.indel_cutoff,
-            determine_cutoff_from_bin=not args.treat_cutoff_as_prob,
-            aggregated_bin_ht=aggregated_bin_ht,
-            bin_id=ht.bin,
+            #determine_cutoff_from_bin=not args.treat_cutoff_as_prob,
+            determine_cutoff_from_bin=False,
+            # aggregated_bin_ht=aggregated_bin_ht,
+            # bin_id=ht.bin,
             inbreeding_coeff_cutoff=INBREEDING_COEFF_HARD_CUTOFF,
         )
         # This column is added by the RF module based on a 0.5 threshold which doesn't correspond to what we use
