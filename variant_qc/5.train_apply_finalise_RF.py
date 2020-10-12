@@ -563,7 +563,6 @@ def main(args):
             #mono_allelic_fiter_expr=(ht.AF == 1) | (ht.AF == 0),
             snp_cutoff=args.snp_cutoff,
             indel_cutoff=args.indel_cutoff,
-            determine_cutoff_from_bin=not args.treat_cutoff_as_prob,
             determine_cutoff_from_bin=False,
             aggregated_bin_ht=bin_ht,
             bin_id=ht.bin,
