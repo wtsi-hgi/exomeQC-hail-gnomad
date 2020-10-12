@@ -524,8 +524,10 @@ def main(args):
         run_hash = args.run_hash
         rf_model = hl.read_table(
             f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/training.ht')
+        # ht = hl.read_table(
+        #    f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_chr1-20-XY_sampleQC_FILTERED_FREQ_adj_inb.ht')
         ht = hl.read_table(
-            f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_chr1-20-XY_sampleQC_FILTERED_FREQ_adj_inb.ht')
+            f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_for_RF_unfiltered.ht ')
         #ht = get_rf(data="training", run_hash=run_hash).ht()
         features = hl.eval(rf_model.features)
         ht = apply_rf_model(ht, rf_model, features, label=LABEL_COL)
