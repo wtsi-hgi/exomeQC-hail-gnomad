@@ -564,14 +564,14 @@ def main(args):
                 freq.freq[1].AF == 0),
             snp_cutoff=args.snp_cutoff,
             indel_cutoff=args.indel_cutoff,
-            determine_cutoff_from_bin=False,
+            determine_cutoff_from_bin=True,
             aggregated_bin_ht=bin_ht,
             bin_id=bin_ht.bin,
             inbreeding_coeff_cutoff=INBREEDING_COEFF_HARD_CUTOFF,
         )
         # This column is added by the RF module based on a 0.5 threshold which doesn't correspond to what we use
         #ht = ht.drop(ht[PREDICTION_COL])
-        ht.write(f'{tmp_dir}/rf_final.ht', overwrite=True)
+        ht.write(f'{tmp_dir}/rf_final_bin_cuttoff.ht', overwrite=True)
 
 
 if __name__ == "__main__":
