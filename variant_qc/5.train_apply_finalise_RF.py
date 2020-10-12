@@ -535,7 +535,7 @@ def main(args):
 
     if args.finalize:
         ht = hl.read_table(
-            f'{temp_dir}variant_qc/models/{run_hash}/rf_result.ht')
+            f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/rf_result.ht')
         # ht = create_grouped_bin_ht(
         #    model_id=run_hash, overwrite=True)
         freq_ht = hl.read_table(
