@@ -534,6 +534,7 @@ def main(args):
         ht_summary.show(n=20)
 
     if args.finalize:
+        run_hash = args.run_hash
         ht = hl.read_table(
             f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/rf_result.ht')
         # ht = create_grouped_bin_ht(
