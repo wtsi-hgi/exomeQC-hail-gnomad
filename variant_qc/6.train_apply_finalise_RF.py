@@ -527,7 +527,7 @@ def main(args):
         ht = hl.read_table(
             f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_chr1-20-XY_sampleQC_FILTERED_FREQ_adj.ht')
         #ht = get_rf(data="training", run_hash=run_hash).ht()
-        features = hl.eval(ht.features)
+        features = hl.eval(rf_model.features)
         ht = apply_rf_model(ht, rf_model, features, label=LABEL_COL)
 
         logger.info("Finished applying RF model")
