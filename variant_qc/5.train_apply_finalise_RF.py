@@ -558,7 +558,7 @@ def main(args):
 
         ht = generate_final_rf_ht(
             ht,
-            ac0_filter_expr=ht.ac == freq.freq[0].AC == 0,
+            ac0_filter_expr=freq.freq[0].AC == 0,
             ts_ac_filter_expr=freq.freq[1].AC == 1,
             mono_allelic_fiter_expr=(freq.freq[1].AF == 1) | (
                 freq.freq[1].AF == 0),
