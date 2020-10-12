@@ -565,7 +565,7 @@ def main(args):
             indel_cutoff=args.indel_cutoff,
             determine_cutoff_from_bin=False,
             aggregated_bin_ht=bin_ht,
-            bin_id=ht.bin,
+            bin_id=bin_ht.bin,
             inbreeding_coeff_cutoff=INBREEDING_COEFF_HARD_CUTOFF,
         )
         # This column is added by the RF module based on a 0.5 threshold which doesn't correspond to what we use
