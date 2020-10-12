@@ -531,7 +531,7 @@ def main(args):
         #ht = get_rf(data="training", run_hash=run_hash).ht()
         features = hl.eval(rf_model.features)
         #ht = apply_rf_model(ht, rf_model, features, label=LABEL_COL)
-        ht = apply_rf_model(ht, rf_model, features)
+        ht = apply_rf_model(ht, rf_model, features, label=None)
         logger.info("Finished applying RF model")
         ht = ht.annotate_globals(rf_hash=run_hash)
         ht = ht.checkpoint(
