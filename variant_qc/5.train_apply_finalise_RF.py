@@ -440,6 +440,39 @@ def generate_final_rf_ht(
 
     return ht
 
+def create_quantile_bin_ht(
+    model_id: str, n_bins: int, vqsr: bool = False, overwrite: bool = False
+) -> None:
+    """
+    Creates a table with quantile bin annotations added for a RF run and writes it to its correct location in
+    annotations.
+    :param model_id: Which data/run hash is being created
+    :param n_bins: Number of bins to bin the data into
+    :param vqsr: Set True is `model_id` refers to a VQSR filtering model
+    :param overwrite: Should output files be overwritten if present
+    :return: Nothing
+    """
+    logger.info(f"Annotating {model_id} HT with quantile bins using {n_bins}")
+    
+    ht = hl.read_table(f'{tmp_dir}/models/{model_id}/rf_result.ht')
+    if vqsr:
+        print("No vqsr available")
+        
+
+    else:
+        
+        ht = ht.annotate(
+            
+            positive_train_site=ht.tp,
+            negative_train_site=ht.fp,
+            score=ht.rf_probability["TP"],
+        )
+
+    ht = ht.filter(ht.ac_raw > 0)
+
+    bin_ht = create_binned_ht(ht, n_bins)
+    bin_ht.write( f'{tmp_dir}/models/{run_hash}/rf_result_quantile_bins.ht', overwrite=True)
+    
 
 ######################################
 # main
@@ -500,13 +533,13 @@ def main(args):
         ht_summary.show(n=20)
 
     if args.finalize:
-        ht = hl.read_table(f'{tmp_dir}/models/{run_hash}/rf_result.ht')
+        ht = hl.read_table(f'{temp_dir}variant_qc/models/{run_hash}/rf_result.ht')
         # ht = create_grouped_bin_ht(
         #    model_id=run_hash, overwrite=True)
-        #freq_ht = freq.ht()
-        #freq = freq_ht[ht.key]
-
-        # if not file_exists(
+        freq_ht = hl.read_table(f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_chr1-20-XY_sampleQC_FILTERED_FREQ_adj.ht')
+        freq = freq_ht[ht.key]
+        create_quantile_bin_ht(ht, n_bins=100, vqsr=False, overwrite=True)
+        #if not file_exists(
         #    get_score_quantile_bins(args.run_hash, aggregated=True).path
         # ):
         #    sys.exit(
