@@ -520,10 +520,10 @@ def main(args):
     if args.apply_rf:
 
         logger.info(f"Applying RF model {run_hash}...")
-        rf_model = load_model(get_rf(data="model", run_hash=run_hash))
+        #rf_model = load_model(get_rf(data="model", run_hash=run_hash))
         run_hash = args.run_hash
-        # rf_model = hl.read_table(
-        #    f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/training.ht')
+        rf_model = hl.read_table(
+            f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/model.model')
         # ht = hl.read_table(
         #    f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_chr1-20-XY_sampleQC_FILTERED_FREQ_adj_inb.ht')
         ht = hl.read_table(
