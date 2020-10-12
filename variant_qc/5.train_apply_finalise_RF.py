@@ -456,7 +456,7 @@ def create_quantile_bin_ht(
     logger.info(f"Annotating {model_id} HT with quantile bins using {n_bins}")
 
     ht = hl.read_table(
-        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{model_id}/rf_result.ht')
+        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{model_id}/rf_result_ac_added.ht')
     if vqsr:
         print("No vqsr available")
 
@@ -539,7 +539,7 @@ def main(args):
     if args.finalize:
         run_hash = args.run_hash
         ht = hl.read_table(
-            f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/rf_result.ht')
+            f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/rf_result_ac_added.ht')
         # ht = create_grouped_bin_ht(
         #    model_id=run_hash, overwrite=True)
         freq_ht = hl.read_table(
