@@ -570,7 +570,7 @@ def main(args):
             inbreeding_coeff_cutoff=INBREEDING_COEFF_HARD_CUTOFF,
         )
         # This column is added by the RF module based on a 0.5 threshold which doesn't correspond to what we use
-        ht = ht.drop(ht[PREDICTION_COL])
+        #ht = ht.drop(ht[PREDICTION_COL])
         ht.write(f'{tmp_dir}/rf_final.ht', overwrite=True)
 
 
