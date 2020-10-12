@@ -455,7 +455,8 @@ def create_quantile_bin_ht(
     """
     logger.info(f"Annotating {model_id} HT with quantile bins using {n_bins}")
 
-    ht = hl.read_table(f'{tmp_dir}/models/{model_id}/rf_result.ht')
+    ht = hl.read_table(
+        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{model_id}/rf_result.ht')
     if vqsr:
         print("No vqsr available")
 
@@ -473,11 +474,13 @@ def create_quantile_bin_ht(
     bin_ht = create_binned_ht(ht, n_bins)
     bin_ht.write(
         f'{tmp_dir}/models/{model_id}/rf_result_quantile_bins.ht', overwrite=True)
-
+    return bin_ht
 
 ######################################
 # main
 ########################################
+
+
 def main(args):
 
     print("main")
@@ -542,7 +545,8 @@ def main(args):
         freq_ht = hl.read_table(
             f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_chr1-20-XY_sampleQC_FILTERED_FREQ_adj.ht')
         freq = freq_ht[ht.key]
-        create_quantile_bin_ht(ht, n_bins=100, vqsr=False, overwrite=True)
+        bin_ht = create_quantile_bin_ht(
+            run_hash, n_bins=100, vqsr=False, overwrite=True)
         # if not file_exists(
         #    get_score_quantile_bins(args.run_hash, aggregated=True).path
         # ):
@@ -550,7 +554,7 @@ def main(args):
         #        f"Could not find binned HT for RF  run {args.run_hash} (). Please run create_ranked_scores.py for that hash."
         #    )
         #aggregated_bin_ht = get_score_quantile_bins(ht, aggregated=True)
-
+        print("created bin ht")
         ht = generate_final_rf_ht(
             ht,
             ac0_filter_expr=ht.AC == 0,
