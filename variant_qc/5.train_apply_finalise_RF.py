@@ -555,17 +555,18 @@ def main(args):
         #    )
         #aggregated_bin_ht = get_score_quantile_bins(ht, aggregated=True)
         print("created bin ht")
+
         ht = generate_final_rf_ht(
             ht,
-            ac0_filter_expr=ht.AC == 0,
-            ts_ac_filter_expr=ht.AC == 1,
-            mono_allelic_fiter_expr=(ht.AF == 1) | (ht.AF == 0),
+            ac0_filter_expr=ht.ac == 0,
+            ts_ac_filter_expr=ht.ac == 1,
+            #mono_allelic_fiter_expr=(ht.AF == 1) | (ht.AF == 0),
             snp_cutoff=args.snp_cutoff,
             indel_cutoff=args.indel_cutoff,
-            #determine_cutoff_from_bin=not args.treat_cutoff_as_prob,
+            determine_cutoff_from_bin=not args.treat_cutoff_as_prob,
             determine_cutoff_from_bin=False,
-            # aggregated_bin_ht=aggregated_bin_ht,
-            # bin_id=ht.bin,
+            aggregated_bin_ht=bin_ht,
+            bin_id=ht.bin,
             inbreeding_coeff_cutoff=INBREEDING_COEFF_HARD_CUTOFF,
         )
         # This column is added by the RF module based on a 0.5 threshold which doesn't correspond to what we use
