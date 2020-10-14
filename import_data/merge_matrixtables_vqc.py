@@ -93,7 +93,7 @@ if __name__ == "__main__":
     # mt_split = mt_split.checkpoint(
     #   f"{tmp_dir}/ddd-elgh-ukbb/{CHROMOSOME}-split-multi_cohorts.mt",  overwrite=True)
     print("repartitioning")
-    mt_repartitioned = mt.repartition(1000, shuffle=True)
+    mt_repartitioned = mt.repartition(10000, shuffle=True)
     print("split multi")
     mt_split = hl.split_multi_hts(
         mt_repartitioned, keep_star=False, left_aligned=False, permit_shuffle=True)
