@@ -54,13 +54,16 @@ def annotate_samples_with_cohort_info(mt: hl.MatrixTable, cohort_file) -> hl.Mat
 
 
 table_cohort = "s3a://DDD-ELGH-UKBB-exomes/samples_cohorts.tsv"
+tmp_dir = "hdfs://spark-master:9820/"
+temp_dir = "file:///home/ubuntu/data/tmp"
+plot_dir = "/home/ubuntu/data/tmp"
+
 
 if __name__ == "__main__":
     # need to create spark cluster first before intiialising hail
     sc = pyspark.SparkContext()
     # Define the hail persistent storage directory
-    tmp_dir = "hdfs://spark-master:9820/"
-    temp_dir = os.path.join(os.environ["HAIL_HOME"], "tmp")
+
     hl.init(sc=sc, tmp_dir=tmp_dir, default_reference="GRCh38")
     # s3 credentials required for user to access the datasets in farm flexible compute s3 environment
     # you may use your own here from your .s3fg file in your home directory
