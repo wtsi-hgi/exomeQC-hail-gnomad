@@ -33,8 +33,6 @@ partitions = 1000
 CHROMOSOMES = ["chr2",
                "chr3",
                "chr4",
-               "chr5",
-
                "chr20",
                ]
 
