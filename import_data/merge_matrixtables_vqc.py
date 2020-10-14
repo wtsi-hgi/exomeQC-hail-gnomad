@@ -32,7 +32,6 @@ partitions = 1000
 
 CHROMOSOMES = ["chr2",
                "chr3",
-               "chr4",
                "chr20",
                ]
 
@@ -90,12 +89,12 @@ if __name__ == "__main__":
 
     # mt_split = mt_split.checkpoint(
     #   f"{tmp_dir}/ddd-elgh-ukbb/{CHROMOSOME}-split-multi_cohorts.mt",  overwrite=True)
-    print("repartitioning")
-    mt_repartitioned = mt.repartition(10000, shuffle=True)
+    # print("repartitioning")
+    #mt_repartitioned = mt.repartition(10000, shuffle=True)
     print("split multi")
     mt_split = hl.split_multi_hts(
-        mt_repartitioned, keep_star=False, left_aligned=False, permit_shuffle=True)
-    print("write out mt split and repartitioned")
+        mt, keep_star=False, left_aligned=False, permit_shuffle=True)
+    print("write out mt split")
     mt_split.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1to5-20_split.mt", overwrite=True)
+        f"{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1to3-20_split.mt", overwrite=True)
     print(f"Wrote matrixtable for whole genome.")
