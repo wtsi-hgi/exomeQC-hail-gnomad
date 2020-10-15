@@ -14,8 +14,13 @@ from typing import Any, Counter, List, Optional, Tuple, Union
 from bokeh.plotting import output_file, save, show
 from gnomad.resources.grch38 import gnomad
 from gnomad.utils.annotations import unphase_call_expr, add_variant_type
-from gnomad.utils.annotations import annotate_adj, bi_allelic_expr
-
+from gnomad.utils.annotations import annotate_adj, bi_allelic_expr, bi_allelic_site_inbreeding_expr
+from gnomad.utils.filtering import filter_to_autosomes
+from gnomad.sample_qc.relatedness import (
+    SIBLINGS,
+    generate_sib_stats_expr,
+    generate_trio_stats_expr,
+)
 
 from hail import Table
 
@@ -204,13 +209,13 @@ if __name__ == "__main__":
     trio_stats_ht.write(
         f'{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_trios_stats.ht', overwrite=True)
 
-    mt_inbreeding = mt.annotate_cols(
-        IB=hl.agg.inbreeding(mt.GT, mt.variant_qc.AF[1]))
-
+    mt_inbreeding = mt.annotate_rows(
+        InbreedingCoeff=bi_allelic_site_inbreeding_expr(mt.GT))
+    ht_inbreeding = mt_inbreeding.rows()
     mt_allele_counts = mt.annotate_rows(
         gt_stats=hl.agg.call_stats(mt.GT, mt.alleles))
     allele_data_ht = generate_allele_data(mt)
-    ht_inbreeding = mt.cols()
+
     ht_allele_counts = mt.rows()
 
     ht_inbreeding.write(
