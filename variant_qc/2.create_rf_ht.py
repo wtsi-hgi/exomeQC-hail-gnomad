@@ -158,10 +158,10 @@ if __name__ == "__main__":
     mt = hl.read_matrix_table(
         f'{temp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1to3-20_split.mt')
 
-    mt = mt.select_entries(
-        GT=hl.unphased_diploid_gt_index_call(mt.GT.n_alt_alleles()))
-    mt = mt.annotate_rows(InbreedingCoeff=hl.or_missing(
-        ~hl.is_nan(mt.info.InbreedingCoeff), mt.info.InbreedingCoeff))
+    # mt = mt.select_entries(
+    #    GT=hl.unphased_diploid_gt_index_call(mt.GT.n_alt_alleles()))
+    # mt = mt.annotate_rows(InbreedingCoeff=hl.or_missing(
+    #   ~hl.is_nan(mt.info.InbreedingCoeff), mt.info.InbreedingCoeff))
     ht = mt.rows()
     ht = ht.transmute(**ht.info)
     ht = ht.select("FS", "MQ", "QD", "InbreedingCoeff", *INFO_FEATURES)
