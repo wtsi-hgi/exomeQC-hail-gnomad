@@ -13,6 +13,7 @@ import logging
 from typing import Any, Counter, List, Optional, Tuple, Union
 from bokeh.plotting import output_file, save, show
 from gnomad.resources.grch38 import gnomad
+from gnomad.utils.annotations import annotate_adj
 from gnomad.utils.annotations import unphase_call_expr, add_variant_type
 from gnomad.utils.annotations import annotate_adj, bi_allelic_expr, bi_allelic_site_inbreeding_expr
 from gnomad.utils.filtering import filter_to_autosomes
@@ -160,6 +161,27 @@ def generate_allele_data(mt: hl.MatrixTable) -> hl.Table:
     return ht
 
 
+def generate_ac(mt: hl.MatrixTable, fam_file: str) -> hl.Table:
+    """
+    Creates Table with QC samples, QC samples removing children and release samples raw and adj ACs.
+    """
+    #mt = mt.filter_cols(mt.meta.high_quality)
+    fam_ht = hl.import_fam(fam_file, delimiter="\t")
+    mt = mt.annotate_cols(unrelated_sample=hl.is_missing(fam_ht[mt.s]))
+    mt = mt.filter_rows(hl.len(mt.alleles) > 1)
+    mt = annotate_adj(mt)
+    mt = mt.annotate_rows(
+        ac_qc_samples_raw=hl.agg.sum(mt.GT.n_alt_alleles()),
+        #ac_qc_samples_unrelated_raw=hl.agg.filter(~mt.meta.all_samples_related, hl.agg.sum(mt.GT.n_alt_alleles())),
+        #ac_release_samples_raw=hl.agg.filter(mt.meta.release, hl.agg.sum(mt.GT.n_alt_alleles())),
+        ac_qc_samples_adj=hl.agg.filter(
+            mt.adj, hl.agg.sum(mt.GT.n_alt_alleles())),
+        #ac_qc_samples_unrelated_adj=hl.agg.filter(~mt.meta.all_samples_related & mt.adj, hl.agg.sum(mt.GT.n_alt_alleles())),
+        #ac_release_samples_adj=hl.agg.filter(mt.meta.release & mt.adj, hl.agg.sum(mt.GT.n_alt_alleles())),
+    )
+    return mt.rows()
+
+
 if __name__ == "__main__":
     # need to create spark cluster first before intiialising hail
     sc = pyspark.SparkContext()
@@ -212,15 +234,13 @@ if __name__ == "__main__":
     mt_inbreeding = mt.annotate_rows(
         InbreedingCoeff=bi_allelic_site_inbreeding_expr(mt.GT))
     ht_inbreeding = mt_inbreeding.rows()
-    mt_allele_counts = mt.annotate_rows(
-        gt_stats=hl.agg.call_stats(mt.GT, mt.alleles))
     allele_data_ht = generate_allele_data(mt)
-
-    ht_allele_counts = mt.rows()
+    fam = "s3a://DDD-ELGH-UKBB-exomes/trios/DDD_trios.fam"
+    qc_ac_ht = generate_ac(mt, fam)
 
     ht_inbreeding.write(
         f'{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_inbreeding.ht', overwrite=True)
-    ht_allele_counts.write(
+    qc_ac_ht.write(
         f'{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_qc_ac.ht', overwrite=True)
     allele_data_ht.write(
         f'{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_allele_data.ht', overwrite=True)
