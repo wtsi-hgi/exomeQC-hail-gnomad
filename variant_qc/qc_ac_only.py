@@ -219,7 +219,6 @@ if __name__ == "__main__":
     fam = "s3a://DDD-ELGH-UKBB-exomes/trios/DDD_trios.fam"
     qc_ac_ht = generate_ac(mt, fam)
 
-    
+    qc_ac_ht = qc_ac_ht.select(*['ac_qc_samples_raw', 'ac_qc_samples_adj'])
     qc_ac_ht.write(
         f'{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_qc_ac.ht', overwrite=True)
-   
