@@ -74,30 +74,6 @@ TRUTH_DATA = ["hapmap", "omni", "mills", "kgp_phase1_hc"]
 INBREEDING_COEFF_HARD_CUTOFF = -0.3
 
 
-def get_truth_ht() -> Table:
-    """
-    Returns a table with the following annotations from the latest version of the corresponding truth data:
-    - hapmap
-    - kgp_omni (1000 Genomes intersection Onni 2.5M array)
-    - kgp_phase_1_hc (high confidence sites in 1000 genonmes)
-    - mills (Mills & Devine indels)
-    :return: A table with the latest version of popular truth data annotations
-    """
-    omni_ht = hl.read_table(omni)
-    mills_ht = hl.read_table(mills)
-    thousand_genomes_ht = hl.read_table(thousand_genomes)
-    hapmap_ht = hl.read_table(hapmap)
-    return (
-        hapmap_ht
-        .select(hapmap=True)
-        .join(omni_ht.select(omni=True), how="outer")
-        .join(thousand_genomes_ht.select(kgp_phase1_hc=True), how="outer")
-        .join(mills_ht.select(mills=True), how="outer")
-        .repartition(200, shuffle=False)
-        .persist()
-    )
-
-
 def split_info() -> hl.Table:
     """
     Generates an info table that splits multi-allelic sites from
@@ -165,14 +141,7 @@ if __name__ == "__main__":
     hadoop_config.set("fs.s3a.access.key", credentials["mer"]["access_key"])
     hadoop_config.set("fs.s3a.secret.key", credentials["mer"]["secret_key"])
     n_partitions = 500
-    omni = f'{temp_dir}/ddd-elgh-ukbb/training_sets/1000G_omni2.5.hg38.ht'
-    omni_ht = hl.read_table(omni)
-    mills = f'{temp_dir}/ddd-elgh-ukbb/training_sets/Mills_and_1000G_gold_standard.indels.hg38.ht'
-    mills_ht = hl.read_table(mills)
-    thousand_genomes = f'{temp_dir}/ddd-elgh-ukbb/training_sets/1000G_phase1.snps.high_confidence.hg38.ht'
-    thousand_genomes_ht = hl.read_table(thousand_genomes)
-    hapmap = f'{temp_dir}/ddd-elgh-ukbb/training_sets/hapmap_3.3.hg38.ht'
-    hapmap_ht = hl.read_table(hapmap)
+
     # ANNOTATION TABLES:
     truth_data_ht = hl.read_table(
         f'{temp_dir}/ddd-elgh-ukbb/variant_qc/truthset_table.ht')
@@ -183,10 +152,12 @@ if __name__ == "__main__":
         f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_allele_data.ht')
     allele_counts_ht = hl.read_table(
         f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_qc_ac.ht')
-
+    inbreeding_ht = hl.read_table(
+        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_inbreeding.ht')
     group = "raw"
     mt = hl.read_matrix_table(
-        f'{temp_dir}/ddd-elgh-ukbb/filtering/Sanger_cohorts_chr1-20-XY_sampleQC_FILTERED.mt')
+        f'{temp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1to3-20_split.mt')
+
     mt = mt.select_entries(
         GT=hl.unphased_diploid_gt_index_call(mt.GT.n_alt_alleles()))
     mt = mt.annotate_rows(InbreedingCoeff=hl.or_missing(
@@ -195,29 +166,22 @@ if __name__ == "__main__":
     ht = ht.transmute(**ht.info)
     ht = ht.select("FS", "MQ", "QD", "InbreedingCoeff", *INFO_FEATURES)
 
-    # mt_inbreeding = mt.annotate_cols(
-    #    IB=hl.agg.inbreeding(mt.GT, mt.variant_qc.AF[1]))
-    # inbreeding_ht=mt_inbreeding.rows().info
-    # inbreeding_ht = inbreeding_ht.annotate(
-    #    InbreedingCoeff=hl.or_missing(
-    #        ~hl.is_nan(inbreeding_ht.InbreedingCoeff), inbreeding_ht.InbreedingCoeff
-    #    )
-    # )
-
     trio_stats_ht = trio_stats_table.select(
         f"n_transmitted_{group}", f"ac_children_{group}"
     )
 
     ht = ht.annotate(
-        **trio_stats_ht[ht.key],
+        **inbreeding_ht[ht.key]
+        ** trio_stats_ht[ht.key],
         **truth_data_ht[ht.key],
         **allele_data_ht[ht.key].allele_data,
         **allele_counts_ht[ht.key],
     )
     # Filter to only variants found in high quality samples or controls with no LowQual filter
-    ht = ht.filter(
-        (ht[f"ac_children_{group}"] > 0)
-    )  # TODO: change to AS_lowqual for v3.1 or leave as is to be more consistent with v3.0? I will need to add this annotation if so
+    # ht = ht.filter(
+    #    (ht[f"ac_children_{group}"] > 0)
+    # )  # TODO: change to AS_lowqual for v3.1 or leave as is to be more consistent with v3.0? I will need to add this annotation if so
+
     ht = ht.select(
         "a_index",
         "was_split",
