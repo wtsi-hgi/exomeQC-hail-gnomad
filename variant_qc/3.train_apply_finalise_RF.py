@@ -485,8 +485,9 @@ def train_rf_model(
     ht = ht.select_globals(
         features_importance=features_importance,
         features=rf_features,
-        test_results=test_results,
+        test_results=test_results
     )
+    print("fuck you bitxh")
 
     return ht.select("rf_train", "rf_label", "rf_test"), rf_model
 
