@@ -244,8 +244,8 @@ def create_grouped_bin_ht(model_id: str, overwrite: bool = False) -> None:
 
 def train_rf(ht, args):
     features = FEATURES
-    #test_intervals = args.test_intervals
-    test_intervals = False
+    test_intervals = args.test_intervals
+    #test_intervals = False
 
     if args.no_inbreeding_coeff:
         features.remove("InbreedingCoeff")
@@ -275,8 +275,9 @@ def train_rf(ht, args):
         fp_to_tp=args.fp_to_tp,
         num_trees=args.num_trees,
         max_depth=args.max_depth,
-        test_expr=hl.literal(test_intervals).any(
-            lambda interval: interval.contains(ht.locus)),
+        test_expr=False
+        # hl.literal(test_intervals).any(
+        #    lambda interval: interval.contains(ht.locus)),
     )
 
     logger.info("Joining original RF Table with training information")
