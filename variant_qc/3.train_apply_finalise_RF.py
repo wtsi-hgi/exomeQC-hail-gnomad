@@ -24,6 +24,7 @@ from gnomad.resources.grch38 import gnomad
 from gnomad.utils.annotations import unphase_call_expr, add_variant_type
 from gnomad.variant_qc.pipeline import create_binned_ht, score_bin_agg
 from gnomad.variant_qc.pipeline import test_model, sample_training_examples, get_features_importance
+from gnomad.variant_qc.pipeline import train_rf as train_rf_imported
 from gnomad.utils.file_utils import file_exists
 from gnomad.resources.resource_utils import TableResource, MatrixTableResource
 from gnomad.utils.filtering import add_filters_expr
@@ -456,7 +457,7 @@ def train_rf_model(
         )
     )
 
-    rf_model = train_rf(
+    rf_model = train_rf_imported(
         ht.filter(ht.rf_train),
         features=rf_features,
         label="rf_label",
