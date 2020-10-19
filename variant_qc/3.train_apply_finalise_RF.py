@@ -495,6 +495,9 @@ def main(args):
     if args.train_rf:
         ht = hl.read_table(
             f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_table_for_RF_by_variant_type.ht')
+
+        # ht = hl.read_table(
+        #    f'{temp_dir}/ddd-elgh-ukbb/variant_qc/chr1-20-XY_analysis/Sanger_table_for_RF_by_variant_type.ht')
         run_hash = str(uuid.uuid4())[:8]
         rf_runs = get_rf_runs(f'{tmp_dir}/ddd-elgh-ukbb/')
         while run_hash in rf_runs:
