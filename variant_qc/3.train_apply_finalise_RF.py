@@ -273,12 +273,10 @@ def train_rf(ht, args):
         max_depth=args.max_depth,
         # test_expr=hl.literal(test_intervals).any(
         #    lambda interval: interval.contains(ht.locus)
-        test_expr=None,
-        ),
-    )
+        test_expr=None)
 
     logger.info("Joining original RF Table with training information")
-    ht=ht.join(rf_ht, how = "left")
+    ht = ht.join(rf_ht, how="left")
 
     return ht, rf_model
 
@@ -304,9 +302,9 @@ def get_run_data(
     :return: Dict of RF information
     """
     if vqsr_training:
-        transmitted_singletons=None
+        transmitted_singletons = None
 
-    run_data={
+    run_data = {
         "input_args": {
             "transmitted_singletons": transmitted_singletons,
             "adj": adj,
