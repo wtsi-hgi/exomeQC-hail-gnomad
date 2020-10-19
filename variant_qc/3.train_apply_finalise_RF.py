@@ -343,7 +343,7 @@ def train_rf_model(
     )
 
     rf_model = train_rf(
-        ht.filter(ht.rf_train),
+        ht.filter(ht.rf_train), main.args
         # features=rf_features,
         # label="rf_label",
         # num_trees=num_trees,
