@@ -245,7 +245,7 @@ def create_grouped_bin_ht(model_id: str, overwrite: bool = False) -> None:
 def train_rf(ht, args):
     features = FEATURES
     test_intervals = args.test_intervals
-    #test_intervals = False
+    # test_intervals = False
 
     if args.no_inbreeding_coeff:
         features.remove("InbreedingCoeff")
@@ -493,11 +493,11 @@ def main(args):
         f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_table_for_RF_by_variant_type.ht')
 
     if args.train_rf:
-        ht = hl.read_table(
-            f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_table_for_RF_by_variant_type.ht')
-
         # ht = hl.read_table(
-        #    f'{temp_dir}/ddd-elgh-ukbb/variant_qc/chr1-20-XY_analysis/Sanger_table_for_RF_by_variant_type.ht')
+        #    f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_table_for_RF_by_variant_type.ht')
+
+        ht = hl.read_table(
+            f'{temp_dir}/ddd-elgh-ukbb/variant_qc/chr1-20-XY_analysis/Sanger_table_for_RF_by_variant_type.ht')
         run_hash = str(uuid.uuid4())[:8]
         rf_runs = get_rf_runs(f'{tmp_dir}/ddd-elgh-ukbb/')
         while run_hash in rf_runs:
