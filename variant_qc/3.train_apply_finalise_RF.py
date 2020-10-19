@@ -271,13 +271,14 @@ def train_rf(ht, args):
         fp_to_tp=args.fp_to_tp,
         num_trees=args.num_trees,
         max_depth=args.max_depth,
-        test_expr=hl.literal(test_intervals).any(
-            lambda interval: interval.contains(ht.locus)
+        # test_expr=hl.literal(test_intervals).any(
+        #    lambda interval: interval.contains(ht.locus)
+        test_expr=None,
         ),
     )
 
     logger.info("Joining original RF Table with training information")
-    ht = ht.join(rf_ht, how="left")
+    ht=ht.join(rf_ht, how = "left")
 
     return ht, rf_model
 
@@ -289,6 +290,8 @@ def get_run_data(
     test_intervals: List[str],
     features_importance: Dict[str, float],
     test_results: List[hl.tstruct],
+
+
 ) -> Dict:
     """
     Creates a Dict containing information about the RF input arguments and feature importance
@@ -301,9 +304,9 @@ def get_run_data(
     :return: Dict of RF information
     """
     if vqsr_training:
-        transmitted_singletons = None
+        transmitted_singletons=None
 
-    run_data = {
+    run_data={
         "input_args": {
             "transmitted_singletons": transmitted_singletons,
             "adj": adj,
@@ -469,7 +472,7 @@ def create_quantile_bin_ht(
             score=ht.rf_probability["TP"],
         )
 
-    #ht = ht.filter(ht.ac_raw > 0)
+    # ht = ht.filter(ht.ac_raw > 0)
 
     bin_ht = create_binned_ht(ht, n_bins)
     bin_ht.write(
@@ -520,7 +523,7 @@ def main(args):
     if args.apply_rf:
 
         logger.info(f"Applying RF model {run_hash}...")
-        #rf_model = load_model(get_rf(data="model", run_hash=run_hash))
+        # rf_model = load_model(get_rf(data="model", run_hash=run_hash))
         run_hash = args.run_hash
         rf_model = hl.read_table(
             f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/model.model')
@@ -529,7 +532,7 @@ def main(args):
         ht = hl.read_table(
             f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_for_RF_unfiltered.ht')
         ht = ht.annotate(rf_label=rf_model[ht.key].rf_label)
-        #ht = get_rf(data="training", run_hash=run_hash).ht()
+        # ht = get_rf(data="training", run_hash=run_hash).ht()
         features = hl.eval(rf_model.features)
         ht = apply_rf_model(ht, rf_model, features, label=LABEL_COL)
         logger.info("Finished applying RF model")
@@ -561,7 +564,7 @@ def main(args):
         #    sys.exit(
         #        f"Could not find binned HT for RF  run {args.run_hash} (). Please run create_ranked_scores.py for that hash."
         #    )
-        #aggregated_bin_ht = get_score_quantile_bins(ht, aggregated=True)
+        # aggregated_bin_ht = get_score_quantile_bins(ht, aggregated=True)
         print("created bin ht")
 
         ht = generate_final_rf_ht(
@@ -578,7 +581,7 @@ def main(args):
             inbreeding_coeff_cutoff=INBREEDING_COEFF_HARD_CUTOFF,
         )
         # This column is added by the RF module based on a 0.5 threshold which doesn't correspond to what we use
-        #ht = ht.drop(ht[PREDICTION_COL])
+        # ht = ht.drop(ht[PREDICTION_COL])
         ht.write(f'{tmp_dir}/rf_final.ht', overwrite=True)
 
 
