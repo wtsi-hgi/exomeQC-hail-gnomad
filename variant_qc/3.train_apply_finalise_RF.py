@@ -472,10 +472,11 @@ def train_rf_model(
         test_results = test_model(
             test_ht, rf_model, features=rf_features, label="rf_label"
         )
-    print("FUCK YOU")
+
     print(test_results)
 
     features_importance = get_features_importance(rf_model)
+    print("FUCK YOU")
     ht = ht.select_globals(
         features_importance=features_importance,
         features=rf_features,
