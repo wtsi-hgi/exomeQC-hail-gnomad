@@ -519,8 +519,8 @@ def main(args):
             test_intervals=args.test_intervals,
             adj=True,
             features_importance=hl.eval(ht_result.features_importance),
-            test_results=hl.eval(ht_result.test_results),
-            test_results=None
+            # test_results=hl.eval(ht_result.test_results),
+            test_results=None,
         )
 
         with hl.hadoop_open(f'{plot_dir}/ddd-elgh-ukbb/variant_qc/rf_runs.json', "w") as f:
