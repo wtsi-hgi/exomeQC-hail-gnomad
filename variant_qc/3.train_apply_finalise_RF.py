@@ -244,7 +244,9 @@ def create_grouped_bin_ht(model_id: str, overwrite: bool = False) -> None:
 
 def train_rf(ht, args):
     features = FEATURES
-    test_intervals = args.test_intervals
+    #test_intervals = args.test_intervals
+    test_intervals = False
+
     if args.no_inbreeding_coeff:
         features.remove("InbreedingCoeff")
 
@@ -254,15 +256,14 @@ def train_rf(ht, args):
         tp_expr = tp_expr | ht.transmitted_singleton
 
     if test_intervals:
-        print("Fuck off")
+
         if isinstance(test_intervals, str):
             test_intervals = [test_intervals]
         test_intervals = [
             hl.parse_locus_interval(x, reference_genome="GRCh38")
             for x in test_intervals
         ]
-    
-    print(hl.eval(test_intervals))
+        print(hl.eval(test_intervals))
 
     ht = ht.annotate(tp=tp_expr, fp=fp_expr)
 
@@ -276,7 +277,7 @@ def train_rf(ht, args):
         max_depth=args.max_depth,
         test_expr=hl.literal(test_intervals).any(
             lambda interval: interval.contains(ht.locus)),
-            )
+    )
 
     logger.info("Joining original RF Table with training information")
     ht = ht.join(rf_ht, how="left")
