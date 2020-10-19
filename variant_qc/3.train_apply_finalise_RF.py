@@ -502,7 +502,7 @@ def main(args):
             vqsr_training=False,
             transmitted_singletons=True,
             test_intervals=args.test_intervals,
-            adj=False,
+            adj=True,
             features_importance=hl.eval(ht_result.features_importance),
             test_results=hl.eval(ht_result.test_results),
         )
