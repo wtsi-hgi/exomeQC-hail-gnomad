@@ -3,6 +3,8 @@
 #  trio matrixtable creation from fam file
 from hail import Table
 import os
+import pprint
+from pprint import pformat
 import argparse
 import hail as hl
 import pandas as pd
@@ -20,7 +22,8 @@ import json
 from bokeh.plotting import output_file, save, show
 from gnomad.resources.grch38 import gnomad
 from gnomad.utils.annotations import unphase_call_expr, add_variant_type
-from gnomad.variant_qc.pipeline import create_binned_ht, score_bin_agg, train_rf_model
+from gnomad.variant_qc.pipeline import create_binned_ht, score_bin_agg,
+#from gnomad.variant_qc.pipeline import train_rf_model
 from gnomad.utils.file_utils import file_exists
 from gnomad.resources.resource_utils import TableResource, MatrixTableResource
 from gnomad.utils.filtering import add_filters_expr
@@ -283,6 +286,154 @@ def train_rf(ht, args):
     ht = ht.join(rf_ht, how="left")
 
     return ht, rf_model
+
+
+def train_rf_model(
+    ht: hl.Table,
+    rf_features: List[str],
+    tp_expr: hl.expr.BooleanExpression,
+    fp_expr: hl.expr.BooleanExpression,
+    fp_to_tp: float = 1.0,
+    num_trees: int = 500,
+    max_depth: int = 5,
+    test_expr: hl.expr.BooleanExpression = False,
+) -> Tuple[hl.Table, pyspark.ml.PipelineModel]:
+    """
+    Perform random forest (RF) training using a Table annotated with features and training data.
+    .. note::
+        This function uses `train_rf` and extends it by:
+            - Adding an option to apply the resulting model to test variants which are withheld from training.
+            - Uses a false positive (FP) to true positive (TP) ratio to determine what variants to use for RF training.
+    The returned Table includes the following annotations:
+        - rf_train: indicates if the variant was used for training of the RF model.
+        - rf_label: indicates if the variant is a TP or FP.
+        - rf_test: indicates if the variant was used in testing of the RF model.
+        - features: global annotation of the features used for the RF model.
+        - features_importance: global annotation of the importance of each feature in the model.
+        - test_results: results from testing the model on variants defined by `test_expr`.
+    :param ht: Table annotated with features for the RF model and the positive and negative training data.
+    :param rf_features: List of column names to use as features in the RF training.
+    :param tp_expr: TP training expression.
+    :param fp_expr: FP training expression.
+    :param fp_to_tp: Ratio of FPs to TPs for creating the RF model. If set to 0, all training examples are used.
+    :param num_trees: Number of trees in the RF model.
+    :param max_depth: Maxmimum tree depth in the RF model.
+    :param test_expr: An expression specifying variants to hold out for testing and use for evaluation only.
+    :return: Table with TP and FP training sets used in the RF training and the resulting RF model.
+    """
+
+    ht = ht.annotate(_tp=tp_expr, _fp=fp_expr, rf_test=test_expr)
+
+    rf_ht = sample_training_examples(
+        ht, tp_expr=ht._tp, fp_expr=ht._fp, fp_to_tp=fp_to_tp, test_expr=ht.rf_test
+    )
+    ht = ht.annotate(rf_train=rf_ht[ht.key].train,
+                     rf_label=rf_ht[ht.key].label)
+
+    summary = ht.group_by("_tp", "_fp", "rf_train", "rf_label", "rf_test").aggregate(
+        n=hl.agg.count()
+    )
+    logger.info("Summary of TP/FP and RF training data:")
+    summary.show(n=20)
+
+    logger.info(
+        "Training RF model:\nfeatures: {}\nnum_tree: {}\nmax_depth:{}".format(
+            ",".join(rf_features), num_trees, max_depth
+        )
+    )
+
+    rf_model = train_rf(
+        ht.filter(ht.rf_train),
+        features=rf_features,
+        label="rf_label",
+        num_trees=num_trees,
+        max_depth=max_depth,
+    )
+
+    test_results = None
+    if test_expr is not None:
+        logger.info(f"Testing model on specified variants or intervals...")
+        test_ht = ht.filter(hl.is_defined(ht.rf_label) & ht.rf_test)
+        test_results = test_model(
+            test_ht, rf_model, features=rf_features, label="rf_label"
+        )
+
+    features_importance = get_features_importance(rf_model)
+    ht = ht.select_globals(
+        features_importance=features_importance,
+        features=rf_features,
+        test_results=test_results,
+    )
+
+    return ht.select("rf_train", "rf_label", "rf_test"), rf_model
+
+
+def test_model(
+    ht: hl.Table,
+    rf_model: pyspark.ml.PipelineModel,
+    features: List[str],
+    label: str,
+    prediction_col_name: str = "rf_prediction",
+) -> List[hl.tstruct]:
+    """
+    A wrapper to test a model on a set of examples with known labels.
+    1) Runs the model on the data
+    2) Prints confusion matrix and accuracy
+    3) Returns confusion matrix as a list of struct
+    :param ht: Input table
+    :param rf_model: RF Model
+    :param features: Columns containing features that were used in the model
+    :param label: Column containing label to be predicted
+    :param prediction_col_name: Where to store the prediction
+    :return: A list containing structs with {label, prediction, n}
+    """
+
+    ht = apply_rf_model(
+        ht.filter(hl.is_defined(ht[label])),
+        rf_model,
+        features,
+        label,
+        prediction_col_name=prediction_col_name,
+    )
+
+    test_results = (
+        ht.group_by(ht[prediction_col_name], ht[label])
+        .aggregate(n=hl.agg.count())
+        .collect()
+    )
+
+    # Print results
+    df = pd.DataFrame(test_results)
+    df = df.pivot(index=label, columns=prediction_col_name, values="n")
+    logger.info("Testing results:\n{}".format(pprint.pformat(df)))
+    logger.info(
+        "Accuracy: {}".format(
+            sum([x.n for x in test_results if x[label] == x[prediction_col_name]])
+            / sum([x.n for x in test_results])
+        )
+    )
+    print("FUCK OFFFFFFF")
+
+    return test_results
+
+
+def get_features_importance(
+    rf_pipeline: pyspark.ml.PipelineModel, rf_index: int = -2, assembler_index: int = -3
+) -> Dict[str, float]:
+    """
+    Extract the features importance from a Pipeline model containing a RandomForestClassifier stage.
+    :param rf_pipeline: Input pipeline
+    :param rf_index: index of the RandomForestClassifier stage
+    :param assembler_index: index of the VectorAssembler stage
+    :return: feature importance for each feature in the RF model
+    """
+
+    feature_names = [
+        x[: -len("_indexed")] if x.endswith("_indexed") else x
+        for x in rf_pipeline.stages[assembler_index].getInputCols()
+    ]
+
+    return dict(zip(feature_names, rf_pipeline.stages[rf_index].featureImportances))
 
 
 def get_run_data(
