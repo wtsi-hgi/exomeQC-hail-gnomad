@@ -344,10 +344,10 @@ def train_rf_model(
 
     rf_model = train_rf(
         ht.filter(ht.rf_train),
-        features=rf_features,
-        label="rf_label",
-        num_trees=num_trees,
-        max_depth=max_depth,
+        # features=rf_features,
+        # label="rf_label",
+        # num_trees=num_trees,
+        # max_depth=max_depth,
     )
 
     test_results = None
@@ -435,6 +435,7 @@ def get_features_importance(
 
     return dict(zip(feature_names, rf_pipeline.stages[rf_index].featureImportances))
 
+
 def sample_training_examples(
     ht: hl.Table,
     tp_expr: hl.BooleanExpression,
@@ -491,7 +492,8 @@ def sample_training_examples(
 
         # Sample training examples
         pd_stats = (
-            ht.group_by(**{"contig": ht.locus.contig, "tp": ht._tp, "fp": ht._fp})
+            ht.group_by(**{"contig": ht.locus.contig,
+                           "tp": ht._tp, "fp": ht._fp})
             .aggregate(**train_stats)
             .to_pandas()
         )
@@ -537,6 +539,7 @@ def sample_training_examples(
     )
 
     return ht.select(train=train_expr & ~ht._exclude, label=label_expr)
+
 
 def get_run_data(
     transmitted_singletons: bool,
