@@ -22,7 +22,7 @@ import json
 from bokeh.plotting import output_file, save, show
 from gnomad.resources.grch38 import gnomad
 from gnomad.utils.annotations import unphase_call_expr, add_variant_type
-from gnomad.variant_qc.pipeline import create_binned_ht, score_bin_agg,
+from gnomad.variant_qc.pipeline import create_binned_ht, score_bin_agg
 #from gnomad.variant_qc.pipeline import train_rf_model
 from gnomad.utils.file_utils import file_exists
 from gnomad.resources.resource_utils import TableResource, MatrixTableResource
