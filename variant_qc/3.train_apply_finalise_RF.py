@@ -485,7 +485,7 @@ def main(args):
 
     print("main table")
     ht = hl.read_table(
-        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_table_for_RF.ht')
+        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_table_for_RF_by_variant_type.ht')
 
     if args.train_rf:
 
