@@ -476,9 +476,13 @@ def train_rf_model(
     print(test_results)
 
     features_importance = get_features_importance(rf_model)
-    print("FUCK YOU")
+    print("Test results:")
+    print(test_results)
+    print("Feature importance:")
     print(features_importance)
-    ht = ht.annotate_globals(
+    print("RF featutes:")
+    print(rf_features)
+    ht = ht.select_globals(
         features_importance=features_importance,
         features=rf_features,
         test_results=test_results,
