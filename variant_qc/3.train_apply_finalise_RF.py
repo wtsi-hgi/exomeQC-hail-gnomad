@@ -550,12 +550,12 @@ def main(args):
             f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/training.ht')
         #ht = ht.annotate(rf_label=rf_model[ht.key].rf_label)
         ht = get_rf(data="training", run_hash=run_hash).ht()
-        features = hl.eval(rf_model.features)
+        features = hl.eval(ht.features)
         ht = apply_rf_model(ht, rf_model, features, label=LABEL_COL)
         logger.info("Finished applying RF model")
         ht = ht.annotate_globals(rf_hash=run_hash)
         ht = ht.checkpoint(
-            get_rf("rf_result_sanger_cohorts",
+            get_rf("rf_result_sanger_cohorts_new",
                    run_hash=run_hash).path, overwrite=True,
         )
 
