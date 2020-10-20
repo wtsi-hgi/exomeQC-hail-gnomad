@@ -231,7 +231,7 @@ def train_rf(ht, args):
         rf_features=features,
         tp_expr=ht.tp,
         fp_expr=ht.fp,
-        fp_to_tp=1,
+        fp_to_tp=1.0,
         num_trees=args.num_trees,
         max_depth=args.max_depth,
         test_expr=hl.literal(test_intervals).any(
