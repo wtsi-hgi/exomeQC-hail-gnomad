@@ -211,8 +211,8 @@ def train_rf(ht, args):
 
     fp_expr = ht.fail_hard_filters
     tp_expr = ht.omni | ht.mills | ht.kgp_phase1_hc | ht.hapmap
-    # if not args.no_transmitted_singletons:
-    #    tp_expr = tp_expr | ht.transmitted_singleton
+    if not args.no_transmitted_singletons:
+        tp_expr = tp_expr | ht.transmitted_singleton
 
     if test_intervals:
 
