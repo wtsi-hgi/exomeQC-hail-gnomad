@@ -650,13 +650,13 @@ if __name__ == "__main__":
         default=1.0,
         type=float,
     )
-    # rf_params.add_argument(
-    #    "--test_intervals",
-    #    help='The specified interval(s) will be held out for testing and evaluation only. (default to "chr20")',
-    #    nargs="+",
-    #    type=str,
-    #    default="chr20",
-    # )
+    rf_params.add_argument(
+        "--test_intervals",
+        help='The specified interval(s) will be held out for testing and evaluation only. (default to "chr20")',
+        nargs="+",
+        type=str,
+        default="chr19",
+    )
     rf_params.add_argument(
         "--num_trees",
         help="Number of trees in the RF model. (default=500)",
