@@ -203,10 +203,10 @@ def save_model(
 
 def train_rf(ht, args):
     features = FEATURES
-    test_intervals = args.test_intervals
-    print("test_intervals")
-    print(test_intervals)
-    # test_intervals = False
+    #test_intervals = args.test_intervals
+    # print("test_intervals")
+    # print(test_intervals)
+    test_intervals = False
 
     if args.no_inbreeding_coeff:
         features.remove("InbreedingCoeff")
