@@ -522,7 +522,7 @@ def main(args):
             test_intervals=args.test_intervals,
             adj=True,
             features_importance=hl.eval(ht_result.features_importance),
-            # test_results=hl.eval(ht_result.test_results),
+            test_results=hl.eval(ht_result.test_results),
             test_results=None,
         )
 
