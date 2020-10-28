@@ -370,6 +370,8 @@ def compute_quantile_bin(
                 ("indel", ~hl.is_snp(ht.alleles[0], ht.alleles[1])),
             ]
         }
+        print("ADSADSADASDAS")
+        print(bin_expr)
 
     bin_ht = ht.annotate(
         **{f"_filter_{bin_id}": bin_expr for bin_id, bin_expr in bin_expr.items()},
