@@ -515,7 +515,7 @@ def main(args):
     if args.add_bin:
         ht = hl.read_table(
             f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/{run_hash}_rf_result_ranked.ht')
-        ht_bins = compute_quantile_bin(ht, ht.rf_probability, bin_expr={
+        ht_bins = compute_quantile_bin(ht, ht.InbreedingCoeff, bin_expr={
             'biallelic_bin': ~ht.was_split,
             'singleton_bin': ht.transmitted_singleton,
         }, compute_snv_indel_separately=True, n_bins=100, k=500, desc=True)
