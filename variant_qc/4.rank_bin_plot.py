@@ -28,7 +28,7 @@ from gnomad.variant_qc.pipeline import create_binned_ht, score_bin_agg
 from gnomad.variant_qc.pipeline import test_model, sample_training_examples, get_features_importance
 
 from gnomad.variant_qc.pipeline import train_rf_model
-#from gnomad.variant_qc.pipeline import train_rf as train_rf_imported
+# from gnomad.variant_qc.pipeline import train_rf as train_rf_imported
 from gnomad.utils.file_utils import file_exists
 from gnomad.resources.resource_utils import TableResource, MatrixTableResource
 from gnomad.utils.filtering import add_filters_expr
@@ -497,6 +497,52 @@ def compute_quantile_bin(
 
     return bin_ht
 
+
+def compute_grouped_binned_ht(
+    bin_ht: hl.Table, checkpoint_path: Optional[str] = None,
+) -> hl.GroupedTable:
+    """
+    Groups a Table that has been annotated with bins based on quantiles (`compute_quantile_bin` or
+    `create_binned_ht`). The table will be grouped by bin_id (bin, biallelic, etc.), contig, snv, bi_allelic and
+    singleton.
+    .. note::
+        If performing an aggregation following this grouping (such as `score_bin_agg`) then the aggregation
+        function will need to use `ht._parent` to get the origin Table from the GroupedTable for the aggregation
+    :param bin_ht: Input Table with a `bin_id` annotation
+    :param checkpoint_path: If provided an intermediate checkpoint table is created with all required annotations before shuffling.
+    :return: Table grouped by bins(s)
+    """
+    # Explode the rank table by bin_id
+    bin_ht = bin_ht.annotate(
+        quantile_bins=hl.array(
+            [
+                hl.Struct(bin_id=bin_name, bin=bin_ht[bin_name])
+                for bin_name in bin_ht.bin_stats
+            ]
+        )
+    )
+    bin_ht = bin_ht.explode(bin_ht.quantile_bins)
+    bin_ht = bin_ht.transmute(
+        bin_id=bin_ht.quantile_bins.bin_id, bin=bin_ht.quantile_bins.bin
+    )
+    bin_ht = bin_ht.filter(hl.is_defined(bin_ht.bin))
+
+    if checkpoint_path is not None:
+        bin_ht.checkpoint(checkpoint_path, overwrite=True)
+    else:
+        bin_ht = bin_ht.persist()
+
+    # Group by bin_id, bin and additional stratification desired and compute QC metrics per bin
+    return bin_ht.group_by(
+        bin_id=bin_ht.bin_id,
+        contig=bin_ht.locus.contig,
+        snv=hl.is_snp(bin_ht.alleles[0], bin_ht.alleles[1]),
+        bi_allelic=~bin_ht.was_split,
+        singleton=bin_ht.singleton,
+        release_adj=bin_ht.ac > 0,
+        bin=bin_ht.bin,
+    )._set_buffer_size(20000)
+
 ######################################
 # main
 ########################################
@@ -523,103 +569,105 @@ def main(args):
         }, compute_snv_indel_separately=True, n_bins=100, k=500, desc=True)
         ht_bins.write(
             f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_BINS.ht', overwrite=True)
+        ht_grouped = compute_grouped_binned_ht(ht_bins)
+        ht_grouped.write(f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_BINS_Grouped.ht', overwrite=True))
 
 
 if __name__ == "__main__":
     # need to create spark cluster first before intiialising hail
-    sc = pyspark.SparkContext()
+    sc=pyspark.SparkContext()
     # Define the hail persistent storage directory
 
-    hl.init(sc=sc, tmp_dir=tmp_dir, default_reference="GRCh38")
+    hl.init(sc = sc, tmp_dir = tmp_dir, default_reference = "GRCh38")
     # s3 credentials required for user to access the datasets in farm flexible compute s3 environment
     # you may use your own here from your .s3fg file in your home directory
-    hadoop_config = sc._jsc.hadoopConfiguration()
+    hadoop_config=sc._jsc.hadoopConfiguration()
 
     hadoop_config.set("fs.s3a.access.key", credentials["mer"]["access_key"])
     hadoop_config.set("fs.s3a.secret.key", credentials["mer"]["secret_key"])
-    n_partitions = 500
-    parser = argparse.ArgumentParser()
+    n_partitions=500
+    parser=argparse.ArgumentParser()
 
     parser.add_argument(
         "--run_hash",
-        help="Run hash. Created by --train_rf and only needed for --apply_rf without running --train_rf",
-        required=False,
+        help = "Run hash. Created by --train_rf and only needed for --apply_rf without running --train_rf",
+        required = False,
     )
 
-    actions = parser.add_argument_group("Actions")
+    actions=parser.add_argument_group("Actions")
 
     actions.add_argument(
         "--add_rank",
-        help="Add rank to RF results",
-        action="store_true",
+        help = "Add rank to RF results",
+        action = "store_true",
     )
     actions.add_argument(
         "--add_bin",
-        help="Split to bin and calculate stats for RF results",
-        action="store_true",
+        help = "Split to bin and calculate stats for RF results",
+        action = "store_true",
     )
-    rf_params = parser.add_argument_group("Random Forest Parameters")
+    rf_params=parser.add_argument_group("Random Forest Parameters")
     rf_params.add_argument(
         "--fp_to_tp",
-        help="Ratio of FPs to TPs for training the RF model. If 0, all training examples are used. (default=1.0)",
-        default=1.0,
-        type=float,
+        help = "Ratio of FPs to TPs for training the RF model. If 0, all training examples are used. (default=1.0)",
+        default = 1.0,
+        type = float,
     )
     rf_params.add_argument(
         "--test_intervals",
-        help='The specified interval(s) will be held out for testing and evaluation only. (default to "chr20")',
-        nargs="+",
-        type=str,
-        default="chr4",
+        help = 'The specified interval(s) will be held out for testing and evaluation only. (default to "chr20")',
+        nargs = "+",
+        type = str,
+        default = "chr4",
     )
     rf_params.add_argument(
         "--num_trees",
-        help="Number of trees in the RF model. (default=500)",
-        default=500,
-        type=int,
+        help = "Number of trees in the RF model. (default=500)",
+        default = 500,
+        type = int,
     )
     rf_params.add_argument(
         "--max_depth",
-        help="Maxmimum tree depth in the RF model. (default=5)",
-        default=5,
-        type=int,
+        help = "Maxmimum tree depth in the RF model. (default=5)",
+        default = 5,
+        type = int,
     )
-    training_params = parser.add_argument_group("Training data parameters")
+    training_params=parser.add_argument_group("Training data parameters")
     training_params.add_argument(
-        "--adj", help="Use adj genotypes.", action="store_true"
+        "--adj", help = "Use adj genotypes.", action = "store_true"
     )
     training_params.add_argument(
-        "--vqsr_training", help="Use VQSR training examples", action="store_true"
+        "--vqsr_training", help = "Use VQSR training examples", action = "store_true"
     )
     training_params.add_argument(
         "--vqsr_type",
-        help="If a string is provided the VQSR training annotations will be used for training.",
-        default="alleleSpecificTrans",
-        choices=["classic", "alleleSpecific", "alleleSpecificTrans"],
-        type=str,
+        help = "If a string is provided the VQSR training annotations will be used for training.",
+        default = "alleleSpecificTrans",
+        choices = ["classic", "alleleSpecific", "alleleSpecificTrans"],
+        type = str,
     )
     training_params.add_argument(
         "--no_transmitted_singletons",
-        help="Do not use transmitted singletons for training.",
-        action="store_true",
+        help = "Do not use transmitted singletons for training.",
+        action = "store_true",
     )
     training_params.add_argument(
         "--no_inbreeding_coeff",
-        help="Train RF without inbreeding coefficient as a feature.",
-        action="store_true",
+        help = "Train RF without inbreeding coefficient as a feature.",
+        action = "store_true",
     )
 
-    finalize_params = parser.add_argument_group("Finalize RF Table parameters")
+    finalize_params=parser.add_argument_group("Finalize RF Table parameters")
     finalize_params.add_argument(
-        "--snp_cutoff", help="Percentile to set RF cutoff", type=float, default=90.0
+        "--snp_cutoff", help = "Percentile to set RF cutoff", type = float, default = 90.0
     )
     finalize_params.add_argument(
-        "--indel_cutoff", help="Percentile to set RF cutoff", type=float, default=80.0
+        "--indel_cutoff", help = "Percentile to set RF cutoff", type = float, default = 80.0
     )
     finalize_params.add_argument(
         "--treat_cutoff_as_prob",
-        help="If set snp_cutoff and indel_cutoff will be probability rather than percentile ",
-        action="store_true",
+        help = "If set snp_cutoff and indel_cutoff will be probability rather than percentile ",
+        action = "store_true",
     )
-    args = parser.parse_args()
+    args=parser.parse_args()
     main(args)
