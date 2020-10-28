@@ -392,7 +392,7 @@ def compute_quantile_bin(
                         ),
                     ),
                 )
-                for bin_id in bin_expr
+                for bin_id in bin_expr.items()
             }
         )
     )
