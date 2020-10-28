@@ -275,6 +275,224 @@ def add_rank(
     ht = ht.annotate(**rank_ht[key])
     return ht
 
+
+def compute_quantile_bin(
+    ht: hl.Table,
+    score_expr: hl.expr.NumericExpression,
+    bin_expr: Dict[str, hl.expr.BooleanExpression] = {"bin": True},
+    compute_snv_indel_separately: bool = True,
+    n_bins: int = 100,
+    k: int = 1000,
+    desc: bool = True,
+) -> hl.Table:
+    """
+    Returns a table with a bin for each row based on quantiles of `score_expr`.
+    The bin is computed by dividing the `score_expr` into `n_bins` bins containing an equal number of elements.
+    This is done based on quantiles computed with hl.agg.approx_quantiles. If a single value in `score_expr` spans more
+    than one bin, the rows with this value are distributed randomly across the bins it spans.
+    If `compute_snv_indel_separately` is True all items in `bin_expr` will be stratified by snv / indels for the bin
+    calculation. Because SNV and indel rows are mutually exclusive, they are re-combined into a single annotation. For
+    example if we have the following four variants and scores and `n_bins` of 2:
+    ========   =======   ======   =================   =================
+    Variant    Type      Score    bin - `compute_snv_indel_separately`:
+    --------   -------   ------   -------------------------------------
+    \          \         \        False               True
+    ========   =======   ======   =================   =================
+    Var1       SNV       0.1      1                   1
+    Var2       SNV       0.2      1                   2
+    Var3       Indel     0.3      2                   1
+    Var4       Indel     0.4      2                   2
+    ========   =======   ======   =================   =================
+    .. note::
+        The `bin_expr` defines which data the bin(s) should be computed on. E.g., to get a biallelic quantile bin and an
+        singleton quantile bin, the following could be used:
+        .. code-block:: python
+            bin_expr={
+                'biallelic_bin': ~ht.was_split,
+                'singleton_bin': ht.singleton
+            }
+    :param ht: Input Table
+    :param score_expr: Expression containing the score
+    :param bin_expr: Quantile bin(s) to be computed (see notes)
+    :param compute_snv_indel_separately: Should all `bin_expr` items be stratified by snv / indels
+    :param n_bins: Number of bins to bin the data into
+    :param k: The `k` parameter of approx_quantiles
+    :param desc: Whether to bin the score in descending order
+    :return: Table with the quantile bins
+    """
+    import math
+
+    def quantiles_to_bin_boundaries(quantiles: List[int]) -> Dict:
+        """
+        Merges bins with the same boundaries into a unique bin while keeping track of
+        which bins have been merged and the global index of all bins.
+        :param quantiles: Original bins boundaries
+        :return: (dict of the indices of bins for which multiple bins were collapsed -> number of bins collapsed,
+                  Global indices of merged bins,
+                  Merged bins boundaries)
+        """
+
+        # Pad the quantiles to create boundaries for the first and last bins
+        bin_boundaries = [-math.inf] + quantiles + [math.inf]
+        merged_bins = defaultdict(int)
+
+        # If every quantile has a unique value, then bin boudaries are unique
+        # and can be passed to binary_search as-is
+        if len(quantiles) == len(set(quantiles)):
+            return dict(
+                merged_bins=merged_bins,
+                global_bin_indices=list(range(len(bin_boundaries))),
+                bin_boundaries=bin_boundaries,
+            )
+
+        indexed_bins = list(enumerate(bin_boundaries))
+        i = 1
+        while i < len(indexed_bins):
+            if indexed_bins[i - 1][1] == indexed_bins[i][1]:
+                merged_bins[i - 1] += 1
+                indexed_bins.pop(i)
+            else:
+                i += 1
+
+        return dict(
+            merged_bins=merged_bins,
+            global_bin_indices=[x[0] for x in indexed_bins],
+            bin_boundaries=[x[1] for x in indexed_bins],
+        )
+
+    if compute_snv_indel_separately:
+        # For each bin, add a SNV / indel stratification
+        bin_expr = {
+            f"{bin_id}_{snv}": (bin_expr & snv_expr)
+            for bin_id, bin_expr in bin_expr.items()
+            for snv, snv_expr in [
+                ("snv", hl.is_snp(ht.alleles[0], ht.alleles[1])),
+                ("indel", ~hl.is_snp(ht.alleles[0], ht.alleles[1])),
+            ]
+        }
+
+    bin_ht = ht.annotate(
+        **{f"_filter_{bin_id}": bin_expr for bin_id, bin_expr in bin_expr.items()},
+        _score=score_expr,
+        snv=hl.is_snp(ht.alleles[0], ht.alleles[1]),
+    )
+
+    logger.info(
+        f"Adding quantile bins using approximate_quantiles binned into {n_bins}, using k={k}"
+    )
+    bin_stats = bin_ht.aggregate(
+        hl.struct(
+            **{
+                bin_id: hl.agg.filter(
+                    bin_ht[f"_filter_{bin_id}"],
+                    hl.struct(
+                        n=hl.agg.count(),
+                        quantiles=hl.agg.approx_quantiles(
+                            bin_ht._score, [x / (n_bins) for x in range(1, n_bins)], k=k
+                        ),
+                    ),
+                )
+                for bin_id in bin_expr
+            }
+        )
+    )
+
+    # Take care of bins with duplicated boundaries
+    bin_stats = bin_stats.annotate(
+        **{
+            rname: bin_stats[rname].annotate(
+                **quantiles_to_bin_boundaries(bin_stats[rname].quantiles)
+            )
+            for rname in bin_stats
+        }
+    )
+
+    bin_ht = bin_ht.annotate_globals(
+        bin_stats=hl.literal(
+            bin_stats,
+            dtype=hl.tstruct(
+                **{
+                    bin_id: hl.tstruct(
+                        n=hl.tint64,
+                        quantiles=hl.tarray(hl.tfloat64),
+                        bin_boundaries=hl.tarray(hl.tfloat64),
+                        global_bin_indices=hl.tarray(hl.tint32),
+                        merged_bins=hl.tdict(hl.tint32, hl.tint32),
+                    )
+                    for bin_id in bin_expr
+                }
+            ),
+        )
+    )
+
+    # Annotate the bin as the index in the unique boundaries array
+    bin_ht = bin_ht.annotate(
+        **{
+            bin_id: hl.or_missing(
+                bin_ht[f"_filter_{bin_id}"],
+                hl.binary_search(
+                    bin_ht.bin_stats[bin_id].bin_boundaries, bin_ht._score
+                ),
+            )
+            for bin_id in bin_expr
+        }
+    )
+
+    # Convert the bin to global bin by expanding merged bins, that is:
+    # If a value falls in a bin that needs expansion, assign it randomly to one of the expanded bins
+    # Otherwise, simply modify the bin to its global index (with expanded bins that is)
+    bin_ht = bin_ht.select(
+        "snv",
+        **{
+            bin_id: hl.if_else(
+                bin_ht.bin_stats[bin_id].merged_bins.contains(bin_ht[bin_id]),
+                bin_ht.bin_stats[bin_id].global_bin_indices[bin_ht[bin_id]]
+                + hl.int(
+                    hl.rand_unif(
+                        0, bin_ht.bin_stats[bin_id].merged_bins[bin_ht[bin_id]] + 1
+                    )
+                ),
+                bin_ht.bin_stats[bin_id].global_bin_indices[bin_ht[bin_id]],
+            )
+            for bin_id in bin_expr
+        },
+    )
+
+    if desc:
+        bin_ht = bin_ht.annotate(
+            **{bin_id: n_bins - bin_ht[bin_id] for bin_id in bin_expr}
+        )
+
+    # Because SNV and indel rows are mutually exclusive, re-combine them into a single bin.
+    # Update the global bin_stats struct to reflect the change in bin names in the table
+    if compute_snv_indel_separately:
+        bin_expr_no_snv = {bin_id.rsplit(
+            "_", 1)[0] for bin_id in bin_ht.bin_stats}
+        bin_ht = bin_ht.annotate_globals(
+            bin_stats=hl.struct(
+                **{
+                    bin_id: hl.struct(
+                        **{
+                            snv: bin_ht.bin_stats[f"{bin_id}_{snv}"]
+                            for snv in ["snv", "indel"]
+                        }
+                    )
+                    for bin_id in bin_expr_no_snv
+                }
+            )
+        )
+
+        bin_ht = bin_ht.transmute(
+            **{
+                bin_id: hl.if_else(
+                    bin_ht.snv, bin_ht[f"{bin_id}_snv"], bin_ht[f"{bin_id}_indel"],
+                )
+                for bin_id in bin_expr_no_snv
+            }
+        )
+
+    return bin_ht
+
 ######################################
 # main
 ########################################
@@ -291,6 +509,14 @@ def main(args):
         ht_ranked = add_rank(ht, 'rf_probability')
         ht_ranked = ht_ranked.checkpoint(
             f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked.ht', overwrite=True)
+
+    if args.add_bin:
+        ht = hl.read_table(
+            f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/{run_hash}_rf_result_ranked.ht')
+        ht_bins = compute_quantile_bin(ht, 'rf_probability', bin_expr={
+                                       "bin": True}, compute_snv_indel_separately=True, n_bins=100, k=1000, desc=True)
+        ht_bins.write(
+            f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_BINS.ht', overwrite=True)
 
 
 if __name__ == "__main__":
@@ -321,7 +547,11 @@ if __name__ == "__main__":
         help="Add rank to RF results",
         action="store_true",
     )
-
+    actions.add_argument(
+        "--add_bin",
+        help="Split to bin and calculate stats for RF results",
+        action="store_true",
+    )
     rf_params = parser.add_argument_group("Random Forest Parameters")
     rf_params.add_argument(
         "--fp_to_tp",
