@@ -517,7 +517,7 @@ def main(args):
             f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/{run_hash}_rf_result_ranked.ht')
         ht_bins = compute_quantile_bin(ht, ht.rf_probability, bin_expr={
             'biallelic_bin': ~ht.was_split,
-            'singleton_bin': ht.transmitted_singleton
+            'singleton_bin': ht.transmitted_singleton,
         }, compute_snv_indel_separately=True, n_bins=100, k=100, desc=True)
         ht_bins.write(
             f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_BINS.ht', overwrite=True)
