@@ -287,7 +287,7 @@ def main(args):
     ht = hl.read_table(
         f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/rf_result_sanger_cohorts_new.ht')
 
-    if args.rank:
+    if args.add_rank:
         add_rank(ht, 'rf_probability')
 
 
