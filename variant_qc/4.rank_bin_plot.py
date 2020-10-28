@@ -510,7 +510,7 @@ def main(args):
         f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/rf_result_sanger_cohorts_new.ht')
 
     if args.add_rank:
-        ht_ranked = add_rank(ht, 'rf_probability')
+        ht_ranked = add_rank(ht, 'rf_probability["TP"]')
         ht_ranked = ht_ranked.checkpoint(
             f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked.ht', overwrite=True)
 
