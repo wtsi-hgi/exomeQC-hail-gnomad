@@ -570,7 +570,7 @@ def main(args):
         ht_bins.write(
             f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_BINS.ht', overwrite=True)
         ht_grouped = compute_grouped_binned_ht(ht_bins)
-        ht_grouped.write(f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_BINS_Grouped.ht', overwrite=True))
+        ht_grouped.write(f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_BINS_Grouped.ht', overwrite=True)
 
 
 if __name__ == "__main__":
