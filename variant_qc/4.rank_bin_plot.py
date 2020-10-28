@@ -570,104 +570,105 @@ def main(args):
         ht_bins.write(
             f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_BINS.ht', overwrite=True)
         ht_grouped = compute_grouped_binned_ht(ht_bins)
-        ht_grouped.write(f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_BINS_Grouped.ht', overwrite=True)
+        ht_grouped.write(
+            f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_BINS_Grouped.ht', overwrite=True)
 
 
 if __name__ == "__main__":
     # need to create spark cluster first before intiialising hail
-    sc=pyspark.SparkContext()
+    sc = pyspark.SparkContext()
     # Define the hail persistent storage directory
 
-    hl.init(sc = sc, tmp_dir = tmp_dir, default_reference = "GRCh38")
+    hl.init(sc=sc, tmp_dir=tmp_dir, default_reference="GRCh38")
     # s3 credentials required for user to access the datasets in farm flexible compute s3 environment
     # you may use your own here from your .s3fg file in your home directory
-    hadoop_config=sc._jsc.hadoopConfiguration()
+    hadoop_config = sc._jsc.hadoopConfiguration()
 
     hadoop_config.set("fs.s3a.access.key", credentials["mer"]["access_key"])
     hadoop_config.set("fs.s3a.secret.key", credentials["mer"]["secret_key"])
-    n_partitions=500
-    parser=argparse.ArgumentParser()
+    n_partitions = 500
+    parser = argparse.ArgumentParser()
 
     parser.add_argument(
         "--run_hash",
-        help = "Run hash. Created by --train_rf and only needed for --apply_rf without running --train_rf",
-        required = False,
+        help="Run hash. Created by --train_rf and only needed for --apply_rf without running --train_rf",
+        required=False,
     )
 
-    actions=parser.add_argument_group("Actions")
+    actions = parser.add_argument_group("Actions")
 
     actions.add_argument(
         "--add_rank",
-        help = "Add rank to RF results",
-        action = "store_true",
+        help="Add rank to RF results",
+        action="store_true",
     )
     actions.add_argument(
         "--add_bin",
-        help = "Split to bin and calculate stats for RF results",
-        action = "store_true",
+        help="Split to bin and calculate stats for RF results",
+        action="store_true",
     )
-    rf_params=parser.add_argument_group("Random Forest Parameters")
+    rf_params = parser.add_argument_group("Random Forest Parameters")
     rf_params.add_argument(
         "--fp_to_tp",
-        help = "Ratio of FPs to TPs for training the RF model. If 0, all training examples are used. (default=1.0)",
-        default = 1.0,
-        type = float,
+        help="Ratio of FPs to TPs for training the RF model. If 0, all training examples are used. (default=1.0)",
+        default=1.0,
+        type=float,
     )
     rf_params.add_argument(
         "--test_intervals",
-        help = 'The specified interval(s) will be held out for testing and evaluation only. (default to "chr20")',
-        nargs = "+",
-        type = str,
-        default = "chr4",
+        help='The specified interval(s) will be held out for testing and evaluation only. (default to "chr20")',
+        nargs="+",
+        type=str,
+        default="chr4",
     )
     rf_params.add_argument(
         "--num_trees",
-        help = "Number of trees in the RF model. (default=500)",
-        default = 500,
-        type = int,
+        help="Number of trees in the RF model. (default=500)",
+        default=500,
+        type=int,
     )
     rf_params.add_argument(
         "--max_depth",
-        help = "Maxmimum tree depth in the RF model. (default=5)",
-        default = 5,
-        type = int,
+        help="Maxmimum tree depth in the RF model. (default=5)",
+        default=5,
+        type=int,
     )
-    training_params=parser.add_argument_group("Training data parameters")
+    training_params = parser.add_argument_group("Training data parameters")
     training_params.add_argument(
-        "--adj", help = "Use adj genotypes.", action = "store_true"
+        "--adj", help="Use adj genotypes.", action="store_true"
     )
     training_params.add_argument(
-        "--vqsr_training", help = "Use VQSR training examples", action = "store_true"
+        "--vqsr_training", help="Use VQSR training examples", action="store_true"
     )
     training_params.add_argument(
         "--vqsr_type",
-        help = "If a string is provided the VQSR training annotations will be used for training.",
-        default = "alleleSpecificTrans",
-        choices = ["classic", "alleleSpecific", "alleleSpecificTrans"],
-        type = str,
+        help="If a string is provided the VQSR training annotations will be used for training.",
+        default="alleleSpecificTrans",
+        choices=["classic", "alleleSpecific", "alleleSpecificTrans"],
+        type=str,
     )
     training_params.add_argument(
         "--no_transmitted_singletons",
-        help = "Do not use transmitted singletons for training.",
-        action = "store_true",
+        help="Do not use transmitted singletons for training.",
+        action="store_true",
     )
     training_params.add_argument(
         "--no_inbreeding_coeff",
-        help = "Train RF without inbreeding coefficient as a feature.",
-        action = "store_true",
+        help="Train RF without inbreeding coefficient as a feature.",
+        action="store_true",
     )
 
-    finalize_params=parser.add_argument_group("Finalize RF Table parameters")
+    finalize_params = parser.add_argument_group("Finalize RF Table parameters")
     finalize_params.add_argument(
-        "--snp_cutoff", help = "Percentile to set RF cutoff", type = float, default = 90.0
+        "--snp_cutoff", help="Percentile to set RF cutoff", type=float, default=90.0
     )
     finalize_params.add_argument(
-        "--indel_cutoff", help = "Percentile to set RF cutoff", type = float, default = 80.0
+        "--indel_cutoff", help="Percentile to set RF cutoff", type=float, default=80.0
     )
     finalize_params.add_argument(
         "--treat_cutoff_as_prob",
-        help = "If set snp_cutoff and indel_cutoff will be probability rather than percentile ",
-        action = "store_true",
+        help="If set snp_cutoff and indel_cutoff will be probability rather than percentile ",
+        action="store_true",
     )
-    args=parser.parse_args()
+    args = parser.parse_args()
     main(args)
