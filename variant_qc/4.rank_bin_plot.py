@@ -456,7 +456,7 @@ def compute_quantile_bin(
                 ),
                 bin_ht.bin_stats[bin_id].global_bin_indices[bin_ht[bin_id]],
             )
-            for bin_id in bin_expr
+            for bin_id in bin_expr.values()
         },
     )
 
