@@ -378,7 +378,7 @@ def compute_quantile_bin(
         _score=score_expr,
         snv=hl.is_snp(ht.alleles[0], ht.alleles[1]),
     )
-
+    print(bin_ht.show())
     logger.info(
         f"Adding quantile bins using approximate_quantiles binned into {n_bins}, using k={k}"
     )
@@ -394,7 +394,7 @@ def compute_quantile_bin(
                         ),
                     ),
                 )
-                for bin_id in bin_expr.values()
+                for bin_id in bin_expr
             }
         )
     )
