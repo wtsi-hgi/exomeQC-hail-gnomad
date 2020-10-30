@@ -364,9 +364,9 @@ def create_binned_data_initial(ht: hl.Table, data: str, data_type: str, n_bins: 
             #    ht.family_stats.unrelated_qc_callstats.AC[1] == 1), hl.agg.sum(ht.family_stats.tdt.u)),
             # n_train_trans_singletons=hl.agg.count_where(
             #    (ht.family_stats.unrelated_qc_callstats.AC[1] == 1) & (ht.family_stats.tdt.t == 1)),
-            n_omni=hl.agg.count_where(ht.truth_data.omni),
-            n_mills=hl.agg.count_where(ht.truth_data.mills),
-            n_hapmap=hl.agg.count_where(ht.truth_data.hapmap),
+            n_omni=hl.agg.count_where(ht.omni),
+            n_mills=hl.agg.count_where(ht.mills),
+            n_hapmap=hl.agg.count_where(ht.hapmap),
             n_kgp_high_conf_snvs=hl.agg.count_where(
                 ht.truth_data.kgp_high_conf_snvs),
             fail_hard_filters=hl.agg.count_where(ht.fail_hard_filters),
@@ -529,7 +529,7 @@ def main(args):
                                  # 'adj_biallelic_singleton_rank': ~ht.was_split & ht.transmitted_singleton & (ht.ac > 0)
                              }
                              )
-
+        ht_ranked = ht_ranked.annotate(score=1-ht_ranked.rf_probability["TP"])
         ht_ranked = ht_ranked.checkpoint(
             f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked.ht', overwrite=True)
 
