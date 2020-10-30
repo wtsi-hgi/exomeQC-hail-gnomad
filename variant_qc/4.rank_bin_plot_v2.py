@@ -368,7 +368,7 @@ def create_binned_data_initial(ht: hl.Table, data: str, data_type: str, n_bins: 
             n_mills=hl.agg.count_where(ht.mills),
             n_hapmap=hl.agg.count_where(ht.hapmap),
             n_kgp_high_conf_snvs=hl.agg.count_where(
-                ht.truth_data.kgp_high_conf_snvs),
+                ht.kgp_phase1_hc),
             fail_hard_filters=hl.agg.count_where(ht.fail_hard_filters),
             # n_vqsr_pos_train=hl.agg.count_where(ht.vqsr_positive_train_site),
             # n_vqsr_neg_train=hl.agg.count_where(ht.vqsr_negative_train_site)
