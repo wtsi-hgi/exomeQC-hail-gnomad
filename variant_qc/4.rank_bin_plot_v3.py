@@ -360,7 +360,7 @@ def main(args):
     # ht after random model
     run_hash = args.run_hash
     ht = hl.read_table(
-        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/rf_result_sanger_cohorts_new.ht')
+        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/rf_result_sanger_cohorts_new_ac_adj.ht')
 
     if args.add_rank:
         ht_ranked = add_rank(ht, 'rf_probability["TP"]')
