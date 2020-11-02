@@ -370,7 +370,8 @@ def main(args):
     if args.add_bin:
         # ht = hl.read_table(
         #    f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/{run_hash}_rf_result_ranked.ht')
-        ht_bins = create_quantile_bin_ht(ht, model_id=run_hash, vqsr=False)
+        ht_bins = create_quantile_bin_ht(
+            ht, n_bins=100, model_id=run_hash, vqsr=False)
 
         ht_bins.write(
             f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_BINS_v3_new.ht', overwrite=True)
