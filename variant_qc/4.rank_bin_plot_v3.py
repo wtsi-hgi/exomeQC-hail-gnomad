@@ -382,9 +382,7 @@ def score_bin_agg(
         n_1bp_indel=hl.agg.count_where(indel_length == 1),
         n_mod3bp_indel=hl.agg.count_where((indel_length % 3) == 0),
         n_singleton=hl.agg.count_where(ht.singleton),
-        fail_hard_filters=hl.agg.count_where(
-            (ht.info.QD < 2) | (ht.info.FS > 60) | (ht.info.MQ < 30)
-        ),
+        fail_hard_filters=hl.agg.count_where(ht.fail_hard_filters),
         n_pos_train=hl.agg.count_where(ht.positive_train_site),
         n_neg_train=hl.agg.count_where(ht.negative_train_site),
 
