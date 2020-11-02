@@ -375,7 +375,7 @@ def main(args):
 
         ht_bins.write(
             f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_BINS_v3_new.ht', overwrite=True)
-        ht_grouped = create_grouped_bin_ht(ht_bins)
+        ht_grouped = create_grouped_bin_ht(ht_bins, model_id=run_hash)
         ht_grouped.write(
             f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_BINS_Grouped_v3_new.ht', overwrite=True)
 
