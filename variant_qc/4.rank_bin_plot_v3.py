@@ -32,7 +32,9 @@ from gnomad.variant_qc.pipeline import train_rf_model
 from gnomad.utils.file_utils import file_exists
 from gnomad.resources.resource_utils import TableResource, MatrixTableResource
 from gnomad.utils.filtering import add_filters_expr
-from gnomad.variant_qc.pipeline import create_binned_ht, score_bin_agg, train_rf_model
+#from gnomad.variant_qc.pipeline import create_binned_ht, score_bin_agg, train_rf_model
+from gnomad.variant_qc.pipeline import create_binned_ht, train_rf_model
+
 from gnomad.variant_qc.random_forest import (
     apply_rf_model,
     load_model,
@@ -283,6 +285,116 @@ def add_rank(
     return ht
 
 
+def score_bin_agg(
+    ht: hl.GroupedTable, fam_stats_ht: hl.Table
+) -> Dict[str, hl.expr.Aggregation]:
+    """
+    Default aggregation function to add aggregations for min/max of score, number of ClinVar variants, number of truth
+    variants (omni, mills, hapmap, and kgp_phase1), and family statistics.
+
+    .. note::
+
+        This function uses `ht._parent` to get the origin Table from the GroupedTable for the aggregation
+
+    This can easily be combined with the GroupedTable returned by `compute_grouped_binned_ht`
+
+    Example:
+
+    .. code-block:: python
+
+        binned_ht = create_binned_ht(...)
+        grouped_binned_ht = compute_grouped_binned_ht(binned_ht)
+        agg_ht = grouped_binned_ht.aggregate(score_bin_agg(**grouped_binned_ht, ...))
+
+    .. note::
+
+        The following annotations should be present:
+
+        In ht:
+            - score
+            - singleton
+            - positive_train_site
+            - negative_train_site
+            - ac_raw - expected that this is the raw allele count before adj filtering
+            - ac - expected that this is the allele count after adj filtering
+            - ac_qc_samples_unrelated_raw - allele count before adj filtering for unrelated samples passing sample QC
+            - info - struct that includes QD, FS, and MQ in order to add an annotation for fail_hard_filters
+
+        In truth_ht:
+            - omni
+            - mills
+            - hapmap
+            - kgp_phase1_hc
+
+        In fam_stats_ht:
+            - n_de_novos_adj
+            - n_de_novos_raw
+            - n_transmitted_raw
+            - n_untransmitted_raw
+
+    Automatic aggregations that will be done are:
+        - `min_score` - minimun of score annotation per group
+        - `max_score` - maiximum of score annotation per group
+        - `n` - count of variants per group
+        - `n_ins` - count of insertion per group
+        - `n_ins` - count of insertion per group
+        - `n_del` - count of deletions per group
+        - `n_ti` - count of transitions per group
+        - `n_tv` - count of trnasversions per group
+        - `n_1bp_indel` - count of one base pair indels per group
+        - `n_mod3bp_indel` - count of indels with a length divisible by three per group
+        - `n_singleton` - count of singletons per group
+        - `fail_hard_filters` - count of variants per group with QD < 2 | FS > 60 | MQ < 30
+        - `n_vqsr_pos_train` - count of variants that were a VQSR positive train site per group
+        - `n_vqsr_neg_train` - count of variants that were a VQSR negative train site per group
+        - `n_clinvar` - count of clinvar variants
+        - `n_de_novos_singleton_adj` - count of singleton de novo variants after adj filtration
+        - `n_de_novo_singleton` - count of raw unfiltered singleton de novo variants
+        - `n_de_novos_adj` - count of adj filtered de novo variants
+        - `n_de_novos` - count of raw unfiltered de novo variants
+        - `n_trans_singletons` - count of transmitted singletons
+        - `n_untrans_singletons` - count of untransmitted singletons
+        - `n_omni` - count of omni truth variants
+        - `n_mills` - count of mills truth variants
+        - `n_hapmap` - count of hapmap truth variants
+        - `n_kgp_phase1_hc` - count of 1000 genomes phase 1 high confidence truth variants
+
+    :param ht: Table that aggregation will be performed on
+    :param fam_stats_ht: Path to family statistics HT
+    :return: a dictionary containing aggregations to perform on ht
+    """
+    # Annotate binned table with the evaluation data
+    ht = ht._parent
+    indel_length = hl.abs(ht.alleles[0].length() - ht.alleles[1].length())
+    # Load external evaluation data
+
+    return dict(
+        min_score=hl.agg.min(ht.score),
+        max_score=hl.agg.max(ht.score),
+        n=hl.agg.count(),
+        n_ins=hl.agg.count_where(
+            hl.is_insertion(ht.alleles[0], ht.alleles[1])),
+        n_del=hl.agg.count_where(hl.is_deletion(ht.alleles[0], ht.alleles[1])),
+        n_ti=hl.agg.count_where(hl.is_transition(
+            ht.alleles[0], ht.alleles[1])),
+        n_tv=hl.agg.count_where(hl.is_transversion(
+            ht.alleles[0], ht.alleles[1])),
+        n_1bp_indel=hl.agg.count_where(indel_length == 1),
+        n_mod3bp_indel=hl.agg.count_where((indel_length % 3) == 0),
+        n_singleton=hl.agg.count_where(ht.singleton),
+        fail_hard_filters=hl.agg.count_where(
+            (ht.info.QD < 2) | (ht.info.FS > 60) | (ht.info.MQ < 30)
+        ),
+        n_pos_train=hl.agg.count_where(ht.positive_train_site),
+        n_neg_train=hl.agg.count_where(ht.negative_train_site),
+
+        n_omni=hl.agg.count_where(ht.omni),
+        n_mills=hl.agg.count_where(ht.mills),
+        n_hapmap=hl.agg.count_where(ht.hapmap),
+        # n_kgp_phase1_hc=hl.agg.count_where(ht.kgp_phase1_hc),
+    )
+
+
 def create_quantile_bin_ht(ht: hl.Table,
                            model_id: str, n_bins: int, vqsr: bool = False, overwrite: bool = False
                            ) -> None:
@@ -340,7 +452,7 @@ def create_grouped_bin_ht(ht: hl.Table, model_id: str, overwrite: bool = False) 
     logger.info(f"Creating grouped bin table...")
     grouped_binned_ht = compute_grouped_binned_ht(
         ht, checkpoint_path=(
-            f'{tmp_dir}/ddd-elgh-ukbb/{model_id}_grouped_bin'),
+            f'{tmp_dir}/ddd-elgh-ukbb/{model_id}_grouped_bin.ht'),
     )
 
     logger.info(f"Aggregating grouped bin table...")
