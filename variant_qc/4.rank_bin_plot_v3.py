@@ -319,7 +319,7 @@ def create_grouped_bin_ht(ht: hl.Table, model_id: str, overwrite: bool = False) 
     :rtype: None
     """
     trio_stats_ht = hl.read_table(
-        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/anger_cohorts_trios_stats.ht')
+        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_trios_stats.ht')
     # Count variants for ranking
     count_expr = {
         x: hl.agg.filter(
