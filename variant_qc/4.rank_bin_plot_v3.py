@@ -318,7 +318,8 @@ def create_grouped_bin_ht(ht: hl.Table, model_id: str, overwrite: bool = False) 
     :return: None
     :rtype: None
     """
-
+    trio_stats_ht = hl.read_table(
+        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/anger_cohorts_trios_stats.ht')
     # Count variants for ranking
     count_expr = {
         x: hl.agg.filter(
@@ -344,7 +345,7 @@ def create_grouped_bin_ht(ht: hl.Table, model_id: str, overwrite: bool = False) 
 
     logger.info(f"Aggregating grouped bin table...")
     agg_ht = grouped_binned_ht.aggregate(
-        **score_bin_agg(grouped_binned_ht)
+        **score_bin_agg(grouped_binned_ht, fam_stats_ht=trio_stats_ht)
     )
 
     return agg_ht
