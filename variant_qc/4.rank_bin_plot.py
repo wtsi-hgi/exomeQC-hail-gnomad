@@ -566,12 +566,12 @@ def main(args):
         ht_bins = compute_quantile_bin(ht, ht.rf_probability["TP"], bin_expr={
             'biallelic_bin': ~ht.was_split,
             'singleton_bin': ht.transmitted_singleton,
-        }, compute_snv_indel_separately=True, n_bins=100, k=500, desc=True)
+        }, compute_snv_indel_separately=True, n_bins=100, k=1000, desc=True)
         ht_bins.write(
-            f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_BINS.ht', overwrite=True)
+            f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_BINS_v3.ht', overwrite=True)
         ht_grouped = compute_grouped_binned_ht(ht_bins)
         ht_grouped.write(
-            f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_BINS_Grouped.ht', overwrite=True)
+            f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_BINS_Grouped_v3.ht', overwrite=True)
 
 
 if __name__ == "__main__":
