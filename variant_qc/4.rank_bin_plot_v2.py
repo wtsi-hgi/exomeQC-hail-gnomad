@@ -280,6 +280,12 @@ def add_rank(
     return ht
 
 
+
+def add_rank_rf_v2()
+ ht: hl.Table,
+    score_expr: hl.expr.NumericExpression,
+    subrank_expr: Optional[Dict[str, hl.expr.BooleanExpression]] = None,
+) -> hl.Table:
 def create_binned_data_initial(ht: hl.Table, data: str, data_type: str, n_bins: int) -> hl.Table:
     # Count variants for ranking
     count_expr = {x: hl.agg.filter(hl.is_defined(ht[x]), hl.agg.counter(hl.cond(hl.is_snp(
@@ -538,7 +544,7 @@ def main(args):
         # ht = hl.read_table(
         #    f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/{run_hash}_rf_result_ranked.ht')
         ht = hl.read_table(
-            f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/{run_hash}_rf_result_ranked_nomissing.ht')
+            f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/{run_hash}_rf_result_ranked.ht')
 
         # ht_bins = compute_quantile_bin(ht, ht.rf_probability["TP"], bin_expr={
         #    'biallelic_bin': ~ht.was_split,
