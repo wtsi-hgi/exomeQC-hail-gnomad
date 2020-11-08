@@ -87,6 +87,8 @@ if __name__ == "__main__":
     mt = mt.union_rows(mt3)
     mt = mt.union_rows(mt4)
     mt = mt.union_rows(mt5)
+    partitions = 10000
+    mt = mt.naive_coalesce(partitions)
     print("write out mt split")
     mt.write(
         f"{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1-7and20_split.mt", overwrite=True)
