@@ -83,10 +83,10 @@ FEATURES = [
     "n_alt_alleles",
     "was_mixed",
     "has_star",
-    # "AS_QD",
-    #    "AS_MQRankSum",
-    #    "AS_SOR",
-    #    "AS_ReadPosRankSum",
+    "AS_QD",
+    "AS_MQRankSum",
+    "AS_SOR",
+    "AS_ReadPosRankSum",
 ]
 
 TRUTH_DATA = ["hapmap", "omni", "mills", "kgp_phase1_hc"]
@@ -573,8 +573,7 @@ def main(args):
         freq_ht = hl.read_table(
             f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_chr1-20-XY_sampleQC_FILTERED_FREQ_adj.ht')
         freq = freq_ht[ht.key]
-        bin_ht = create_quantile_bin_ht(
-            run_hash, n_bins=100, vqsr=False, overwrite=True)
+
         # if not file_exists(
         #    get_score_quantile_bins(args.run_hash, aggregated=True).path
         # ):
