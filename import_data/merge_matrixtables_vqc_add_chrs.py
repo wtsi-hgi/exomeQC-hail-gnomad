@@ -82,7 +82,9 @@ if __name__ == "__main__":
         mt2 = hl.read_matrix_table(f"{temp_dir}/ddd-elgh-ukbb/{chromosome}.mt")
         mt2_split = hl.split_multi_hts(
             mt2, keep_star=False, left_aligned=False, permit_shuffle=True)
-        mt = mt.union_rows(mt2)
+        mt2_split = mt2_split.checkpoint(
+            f'{tmp_dir}/{chromosome}_added.mt', overwrite=True)
+        mt = mt.union_rows(mt2_split)
 
     print("Now writing joined matrixtable to disk:")
     # annotate with cohorts
