@@ -76,6 +76,18 @@ INFO_FEATURES = [
     "AS_MQRankSum",
     "AS_SOR",
 ]  # Note: AS_SOR is currently in VQSR HT and named SOR in the VQSR split HT
+# FEATURES = [
+#    "InbreedingCoeff",
+#    "variant_type",
+#    "n_alt_alleles",
+#    "allele_type",
+#    "has_star",
+# "was_mixed",
+#    "ASQD",
+# "ASMQRankSum",
+#    "ASSOR",
+#    "ASReadPosRankSum",
+# ]
 FEATURES = [
     "InbreedingCoeff",
     "variant_type",
@@ -83,10 +95,12 @@ FEATURES = [
     "n_alt_alleles",
     "was_mixed",
     "has_star",
-    "ASQD",
-    "ASMQRankSum",
-    "ASSOR",
-    "ASReadPosRankSum",
+    "QD",
+    "MQRankSum",
+    "SOR",
+    "ReadPosRankSum",
+    "FS",
+    "DP"
 ]
 
 TRUTH_DATA = ["hapmap", "omni", "mills", "kgp_phase1_hc"]

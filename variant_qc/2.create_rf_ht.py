@@ -65,10 +65,12 @@ FEATURES = [
     "n_alt_alleles",
     "was_mixed",
     "has_star",
-    "AS_QD",
-    "AS_MQRankSum",
-    "AS_SOR",
-    "AS_ReadPosRankSum",
+    "QD",
+    "MQRankSum",
+    "SOR",
+    "ReadPosRankSum",
+    "FS",
+    "DP"
 ]
 TRUTH_DATA = ["hapmap", "omni", "mills", "kgp_phase1_hc"]
 INBREEDING_COEFF_HARD_CUTOFF = -0.3
@@ -193,7 +195,7 @@ if __name__ == "__main__":
             "transmitted_singleton": (ht[f"n_transmitted_{group}"] == 1),
             "fail_hard_filters": (ht.QD < 2) | (ht.FS > 60) | (ht.MQ < 30),
         },
-
+        ac_raw=ht.ac_qc_samples_raw
     )
 
     ht = ht.repartition(n_partitions, shuffle=False)
