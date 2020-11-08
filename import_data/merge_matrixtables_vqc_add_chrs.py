@@ -77,7 +77,7 @@ if __name__ == "__main__":
 
     print("Reading all matrixtables and joining them")
     mt = hl.read_matrix_table(
-        f"{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1to3-20_split.mt")
+        f"{temp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1to3-20_split.mt")
     for chromosome in CHROMOSOMES:
         mt2 = hl.read_matrix_table(f"{temp_dir}/ddd-elgh-ukbb/{chromosome}.mt")
         mt2_split = hl.split_multi_hts(
