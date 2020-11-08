@@ -280,30 +280,31 @@ def add_rank(
     return ht
 
 
-
 def add_rank_rf_v2()
  ht: hl.Table,
     score_expr: hl.expr.NumericExpression,
     subrank_expr: Optional[Dict[str, hl.expr.BooleanExpression]] = None,
+
+
 ) -> hl.Table:
 def create_binned_data_initial(ht: hl.Table, data: str, data_type: str, n_bins: int) -> hl.Table:
     # Count variants for ranking
-    count_expr = {x: hl.agg.filter(hl.is_defined(ht[x]), hl.agg.counter(hl.cond(hl.is_snp(
+    count_expr={x: hl.agg.filter(hl.is_defined(ht[x]), hl.agg.counter(hl.cond(hl.is_snp(
         ht.alleles[0], ht.alleles[1]), 'snv', 'indel'))) for x in ht.row if x.endswith('rank')}
-    rank_variant_counts = ht.aggregate(hl.Struct(**count_expr))
+    rank_variant_counts=ht.aggregate(hl.Struct(**count_expr))
     logger.info(
         f"Found the following variant counts:\n {pformat(rank_variant_counts)}")
-    ht_truth_data = hl.read_table(
+    ht_truth_data=hl.read_table(
         f"{temp_dir}/ddd-elgh-ukbb/variant_qc/truthset_table.ht")
-    ht = ht.annotate_globals(rank_variant_counts=rank_variant_counts)
-    ht = ht.annotate(
+    ht=ht.annotate_globals(rank_variant_counts = rank_variant_counts)
+    ht=ht.annotate(
         **ht_truth_data[ht.key],
         # **fam_ht[ht.key],
         # **gnomad_ht[ht.key],
         # **denovo_ht[ht.key],
         # clinvar=hl.is_defined(clinvar_ht[ht.key]),
-        indel_length=hl.abs(ht.alleles[0].length()-ht.alleles[1].length()),
-        rank_bins=hl.array(
+        indel_length = hl.abs(ht.alleles[0].length()-ht.alleles[1].length()),
+        rank_bins = hl.array(
             [hl.Struct(
                 rank_id=rank_name,
                 bin=hl.int(hl.ceil(hl.float(ht[rank_name] + 1) / hl.floor(ht.globals.rank_variant_counts[rank_name][hl.cond(
@@ -334,7 +335,7 @@ def create_binned_data_initial(ht: hl.Table, data: str, data_type: str, n_bins: 
             bi_allelic=hl.is_defined(ht.biallelic_rank),
             singleton=ht.transmitted_singleton,
             trans_singletons=hl.is_defined(ht.singleton_rank),
-            #release_adj=ht.ac > 0,
+            # release_adj=ht.ac > 0,
             bin=ht.bin
         )._set_buffer_size(20000)
         .aggregate(
@@ -535,7 +536,7 @@ def main(args):
                                  # 'adj_biallelic_singleton_rank': ~ht.was_split & ht.transmitted_singleton & (ht.ac > 0)
                              }
                              )
-        #ht_ranked = ht_ranked.annotate(score=1-ht_ranked.rf_probability["TP"])
+        # ht_ranked = ht_ranked.annotate(score=1-ht_ranked.rf_probability["TP"])
         ht_ranked = ht_ranked.annotate(score=ht_ranked.rf_probability["TP"])
         ht_ranked = ht_ranked.checkpoint(
             f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked.ht', overwrite=True)
@@ -552,8 +553,8 @@ def main(args):
         # }, compute_snv_indel_separately=True, n_bins=100, k=500, desc=True)
         ht_bins = create_binned_data_initial(ht, "exomes", "RF", n_bins=100)
         ht_bins.write(
-            f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_BINS_nonmissing.ht', overwrite=True)
-        #ht_grouped = compute_grouped_binned_ht(ht_bins)
+            f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_BINS.ht', overwrite=True)
+        # ht_grouped = compute_grouped_binned_ht(ht_bins)
         # ht_grouped.write(
         #    f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_BINS_Grouped.ht', overwrite=True)
 
