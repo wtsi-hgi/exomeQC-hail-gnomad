@@ -25,7 +25,7 @@ from gnomad.utils.annotations import unphase_call_expr, add_variant_type
 from gnomad.variant_qc.pipeline import create_binned_ht, score_bin_agg
 from gnomad.variant_qc.pipeline import test_model, sample_training_examples, get_features_importance
 
-from gnomad.variant_qc.pipeline import train_rf_model
+from gnomad.variant_qc.pipeline import train_rf_model, train_rf_imported
 #from gnomad.variant_qc.pipeline import train_rf as train_rf_imported
 from gnomad.utils.file_utils import file_exists
 from gnomad.resources.resource_utils import TableResource, MatrixTableResource
@@ -242,7 +242,7 @@ def train_rf(ht, args):
 
     ht = ht.annotate(tp=tp_expr, fp=fp_expr)
 
-    rf_ht, rf_model = train_rf_model(
+    rf_ht, rf_model = train_rf_model_local(
         ht,
         rf_features=features,
         tp_expr=ht.tp,
@@ -421,8 +421,7 @@ def generate_final_rf_ht(
     return ht
 
 
-'''
-def train_rf_model(
+def train_rf_model_local(
     ht: hl.Table,
     rf_features: List[str],
     tp_expr: hl.expr.BooleanExpression,
@@ -508,7 +507,7 @@ def train_rf_model(
     )
 
     return ht.select("rf_train", "rf_label", "rf_test"), rf_model
-'''
+
 ######################################
 # main
 ########################################
