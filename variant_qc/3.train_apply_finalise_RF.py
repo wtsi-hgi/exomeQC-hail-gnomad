@@ -224,8 +224,7 @@ def train_rf(ht, args):
         features.remove("InbreedingCoeff")
 
     fp_expr = ht.fail_hard_filters
-    tp_expr = ht.omni | ht.mills
-    # | ht.kgp_phase1_hc | ht.hapmap
+    tp_expr = ht.omni | ht.mills | ht.kgp_phase1_hc | ht.hapmap
     # if not args.no_transmitted_singletons:
     #    tp_expr = tp_expr | ht.transmitted_singleton
 
@@ -422,6 +421,7 @@ def generate_final_rf_ht(
     return ht
 
 
+'''
 def train_rf_model_local(
     ht: hl.Table,
     rf_features: List[str],
@@ -508,6 +508,7 @@ def train_rf_model_local(
     )
 
     return ht.select("rf_train", "rf_label", "rf_test"), rf_model
+'''
 
 ######################################
 # main
