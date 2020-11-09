@@ -159,8 +159,9 @@ if __name__ == "__main__":
     inbreeding_ht = hl.read_table(
         f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_inbreeding.ht')
     group = "raw"
+
     mt = hl.read_matrix_table(
-        f'{temp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1to3-20_split.mt')
+        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_chr1-7and20_split.mt')
 
     # mt = mt.select_entries(
     #    GT=hl.unphased_diploid_gt_index_call(mt.GT.n_alt_alleles()))
