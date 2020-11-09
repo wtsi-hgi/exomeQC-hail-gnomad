@@ -224,7 +224,8 @@ def train_rf(ht, args):
         features.remove("InbreedingCoeff")
 
     fp_expr = ht.fail_hard_filters
-    tp_expr = ht.omni | ht.mills | ht.kgp_phase1_hc | ht.hapmap
+    tp_expr = ht.omni | ht.mills
+    # | ht.kgp_phase1_hc | ht.hapmap
     # if not args.no_transmitted_singletons:
     #    tp_expr = tp_expr | ht.transmitted_singleton
 
