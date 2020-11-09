@@ -22,10 +22,8 @@ import json
 from bokeh.plotting import output_file, save, show
 from gnomad.resources.grch38 import gnomad
 from gnomad.utils.annotations import unphase_call_expr, add_variant_type
-from gnomad.variant_qc.pipeline import create_binned_ht, score_bin_agg
+from gnomad.variant_qc.pipeline import create_binned_ht, score_bin_agg, train_rf_model
 from gnomad.variant_qc.pipeline import test_model, sample_training_examples, get_features_importance
-
-from gnomad.variant_qc.pipeline import train_rf_model, train_rf_imported
 #from gnomad.variant_qc.pipeline import train_rf as train_rf_imported
 from gnomad.utils.file_utils import file_exists
 from gnomad.resources.resource_utils import TableResource, MatrixTableResource
@@ -242,12 +240,12 @@ def train_rf(ht, args):
 
     ht = ht.annotate(tp=tp_expr, fp=fp_expr)
 
-    rf_ht, rf_model = train_rf_model_local(
+    rf_ht, rf_model = train_rf_model(
         ht,
         rf_features=features,
         tp_expr=ht.tp,
         fp_expr=ht.fp,
-        fp_to_tp=1.0,
+        fp_to_tp=args.fp_to_tp,
         num_trees=args.num_trees,
         max_depth=args.max_depth,
         test_expr=hl.literal(test_intervals).any(
@@ -475,7 +473,7 @@ def train_rf_model_local(
         )
     )
 
-    rf_model = train_rf_imported(
+    rf_model = train_rf(
         ht.filter(ht.rf_train),
         features=rf_features,
         label="rf_label",
