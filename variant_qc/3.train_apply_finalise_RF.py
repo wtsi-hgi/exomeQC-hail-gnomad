@@ -239,7 +239,10 @@ def train_rf(ht, args):
         print(hl.eval(test_intervals))
 
     ht = ht.annotate(tp=tp_expr, fp=fp_expr)
-
+    test_expr = hl.literal(test_intervals).any(
+        lambda interval: interval.contains(ht.locus))
+    print("test_expr")
+    print(test_expr)
     rf_ht, rf_model = train_rf_model(
         ht,
         rf_features=features,
