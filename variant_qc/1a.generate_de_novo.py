@@ -416,7 +416,7 @@ def generate_family_stats(mt: hl.MatrixTable, fam_file: str, calculate_adj: bool
     :return: Table with qc annotations
     :rtype: Table
     """
-    mt = mt.select_cols(high_quality=mt.meta.high_quality)
+    #mt = mt.select_cols(high_quality=mt.meta.high_quality)
     mt = mt.select_rows()
     mt = annotate_unrelated_sample(mt, fam_file)
 
