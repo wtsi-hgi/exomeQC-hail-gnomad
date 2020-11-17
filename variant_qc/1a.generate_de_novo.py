@@ -440,42 +440,6 @@ def generate_family_stats(mt: hl.MatrixTable, fam_file: str, calculate_adj: bool
     return mt.rows(), family_stats_sample_ht
 
 
-def generate_family_stats(mt: hl.MatrixTable, fam_file: str, calculate_adj: bool = False) -> Tuple[hl.Table, hl.Table]:
-    """
-    Writes bi-allelic sites MT with the following annotations:
-     - family_stats (TDT, Mendel Errors, AC_unrelated_qc)
-     - truth_data (presence in Omni, HapMap, 1KG high conf SNVs, Mills)
-
-    :param MatrixTable mt: Full MT
-    :param str fam_file: Fam pedigree file location
-    :param bool calculate_adj: Whether to also calculate family metrics for adj genotypes
-    :return: Table with qc annotations
-    :rtype: Table
-    """
-    mt = mt.select_cols(high_quality=mt.meta.high_quality)
-    mt = mt.select_rows()
-    mt = annotate_unrelated_sample(mt, fam_file)
-
-    # Unphased for now, since mendel_errors does not support phased alleles
-    mt = mt.annotate_entries(GT=unphase_call_expr(mt.GT))
-    ped = hl.Pedigree.read(fam_file, delimiter='\\t')
-    family_stats_struct, family_stats_sample_ht = family_stats(mt, ped, 'raw')
-    mt = mt.annotate_rows(family_stats=[family_stats_struct])
-
-    if calculate_adj:
-        mt = filter_to_adj(mt)
-        adj_family_stats_struct, adj_family_stats_sample_ht = family_stats(
-            mt, ped, 'adj')
-
-        family_stats_sample_ht = family_stats_sample_ht.annotate(
-            adj=adj_family_stats_sample_ht[family_stats_sample_ht.s])
-
-        mt = mt.annotate_rows(
-            family_stats=mt.family_stats.append(adj_family_stats_struct))
-
-    return mt.rows(), family_stats_sample_ht
-
-
 def family_stats(mt: hl.MatrixTable, ped: hl.Pedigree, group_name: str) -> Tuple[hl.expr.StructExpression, hl.Table]:
     tdt_table = hl.transmission_disequilibrium_test(mt, ped)
     _, _, per_sample, per_variant = hl.mendel_errors(mt.GT, ped)
