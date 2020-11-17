@@ -514,7 +514,7 @@ if __name__ == "__main__":
 
     mt = hl.read_matrix_table(
         f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_chr1-7and20_split.mt')
-    fam = f"{temp_dir}/variant_qc/DDD_trios.fam"
+    fam = f"{temp_dir}/ddd-elgh-ukbb/variant_qc/DDD_trios.fam"
     pedigree = hl.Pedigree.read(fam)
     (mt1, famstats_ht) = generate_family_stats(mt, fam)
     print("Writing mt and family stats_ht")
