@@ -328,7 +328,7 @@ if __name__ == "__main__":
     group = "raw"
 
     mt = hl.read_matrix_table(
-        f'{temp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1to3-20_split.mt')
+        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_chr1-7and20_split.mt')
 
     mt = hl.variant_qc(mt)
 
@@ -337,9 +337,12 @@ if __name__ == "__main__":
     fam = "s3a://DDD-ELGH-UKBB-exomes/trios/DDD_trios.fam"
     pedigree = hl.Pedigree.read(fam)
     trio_dataset = hl.trio_matrix(mt_adj, pedigree, complete_trios=True)
-    trio_dataset.checkpoint(
-        f'{tmp_dir}/ddd-elgh-ukbb/mt_trios_adj.mt', overwrite=True)
-    trio_stats_ht = generate_trio_stats(
-        trio_dataset, autosomes_only=True, bi_allelic_only=True)
-    trio_stats_ht.write(
-        f'{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_trios_stats.ht', overwrite=True)
+    trio_dataset = hl.read_matrix_table(
+        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/mt_trios_adj.mt')
+
+    de_novo_table = hl.de_novo(
+        mt, pedigree, trio_dataset.family_stats[0].unrelated_qc_callstats.AF[1])
+    de_novo_table = de_novo_table.key_by(
+        'locus', 'alleles').collect_by_key('de_novo_data')
+    de_novo_table.write(
+        f'{tmp_dir}/Sanger_cohorts_denovo_table.ht', overwrite=True)
