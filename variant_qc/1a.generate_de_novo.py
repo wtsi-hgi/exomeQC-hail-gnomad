@@ -10,7 +10,7 @@ import sys
 import re
 from pathlib import Path
 import logging
-from typing import Any, Counter, List, Optional, Tuple, Union
+from typing import Any, Counter, List, Optional, Tuple, Union, Dict
 from bokeh.plotting import output_file, save, show
 from gnomad.resources.grch38 import gnomad
 from gnomad.utils.annotations import annotate_adj
