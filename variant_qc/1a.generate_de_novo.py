@@ -445,7 +445,7 @@ def family_stats(mt: hl.MatrixTable, ped: hl.Pedigree, group_name: str) -> Tuple
     _, _, per_sample, per_variant = hl.mendel_errors(mt.GT, ped)
     family_stats_struct = hl.struct(mendel=per_variant[mt.row_key],
                                     tdt=tdt_table[mt.row_key],
-                                    unrelated_qc_callstats=hl.agg.filter(mt.high_quality & mt.unrelated_sample,
+                                    unrelated_qc_callstats=hl.agg.filter(mt.unrelated_sample,
                                                                          hl.agg.call_stats(mt.GT, mt.alleles)),
                                     meta={'group': group_name})
     return family_stats_struct, per_sample
@@ -516,7 +516,10 @@ if __name__ == "__main__":
         f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_chr1-7and20_split.mt')
     fam = "s3a://DDD-ELGH-UKBB-exomes/trios/DDD_trios.fam"
     pedigree = hl.Pedigree.read(fam)
-    (mt1, stats_ht) = generate_family_stats(mt, fam)
+    (mt1, famstats_ht) = generate_family_stats(mt, fam)
+    print("Writing mt and family stats_ht")
+    mt1.write(f'{tmp_dir}/Sanger_cohorts_family_stats.mt', overwrite=True)
+    famstats_ht.write(f'{tmp_dir}/Sanger_cohorts_family_stats.ht',overwrite=True)
     #mt = hl.variant_qc(mt)
     # mt=annotate_freq(mt)
     # trio annotation:
