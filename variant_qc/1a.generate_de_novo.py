@@ -514,7 +514,7 @@ if __name__ == "__main__":
 
     mt = hl.read_matrix_table(
         f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_chr1-7and20_split.mt')
-    ht = hl.read_matrix_table(
+    ht = hl.read_table(
         f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_family_stats.ht')
 
     fam = f"{temp_dir}/ddd-elgh-ukbb/variant_qc/DDD_trios.fam"
