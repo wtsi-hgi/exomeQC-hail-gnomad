@@ -330,7 +330,7 @@ def create_binned_data_initial(ht: hl.Table, data: str, data_type: str, n_bins: 
             trans_singletons=hl.is_defined(ht.singleton_rank),
             de_novo_high_quality=ht.de_novo_high_quality_rank,
             de_novo_medium_quality=hl.is_defined(
-                ht.de_novo_medium_quality_rank)
+                ht.de_novo_medium_quality_rank),
             # release_adj=ht.ac > 0,
             bin=ht.bin
         )._set_buffer_size(20000)
