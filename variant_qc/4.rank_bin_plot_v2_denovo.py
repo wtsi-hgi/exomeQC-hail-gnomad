@@ -356,20 +356,20 @@ def create_binned_data_initial(ht: hl.Table, data: str, data_type: str, n_bins: 
                 ht.de_novo_data.p_de_novo[0] > 0.5),
             n_high_confidence_de_novos=hl.agg.count_where(
                 ht.de_novo_data.confidence[0] == 'HIGH'),
-            # n_de_novo=hl.agg.filter(ht.family_stats.unrelated_qc_callstats.AC[1] == 0, hl.agg.sum(
-            #    ht.family_stats.mendel.errors)),
+            n_de_novo=hl.agg.filter(ht.family_stats.unrelated_qc_callstats.AC[1] == 0, hl.agg.sum(
+                ht.family_stats.mendel.errors)),
             # n_de_novo_no_lcr=hl.agg.filter(~ht.lcr & (
             #    ht.family_stats.unrelated_qc_callstats.AC[1] == 0), hl.agg.sum(ht.family_stats.mendel.errors)),
-            # n_de_novo_sites=hl.agg.filter(ht.family_stats.unrelated_qc_callstats.AC[1] == 0, hl.agg.count_where(
-            #    ht.family_stats.mendel.errors > 0)),
+            n_de_novo_sites=hl.agg.filter(ht.family_stats.unrelated_qc_callstats.AC[1] == 0, hl.agg.count_where(
+                ht.family_stats.mendel.errors > 0)),
             # n_de_novo_sites_no_lcr=hl.agg.filter(~ht.lcr & (
             #    ht.family_stats.unrelated_qc_callstats.AC[1] == 0), hl.agg.count_where(ht.family_stats.mendel.errors > 0)),
-            # n_trans_singletons=hl.agg.filter((ht.info_ac < 3) & (
-            #    ht.family_stats.unrelated_qc_callstats.AC[1] == 1), hl.agg.sum(ht.family_stats.tdt.t)),
-            # n_untrans_singletons=hl.agg.filter((ht.info_ac < 3) & (
-            #    ht.family_stats.unrelated_qc_callstats.AC[1] == 1), hl.agg.sum(ht.family_stats.tdt.u)),
-            # n_train_trans_singletons=hl.agg.count_where(
-            #    (ht.family_stats.unrelated_qc_callstats.AC[1] == 1) & (ht.family_stats.tdt.t == 1)),
+            n_trans_singletons=hl.agg.filter((ht.ac_raw < 3) & (
+                ht.family_stats.unrelated_qc_callstats.AC[1] == 1), hl.agg.sum(ht.family_stats.tdt.t)),
+            n_untrans_singletons=hl.agg.filter((ht.ac_raw < 3) & (
+                ht.family_stats.unrelated_qc_callstats.AC[1] == 1), hl.agg.sum(ht.family_stats.tdt.u)),
+            n_train_trans_singletons=hl.agg.count_where(
+                (ht.family_stats.unrelated_qc_callstats.AC[1] == 1) & (ht.family_stats.tdt.t == 1)),
             n_omni=hl.agg.count_where(ht.omni),
             n_mills=hl.agg.count_where(ht.mills),
             n_hapmap=hl.agg.count_where(ht.hapmap),
