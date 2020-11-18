@@ -355,7 +355,7 @@ def create_binned_data_initial(ht: hl.Table, data: str, data_type: str, n_bins: 
             n_medium_quality_de_novos=hl.agg.count_where(
                 ht.de_novo_data.p_de_novo[0] > 0.5),
             n_high_confidence_de_novos=hl.agg.count_where(
-                ht.de_novo_data.confindence[0] == 'HIGH'),
+                ht.de_novo_data.confidence[0] == 'HIGH'),
             # n_de_novo=hl.agg.filter(ht.family_stats.unrelated_qc_callstats.AC[1] == 0, hl.agg.sum(
             #    ht.family_stats.mendel.errors)),
             # n_de_novo_no_lcr=hl.agg.filter(~ht.lcr & (
