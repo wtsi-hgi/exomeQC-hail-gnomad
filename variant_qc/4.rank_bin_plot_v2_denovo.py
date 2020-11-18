@@ -328,6 +328,9 @@ def create_binned_data_initial(ht: hl.Table, data: str, data_type: str, n_bins: 
             bi_allelic=hl.is_defined(ht.biallelic_rank),
             singleton=ht.transmitted_singleton,
             trans_singletons=hl.is_defined(ht.singleton_rank),
+            de_novo_high_quality=ht.de_novo_high_quality_rank,
+            de_novo_medium_quality=hl.is_defined(
+                ht.de_novo_medium_quality_rank)
             # release_adj=ht.ac > 0,
             bin=ht.bin
         )._set_buffer_size(20000)
@@ -347,9 +350,12 @@ def create_binned_data_initial(ht: hl.Table, data: str, data_type: str, n_bins: 
             n_mod3bp_indel=hl.agg.count_where((ht.indel_length % 3) == 0),
             # n_clinvar=hl.agg.count_where(ht.clinvar),
             n_singleton=hl.agg.count_where(ht.transmitted_singleton),
-            # n_validated_de_novos=hl.agg.count_where(ht.validated_denovo),
-            # n_high_confidence_de_novos=hl.agg.count_where(
-            #    ht.high_confidence_denovo),
+            n_high_quality_de_novos=hl.agg.count_where(
+                ht.de_novo_data.p_de_novo[0] > 0.9),
+            n_medium_quality_de_novos=hl.agg.count_where(
+                ht.de_novo_data.p_de_novo[0] > 0.5),
+            n_high_confidence_de_novos=hl.agg.count_where(
+                ht.de_novo_data.confindence[0] == 'HIGH'),
             # n_de_novo=hl.agg.filter(ht.family_stats.unrelated_qc_callstats.AC[1] == 0, hl.agg.sum(
             #    ht.family_stats.mendel.errors)),
             # n_de_novo_no_lcr=hl.agg.filter(~ht.lcr & (
