@@ -523,7 +523,7 @@ def main(args):
                                  'singleton_rank': ht.transmitted_singleton,
                                  'biallelic_rank': ~ht.was_split,
                                  'biallelic_singleton_rank': ~ht.was_split & ht.transmitted_singleton,
-                                 'de_novo_high_quality_rank': ht.any(de_novo_data.p_de_novo > 0.9),
+                                 'de_novo_high_quality_rank': hl.any(ht.de_novo_data.p_de_novo > 0.9),
                                  # 'de_novo_medium_quality_rank': ht.de_novo_data.p_de_novo > 0.5
                                  # 'adj_rank': ht.ac > 0,
                                  # 'adj_biallelic_rank': ~ht.was_split & (ht.ac > 0),
