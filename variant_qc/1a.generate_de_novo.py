@@ -532,7 +532,8 @@ if __name__ == "__main__":
     priors = hl.read_table(
         f'{temp_dir}/ddd-elgh-ukbb/variant_qc/gnomad_v3-0_AF.ht')
     mt = mt.annotate_rows(gnomad_maf=priors[mt.row_key].maf)
-    mt = mt.checkpoint(f'{tmp_dir}/Sanger_cohorts_family_stats_gnomad_AF.mt')
+    mt = mt.checkpoint(
+        f'{tmp_dir}/Sanger_cohorts_family_stats_gnomad_AF.mt', overwrite=True)
     de_novo_table = hl.de_novo(
         mt, pedigree, mt.gnomad_maf)
 
