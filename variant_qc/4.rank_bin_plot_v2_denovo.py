@@ -537,7 +537,7 @@ def main(args):
                                  'biallelic_singleton_rank': ~ht.was_split & ht.transmitted_singleton,
                                  'de_novo_high_quality_rank': ht.de_novo_data.p_de_novo[0] > 0.9,
                                  'de_novo_medium_quality_rank': ht.de_novo_data.p_de_novo[0] > 0.5,
-                                 'de_novo_synonymous': ht.consequence == "synonymous"
+                                 'de_novo_synonymous_rank': ht.consequence == "synonymous",
                                  # 'adj_rank': ht.ac > 0,
                                  # 'adj_biallelic_rank': ~ht.was_split & (ht.ac > 0),
                                  # 'adj_singleton_rank': ht.transmitted_singleton & (ht.ac > 0),
@@ -550,6 +550,7 @@ def main(args):
             f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_denovo.ht', overwrite=True)
 
     if args.add_bin:
+
         # ht = hl.read_table(
         #    f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/{run_hash}_rf_result_ranked.ht')
         ht = hl.read_table(
