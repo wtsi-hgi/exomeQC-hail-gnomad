@@ -351,13 +351,15 @@ def create_binned_data_initial(ht: hl.Table, data: str, data_type: str, n_bins: 
             # n_clinvar=hl.agg.count_where(ht.clinvar),
             n_singleton=hl.agg.count_where(ht.transmitted_singleton),
             n_high_quality_de_novos=hl.agg.count_where(
-                ht.de_novo_data.p_de_novo[0] > 0.9),
+                ht.de_novo_data.p_de_novo[0] > 0.99),
             n_medium_quality_de_novos=hl.agg.count_where(
                 ht.de_novo_data.p_de_novo[0] > 0.5),
             n_high_confidence_de_novos=hl.agg.count_where(
                 ht.de_novo_data.confidence[0] == 'HIGH'),
             n_de_novo=hl.agg.filter(ht.family_stats.unrelated_qc_callstats.AC[0][1] == 0, hl.agg.sum(
                 ht.family_stats.mendel[0].errors)),
+            n_high_quality_de_novos_synonymous=hl.agg.count_where(
+                (ht.de_novo_data.p_de_novo[0] > 0.99) & (ht.consequence == "synonymous")),
             # n_de_novo_no_lcr=hl.agg.filter(~ht.lcr & (
             #    ht.family_stats.unrelated_qc_callstats.AC[1] == 0), hl.agg.sum(ht.family_stats.mendel.errors)),
             n_de_novo_sites=hl.agg.filter(ht.family_stats.unrelated_qc_callstats.AC[0][1] == 0, hl.agg.count_where(
@@ -366,7 +368,11 @@ def create_binned_data_initial(ht: hl.Table, data: str, data_type: str, n_bins: 
             #    ht.family_stats.unrelated_qc_callstats.AC[1] == 0), hl.agg.count_where(ht.family_stats.mendel.errors > 0)),
             n_trans_singletons=hl.agg.filter((ht.ac_raw < 3) & (
                 ht.family_stats.unrelated_qc_callstats.AC[0][1] == 1), hl.agg.sum(ht.family_stats.tdt[0].t)),
+            n_trans_singletons_synonymous=hl.agg.filter((ht.ac_raw < 3) & (ht.consequence == "synonymous") & (
+                ht.family_stats.unrelated_qc_callstats.AC[0][1] == 1), hl.agg.sum(ht.family_stats.tdt[0].t)),
             n_untrans_singletons=hl.agg.filter((ht.ac_raw < 3) & (
+                ht.family_stats.unrelated_qc_callstats.AC[0][1] == 1), hl.agg.sum(ht.family_stats.tdt[0].u)),
+            n_untrans_singletons_synonymous=hl.agg.filter((ht.ac_raw < 3) & (ht.consequence == "synonymous") & (
                 ht.family_stats.unrelated_qc_callstats.AC[0][1] == 1), hl.agg.sum(ht.family_stats.tdt[0].u)),
             n_train_trans_singletons=hl.agg.count_where(
                 (ht.family_stats.unrelated_qc_callstats.AC[0][1] == 1) & (ht.family_stats.tdt[0].t == 1)),
@@ -519,7 +525,7 @@ def main(args):
     # ht after random model
     run_hash = args.run_hash
     ht = hl.read_table(
-        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/{run_hash}_rf_result_sanger_cohorts_DENOVO_family_stats.ht')
+        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/{run_hash}_rf_result_sanger_cohorts_DENOVO_family_stats_SYNONYMOUS.ht')
 
     if args.add_rank:
         ht_ranked = add_rank(ht,
@@ -531,6 +537,7 @@ def main(args):
                                  'biallelic_singleton_rank': ~ht.was_split & ht.transmitted_singleton,
                                  'de_novo_high_quality_rank': ht.de_novo_data.p_de_novo[0] > 0.9,
                                  'de_novo_medium_quality_rank': ht.de_novo_data.p_de_novo[0] > 0.5,
+                                 'de_novo_synonymous': ht.consequence == "synonymous"
                                  # 'adj_rank': ht.ac > 0,
                                  # 'adj_biallelic_rank': ~ht.was_split & (ht.ac > 0),
                                  # 'adj_singleton_rank': ht.transmitted_singleton & (ht.ac > 0),
@@ -540,13 +547,13 @@ def main(args):
         # ht_ranked = ht_ranked.annotate(score=1-ht_ranked.rf_probability["TP"])
         ht_ranked = ht_ranked.annotate(score=ht_ranked.rf_probability["TP"])
         ht_ranked = ht_ranked.checkpoint(
-            f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_denovo_family_stats.ht', overwrite=True)
+            f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_denovo.ht', overwrite=True)
 
     if args.add_bin:
         # ht = hl.read_table(
         #    f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/{run_hash}_rf_result_ranked.ht')
         ht = hl.read_table(
-            f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/{run_hash}_rf_result_ranked_denovo_family_stats.ht')
+            f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/{run_hash}_rf_result_ranked_denovo.ht')
 
         # ht_bins = compute_quantile_bin(ht, ht.rf_probability["TP"], bin_expr={
         #    'biallelic_bin': ~ht.was_split,
@@ -554,7 +561,7 @@ def main(args):
         # }, compute_snv_indel_separately=True, n_bins=100, k=500, desc=True)
         ht_bins = create_binned_data_initial(ht, "exomes", "RF", n_bins=100)
         ht_bins.write(
-            f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_BINS_denovo_family_stats.ht', overwrite=True)
+            f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_BINS_denovo.ht', overwrite=True)
         # ht_grouped = compute_grouped_binned_ht(ht_bins)
         # ht_grouped.write(
         #    f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_BINS_Grouped.ht', overwrite=True)
