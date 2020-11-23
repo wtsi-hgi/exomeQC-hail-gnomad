@@ -525,10 +525,17 @@ if __name__ == "__main__":
     #mt1.write(f'{tmp_dir}/Sanger_cohorts_family_stats.mt', overwrite=True)
     # famstats_ht.write(
     #    f'{tmp_dir}/Sanger_cohorts_family_stats.ht', overwrite=True)
-    mt = mt.annotate_rows(family_stats=ht[mt.row_key].family_stats)
-    mt.write(f'{tmp_dir}/Sanger_cohorts_family_stats.mt', overwrite=True)
+    #mt = mt.annotate_rows(family_stats=ht[mt.row_key].family_stats)
+    #mt.write(f'{tmp_dir}/Sanger_cohorts_family_stats.mt', overwrite=True)
+    mt = hl.read_matrix_table(
+        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_family_stats.mt')
+    priors = hl.read_table(
+        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/gnomad_v3-0_AF.ht')
+    mt = mt.annotate_rows(gnomad_maf=priors[mt.row_key].maf)
+    mt = mt.checkpoint(f'{tmp_dir}/Sanger_cohorts_family_stats_gnomad_AF.mt')
     de_novo_table = hl.de_novo(
-        mt, pedigree, mt.family_stats[0].unrelated_qc_callstats.AF[1])
+        mt, pedigree, mt.gnomad_maf)
+
     de_novo_table = de_novo_table.key_by(
         'locus', 'alleles').collect_by_key('de_novo_data')
     de_novo_table.write(
