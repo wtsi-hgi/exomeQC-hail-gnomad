@@ -541,22 +541,3 @@ if __name__ == "__main__":
         'locus', 'alleles').collect_by_key('de_novo_data')
     de_novo_table.write(
         f'{tmp_dir}/Sanger_cohort_denovo_table.ht', overwrite=True)
-
-    #mt = hl.variant_qc(mt)
-    # mt=annotate_freq(mt)
-    # trio annotation:
-    #mt_adj = annotate_adj(mt)
-    #pedigree = hl.Pedigree.read(fam)
-    ##fam = f"{temp_dir}/variant_qc/DDD_trios.fam"
-    #trio_dataset = hl.trio_matrix(mt_adj, pedigree, complete_trios=True)
-    # trio_dataset = hl.read_matrix_table(
-    #    f'{temp_dir}/ddd-elgh-ukbb/variant_qc/mt_trios_adj.mt')
-
-    # trio_dataset=annotate_freq(trio_dataset)
-    #trio_dataset = trio_dataset.annotate_rows(family_stats=freq_data[trio_dataset.row_key].family_stats)
-    # de_novo_table = hl.de_novo(
-    #    mt, pedigree, trio_dataset.family_stats[0].unrelated_qc_callstats.AF[1])
-    # de_novo_table = de_novo_table.key_by(
-    #    'locus', 'alleles').collect_by_key('de_novo_data')
-    # de_novo_table.write(
-    #    f'{tmp_dir}/Sanger_cohorts_denovo_table.ht', overwrite=True)
