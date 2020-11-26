@@ -35,7 +35,6 @@ CHROMOSOMES = ["chr2",
                "chr4",
                "chr5",
                "chr6",
-               "chr7",
                "chr20",
                ]
 
