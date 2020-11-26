@@ -189,6 +189,8 @@ if __name__ == "__main__":
     ht = ht.annotate(fail_hard_filters=(ht.QD < 2)
                      | (ht.FS > 60) | (ht.MQ < 30))
     ht = ht.annotate(ac_raw=ht.ac_qc_samples_raw)
+    ht = ht.annotate(transmitted_singleton=(
+        ht[f"n_transmitted_{group}"] == 1) & (ht[f"ac_qc_samples_{group}"] == 2))
     # ht = ht.select(
     #    "a_index",
     #    "was_split",
