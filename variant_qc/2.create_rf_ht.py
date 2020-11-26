@@ -186,24 +186,26 @@ if __name__ == "__main__":
     # ht = ht.filter(
     #    (ht[f"ac_children_{group}"] > 0)
     # )  # TODO: change to AS_lowqual for v3.1 or leave as is to be more consistent with v3.0? I will need to add this annotation if so
+    ht = ht.annotate(fail_hard_filters=(ht.QD < 2)
+                     | (ht.FS > 60) | (ht.MQ < 30))
+    ht = ht.annotate(ac_raw=ht.ac_qc_samples_raw)
+    # ht = ht.select(
+    #    "a_index",
+    #    "was_split",
+    #    *FEATURES,
+    #    *TRUTH_DATA,
+    #    **{
+    #        "transmitted_singleton": (ht[f"n_transmitted_{group}"] == 1)
+    #        & (ht[f"ac_qc_samples_{group}"] == 2),
+    #        "fail_hard_filters": (ht.QD < 2) | (ht.FS > 60) | (ht.MQ < 30),
+    #    },
+    #    ac_raw=ht.ac_qc_samples_raw
 
-    ht = ht.select(
-        "a_index",
-        "was_split",
-        *FEATURES,
-        *TRUTH_DATA,
-        **{
-            "transmitted_singleton": (ht[f"n_transmitted_{group}"] == 1)
-            & (ht[f"ac_qc_samples_{group}"] == 2),
-            "fail_hard_filters": (ht.QD < 2) | (ht.FS > 60) | (ht.MQ < 30),
-        },
-        ac_raw=ht.ac_qc_samples_raw
-
-    )
+    # )
 
     ht = ht.repartition(n_partitions, shuffle=False)
     ht = ht.checkpoint(
-        f'{tmp_dir}/ddd-elgh-ukbb/Sanger_table_for_RF.ht', overwrite=True)
+        f'{tmp_dir}/ddd-elgh-ukbb/Sanger_table_for_RF_all_cols.ht', overwrite=True)
     ht = median_impute_features(ht, {"variant_type": ht.variant_type})
     ht = ht.checkpoint(
-        f'{tmp_dir}/ddd-elgh-ukbb/Sanger_table_for_RF_by_variant_type.ht', overwrite=True)
+        f'{tmp_dir}/ddd-elgh-ukbb/Sanger_table_for_RF_by_variant_type_all_cols.ht', overwrite=True)
