@@ -35,7 +35,7 @@ CHROMOSOMES = ["chr2",
                "chr4",
                "chr5",
                "chr6",
-               "chr7"
+               "chr7",
                "chr20",
                ]
 
@@ -98,7 +98,7 @@ if __name__ == "__main__":
     #print("split multi")
     # mt_split = hl.split_multi_hts(
     #    mt, keep_star=False, left_aligned=False, permit_shuffle=True)
-    print("write out mt split")
+    print("write out mt ")
     mt.write(
         f"{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1to7-20.mt", overwrite=True)
     print(f"Wrote matrixtable for whole genome.")
