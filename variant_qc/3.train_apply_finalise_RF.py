@@ -81,10 +81,10 @@ INFO_FEATURES = [
 #    "allele_type",
 #    "has_star",
 # "was_mixed",
-#    "ASQD",
-# "ASMQRankSum",
-#    "ASSOR",
-#    "ASReadPosRankSum",
+#    "AS_QD",
+# "AS_MQRankSum",
+#    "AS_SOR",
+#    "AS_ReadPosRankSum",
 # ]
 FEATURES = [
     "InbreedingCoeff",
@@ -93,12 +93,12 @@ FEATURES = [
     "n_alt_alleles",
     "was_mixed",
     "has_star",
-    "QD",
-    "MQRankSum",
-    "SOR",
-    "ReadPosRankSum",
-    "FS",
-    "DP"
+    "QD",  # QualByDepth
+    "MQRankSum",  # MappingQualityRankSumTest
+    "SOR",  # StrandOddsRatio
+    "ReadPosRankSum",  # ReadPosRankSumTest
+    "FS",  # FisherStrand
+    "DP"  # Depth
 ]
 
 TRUTH_DATA = ["hapmap", "omni", "mills", "kgp_phase1_hc"]
@@ -667,7 +667,7 @@ if __name__ == "__main__":
         help='The specified interval(s) will be held out for testing and evaluation only. (default to "chr20")',
         nargs="+",
         type=str,
-        default="chr3",
+        default="chr20:1-32000000",
     )
     rf_params.add_argument(
         "--num_trees",
