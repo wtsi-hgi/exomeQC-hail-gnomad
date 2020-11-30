@@ -53,7 +53,7 @@ with open(f"{thresholds}", 'r') as f:
 LABEL_COL = "rf_label"
 TRAIN_COL = "rf_train"
 PREDICTION_COL = "rf_prediction"
-]
+
 TRUTH_DATA = ["hapmap", "omni", "mills", "kgp_phase1_hc"]
 INBREEDING_COEFF_HARD_CUTOFF = -0.3
 
