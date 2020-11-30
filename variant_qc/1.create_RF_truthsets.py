@@ -53,24 +53,6 @@ with open(f"{thresholds}", 'r') as f:
 LABEL_COL = "rf_label"
 TRAIN_COL = "rf_train"
 PREDICTION_COL = "rf_prediction"
-INFO_FEATURES = [
-    "AS_QD",
-    "AS_ReadPosRankSum",
-    "AS_MQRankSum",
-    "AS_SOR",
-]  # Note: AS_SOR is currently in VQSR HT and named SOR in the VQSR split HT
-FEATURES = [
-    "InbreedingCoeff",
-    "variant_type",
-    "allele_type",
-    "n_alt_alleles",
-    "was_mixed",
-    "has_star",
-    "AS_QD",
-    "AS_pab_max",
-    "AS_MQRankSum",
-    "AS_SOR",
-    "AS_ReadPosRankSum",
 ]
 TRUTH_DATA = ["hapmap", "omni", "mills", "kgp_phase1_hc"]
 INBREEDING_COEFF_HARD_CUTOFF = -0.3
@@ -165,19 +147,19 @@ def generate_ac(mt: hl.MatrixTable, fam_file: str) -> hl.Table:
     """
     Creates Table with QC samples, QC samples removing children and release samples raw and adj ACs.
     """
-    #mt = mt.filter_cols(mt.meta.high_quality)
+    # mt = mt.filter_cols(mt.meta.high_quality)
     fam_ht = hl.import_fam(fam_file, delimiter="\t")
     mt = mt.annotate_cols(unrelated_sample=hl.is_missing(fam_ht[mt.s]))
     mt = mt.filter_rows(hl.len(mt.alleles) > 1)
     mt = annotate_adj(mt)
     mt = mt.annotate_rows(
         ac_qc_samples_raw=hl.agg.sum(mt.GT.n_alt_alleles()),
-        #ac_qc_samples_unrelated_raw=hl.agg.filter(~mt.meta.all_samples_related, hl.agg.sum(mt.GT.n_alt_alleles())),
-        #ac_release_samples_raw=hl.agg.filter(mt.meta.release, hl.agg.sum(mt.GT.n_alt_alleles())),
+        # ac_qc_samples_unrelated_raw=hl.agg.filter(~mt.meta.all_samples_related, hl.agg.sum(mt.GT.n_alt_alleles())),
+        # ac_release_samples_raw=hl.agg.filter(mt.meta.release, hl.agg.sum(mt.GT.n_alt_alleles())),
         ac_qc_samples_adj=hl.agg.filter(
             mt.adj, hl.agg.sum(mt.GT.n_alt_alleles())),
-        #ac_qc_samples_unrelated_adj=hl.agg.filter(~mt.meta.all_samples_related & mt.adj, hl.agg.sum(mt.GT.n_alt_alleles())),
-        #ac_release_samples_adj=hl.agg.filter(mt.meta.release & mt.adj, hl.agg.sum(mt.GT.n_alt_alleles())),
+        # ac_qc_samples_unrelated_adj=hl.agg.filter(~mt.meta.all_samples_related & mt.adj, hl.agg.sum(mt.GT.n_alt_alleles())),
+        # ac_release_samples_adj=hl.agg.filter(mt.meta.release & mt.adj, hl.agg.sum(mt.GT.n_alt_alleles())),
     )
     return mt.rows()
 
@@ -214,14 +196,16 @@ if __name__ == "__main__":
     #    f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_trios_stats.ht')
     group = "raw"
 
+    # mt = hl.read_matrix_table(
+    #    f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_chr1-7and20_split.mt')
     mt = hl.read_matrix_table(
-        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_chr1-7and20_split.mt')
+        f'{temp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1to6-20.mt')
 
     mt = hl.variant_qc(mt)
 
     # trio annotation:
     mt_adj = annotate_adj(mt)
-    fam = "s3a://DDD-ELGH-UKBB-exomes/trios/DDD_trios.fam"
+    fam = f"{temp_dir}/ddd-elgh-ukbb/variant_qc/DDD_trios.fam"
     pedigree = hl.Pedigree.read(fam)
     trio_dataset = hl.trio_matrix(mt_adj, pedigree, complete_trios=True)
     trio_dataset.checkpoint(
@@ -239,8 +223,8 @@ if __name__ == "__main__":
     qc_ac_ht = generate_ac(mt, fam)
 
     ht_inbreeding.write(
-        f'{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_inbreeding.ht', overwrite=True)
+        f'{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_inbreeding_new.ht', overwrite=True)
     qc_ac_ht.write(
-        f'{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_qc_ac.ht', overwrite=True)
+        f'{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_qc_ac_new.ht', overwrite=True)
     allele_data_ht.write(
-        f'{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_allele_data.ht', overwrite=True)
+        f'{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_allele_data_new.ht', overwrite=True)
