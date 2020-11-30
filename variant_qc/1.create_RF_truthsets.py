@@ -204,26 +204,30 @@ if __name__ == "__main__":
     mt = hl.variant_qc(mt)
 
     # trio annotation:
-    mt_adj = annotate_adj(mt)
+ #   mt_adj = annotate_adj(mt)
     fam = f"{temp_dir}/ddd-elgh-ukbb/variant_qc/DDD_trios.fam"
     pedigree = hl.Pedigree.read(fam)
-    trio_dataset = hl.trio_matrix(mt_adj, pedigree, complete_trios=True)
-    trio_dataset.checkpoint(
-        f'{tmp_dir}/ddd-elgh-ukbb/mt_trios_adj.mt', overwrite=True)
-    trio_stats_ht = generate_trio_stats(
-        trio_dataset, autosomes_only=True, bi_allelic_only=True)
-    trio_stats_ht.write(
-        f'{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_trios_stats.ht', overwrite=True)
+  #  trio_dataset = hl.trio_matrix(mt_adj, pedigree, complete_trios=True)
+  #  trio_dataset.checkpoint(
+  #      f'{tmp_dir}/ddd-elgh-ukbb/mt_trios_adj.mt', overwrite=True)
+  #  trio_stats_ht = generate_trio_stats(
+  #      trio_dataset, autosomes_only=True, bi_allelic_only=True)
+  #  trio_stats_ht.write(
+  #      f'{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_trios_stats.ht', overwrite=True)
 
-    mt_inbreeding = mt.annotate_rows(
-        InbreedingCoeff=bi_allelic_site_inbreeding_expr(mt.GT))
-    ht_inbreeding = mt_inbreeding.rows()
+ #   mt_inbreeding = mt.annotate_rows(
+ #       InbreedingCoeff=bi_allelic_site_inbreeding_expr(mt.GT))
+
+    mt = mt.key_rows_by('locus').distinct_by_row(
+    ).key_rows_by('locus', 'alleles')
+
+  #  ht_inbreeding = mt_inbreeding.rows()
     allele_data_ht = generate_allele_data(mt)
-    fam = "s3a://DDD-ELGH-UKBB-exomes/trios/DDD_trios.fam"
+
     qc_ac_ht = generate_ac(mt, fam)
 
-    ht_inbreeding.write(
-        f'{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_inbreeding_new.ht', overwrite=True)
+#    ht_inbreeding.write(
+#        f'{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_inbreeding_new.ht', overwrite=True)
     qc_ac_ht.write(
         f'{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_qc_ac_new.ht', overwrite=True)
     allele_data_ht.write(
