@@ -161,7 +161,7 @@ if __name__ == "__main__":
     group = "raw"
 
     mt = hl.read_matrix_table(
-        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_chr1to6-20.mt')
+        f'{temp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1to6-20.mt')
     mt = mt.key_rows_by('locus').distinct_by_row(
     ).key_rows_by('locus', 'alleles')
     # mt = mt.select_entries(
