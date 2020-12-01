@@ -151,18 +151,19 @@ if __name__ == "__main__":
         f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_trios_stats.ht')
     #inbreeding_ht = hl.read_table(f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_inbreeding.ht')
     allele_data_ht = hl.read_table(
-        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_allele_data.ht')
+        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_allele_data_new.ht')
     allele_counts_ht = hl.read_table(
-        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_qc_ac.ht')
+        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_qc_ac_new.ht')
     allele_counts_ht = allele_counts_ht.select(
         *['ac_qc_samples_raw', 'ac_qc_samples_adj'])
     inbreeding_ht = hl.read_table(
-        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_inbreeding.ht')
+        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_inbreeding_new.ht')
     group = "raw"
 
     mt = hl.read_matrix_table(
-        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_chr1-7and20_split.mt')
-
+        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_chr1to6-20.mt')
+    mt = mt.key_rows_by('locus').distinct_by_row(
+    ).key_rows_by('locus', 'alleles')
     # mt = mt.select_entries(
     #    GT=hl.unphased_diploid_gt_index_call(mt.GT.n_alt_alleles()))
     # mt = mt.annotate_rows(InbreedingCoeff=hl.or_missing(
