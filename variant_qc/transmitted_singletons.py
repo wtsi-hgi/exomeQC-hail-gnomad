@@ -96,22 +96,23 @@ if __name__ == "__main__":
 
     #################################
 
-    mt_trios = hl.read_matrix_table(
-        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/mt_trios_adj.mt')
+    # mt_trios = hl.read_matrix_table(
+    #    f'{temp_dir}/ddd-elgh-ukbb/variant_qc/mt_trios_adj.mt')
     run_hash = "91b132aa"
     ht = hl.read_table(
         f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/{run_hash}_rf_result_sanger_cohorts_DENOVO_family_stats_SYNONYMOUS.ht')
 
-    mt_trios = mt_trios.annotate_rows(
-        consequence=ht[mt_trios.row_key].consequence)
+    # mt_trios = mt_trios.annotate_rows(
+    #    consequence=ht[mt_trios.row_key].consequence)
 
-    mt_trios = mt_trios.checkpoint(
-        f'{tmp_dir}/sanger_cohorts_trios_consequence.mt', overwrite=True)
-    mt_filtered = mt_trios.filter_rows((mt_trios.info.AC[0] <= 2) & (
-        mt_trios.consequence == "synonymous_variant"))
-
-    mt_filtered = mt_filtered.checkpoint(
-        f'{tmp_dir}/sanger_cohorts_AC_synonymous_filtered.mt', overwrite=True)
+    # mt_trios = mt_trios.checkpoint(
+    #    f'{tmp_dir}/sanger_cohorts_trios_consequence.mt', overwrite=True)
+    # mt_filtered = mt_trios.filter_rows((mt_trios.info.AC[0] <= 2) & (
+    #    mt_trios.consequence == "synonymous_variant"))
+    mt_filtered = hl.read_matrix_table(
+        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/sanger_cohorts_AC_synonymous_filtered.mt')
+    # mt_filtered = mt_filtered.checkpoint(
+    #    f'{tmp_dir}/sanger_cohorts_AC_synonymous_filtered.mt', overwrite=True)
 
     mt_untransmitted = mt_filtered.filter_entries((mt_filtered.info.AC[0] == 1) &
 
@@ -128,8 +129,8 @@ if __name__ == "__main__":
                                                                                       ((hl.is_defined(mt_filtered.father_entry.GT)) |
                                                                                        (hl.is_defined(mt_filtered.mother_entry.GT)))))
     print(f"Untransmitted singletons count:{untransmitted_singletons_count}")
-    transmitted_singletons_count = mt_filtered.aggregate_entries((mt_filtered.info.AC[0] == 2) &
-                                                                 (hl.is_defined(mt_filtered.proband_entry.GT)) &
-                                                                 ((hl.is_defined(mt_filtered.father_entry.GT)) |
-                                                                  (hl.is_defined(mt_filtered.mother_entry.GT))))
+    transmitted_singletons_count = mt_filtered.aggregate_entries(hl.agg.count_where((mt_filtered.info.AC[0] == 2) &
+                                                                                    (hl.is_defined(mt_filtered.proband_entry.GT)) &
+                                                                                    ((hl.is_defined(mt_filtered.father_entry.GT)) |
+                                                                                     (hl.is_defined(mt_filtered.mother_entry.GT)))))
     print(f"Transmitted singletons count:{transmitted_singletons_count}")
