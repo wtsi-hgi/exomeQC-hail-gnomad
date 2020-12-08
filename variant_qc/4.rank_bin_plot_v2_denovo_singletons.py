@@ -422,14 +422,14 @@ def main(args):
         # ht_ranked = ht_ranked.annotate(score=1-ht_ranked.rf_probability["TP"])
         ht_ranked=ht_ranked.annotate(score=ht_ranked.rf_probability["TP"])
         ht_ranked=ht_ranked.checkpoint(
-            f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_denovo.ht', overwrite=True)
+            f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_denovo_singletons.ht', overwrite=True)
 
     if args.add_bin:
 
         # ht = hl.read_table(
         #    f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/{run_hash}_rf_result_ranked.ht')
         ht=hl.read_table(
-            f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/{run_hash}_rf_result_ranked_denovo.ht')
+            f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/{run_hash}_rf_result_ranked_denovo_singletons.ht')
 
         # ht_bins = compute_quantile_bin(ht, ht.rf_probability["TP"], bin_expr={
         #    'biallelic_bin': ~ht.was_split,
@@ -437,7 +437,7 @@ def main(args):
         # }, compute_snv_indel_separately=True, n_bins=100, k=500, desc=True)
         ht_bins=create_binned_data_initial(ht, "exomes", "RF", n_bins=100)
         ht_bins.write(
-            f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_BINS_denovo.ht', overwrite=True)
+            f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_BINS_denovo_singletons.ht', overwrite=True)
         # ht_grouped = compute_grouped_binned_ht(ht_bins)
         # ht_grouped.write(
         #    f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_BINS_Grouped.ht', overwrite=True)
