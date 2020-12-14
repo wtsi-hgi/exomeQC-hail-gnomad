@@ -369,12 +369,12 @@ def create_binned_data_initial(ht: hl.Table, data: str, data_type: str, n_bins: 
             #    ht.family_stats.unrelated_qc_callstats.AC[1] == 0), hl.agg.count_where(ht.family_stats.mendel.errors > 0)),
             n_trans_singletons=hl.agg.filter((ht.ac_raw < 3) & (
                 ht.family_stats.unrelated_qc_callstats.AC[0][1] == 1), hl.agg.sum(ht.family_stats.tdt[0].t)),
-            n_trans_singletons_synonymous=hl.agg.filter(
-                ht.transmitted_singletons == 1, hl.agg.sum(ht.transmitted_singletons == 1)),
+            n_trans_singletons_synonymous=hl.agg.count(
+                ht.variant_transmitted_singletons > 0),
             n_untrans_singletons=hl.agg.filter((ht.ac_raw < 3) & (
                 ht.family_stats.unrelated_qc_callstats.AC[0][1] == 1), hl.agg.sum(ht.family_stats.tdt[0].u)),
             n_untrans_singletons_synonymous=hl.agg.count_where(
-                ht.untransmitted_singletons == 1),
+                ht.variant_untransmitted_singletons > 0),
             n_train_trans_singletons=hl.agg.count_where(
                 (ht.family_stats.unrelated_qc_callstats.AC[0][1] == 1) & (ht.family_stats.tdt[0].t == 1)),
             n_omni=hl.agg.count_where(ht.omni),
@@ -412,8 +412,7 @@ def main(args):
                                  'de_novo_high_quality_rank': ht.de_novo_data.p_de_novo[0] > 0.9,
                                  'de_novo_medium_quality_rank': ht.de_novo_data.p_de_novo[0] > 0.5,
                                  'de_novo_synonymous_rank': ht.consequence == "synonymous_variant",
-                                 'transmited_singleton_rank': ht.transmitted_singletons == 1,
-                                 'untransmited_singleton_rank': ht.untransmitted_singletons == 1,
+
                                  # 'adj_rank': ht.ac > 0,
                                  # 'adj_biallelic_rank': ~ht.was_split & (ht.ac > 0),
                                  # 'adj_singleton_rank': ht.transmitted_singleton & (ht.ac > 0),
