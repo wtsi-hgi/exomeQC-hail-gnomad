@@ -423,7 +423,7 @@ def main(args):
         # ht_ranked = ht_ranked.annotate(score=1-ht_ranked.rf_probability["TP"])
         ht_ranked = ht_ranked.annotate(score=ht_ranked.rf_probability["TP"])
         ht_ranked = ht_ranked.checkpoint(
-            f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_denovo_ddd.ht', overwrite=True)
+            f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_denovo_ddd_comp.ht', overwrite=True)
 
     if args.add_bin:
 
