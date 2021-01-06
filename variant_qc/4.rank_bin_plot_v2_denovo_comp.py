@@ -400,10 +400,9 @@ def main(args):
 
     # ht after random model
     run_hash = args.run_hash
-    # ht = hl.read_table(
-    #    f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/{run_hash}_rf_result_sanger_cohorts_DENOVO_family_stats_SYNONYMOUS_inheritance.ht')
     ht = hl.read_table(
-        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/{run_hash}_ddd_denovo_validated_only.ht')
+        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/{run_hash}_rf_result_sanger_cohorts_DENOVO_family_stats_SYNONYMOUS_inheritance.ht')
+
     if args.add_rank:
         ht_ranked = add_rank(ht,
                              score_expr=1-ht.rf_probability["TP"],
