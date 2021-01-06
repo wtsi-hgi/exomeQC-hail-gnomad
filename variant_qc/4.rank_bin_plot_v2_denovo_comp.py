@@ -325,13 +325,13 @@ def create_binned_data_initial(ht: hl.Table, data: str, data_type: str, n_bins: 
             rank_id=ht.rank_id,
             contig=ht.locus.contig,
             snv=hl.is_snp(ht.alleles[0], ht.alleles[1]),
-            # bi_allelic=hl.is_defined(ht.biallelic_rank),
-            # singleton=ht.transmitted_singleton,
-            # trans_singletons=hl.is_defined(ht.singleton_rank),
-            # de_novo_high_quality=ht.de_novo_high_quality_rank,
-            # de_novo_medium_quality=hl.is_defined(
-            #     ht.de_novo_medium_quality_rank),
-            # de_novo_synonymous=hl.is_defined(ht.de_novo_synonymous_rank),
+            bi_allelic=hl.is_defined(ht.biallelic_rank),
+            singleton=ht.transmitted_singleton,
+            trans_singletons=hl.is_defined(ht.singleton_rank),
+            de_novo_high_quality=ht.de_novo_high_quality_rank,
+            de_novo_medium_quality=hl.is_defined(
+                ht.de_novo_medium_quality_rank),
+            de_novo_synonymous=hl.is_defined(ht.de_novo_synonymous_rank),
             # release_adj=ht.ac > 0,
             bin=ht.bin
         )._set_buffer_size(20000)
@@ -408,31 +408,31 @@ def main(args):
         ht_ranked = add_rank(ht,
                              score_expr=1-ht.rf_probability["TP"],
                              # score_expr=ht.rf_probability["TP"],
-                             # subrank_expr={
-                             #    'biallelic_rank': ~ht.was_split,
-                             # 'singleton_rank': ht.transmitted_singleton,
-                             #    'biallelic_singleton_rank': ~ht.was_split & ht.transmitted_singleton,
-                             #    'de_novo_high_quality_rank': ht.de_novo_data.p_de_novo[0] > 0.9,
-                             #    'de_novo_medium_quality_rank': ht.de_novo_data.p_de_novo[0] > 0.5,
-                             #    'de_novo_synonymous_rank': ht.consequence == "synonymous_variant",
+                             subrank_expr={
+                                 'biallelic_rank': ~ht.was_split,
+                                 'singleton_rank': ht.transmitted_singleton,
+                                 'biallelic_singleton_rank': ~ht.was_split & ht.transmitted_singleton,
+                                 'de_novo_high_quality_rank': ht.de_novo_data.p_de_novo[0] > 0.9,
+                                 'de_novo_medium_quality_rank': ht.de_novo_data.p_de_novo[0] > 0.5,
+                                 'de_novo_synonymous_rank': ht.consequence == "synonymous_variant",
 
-                             # 'adj_rank': ht.ac > 0,
-                             # 'adj_biallelic_rank': ~ht.was_split & (ht.ac > 0),
-                             # 'adj_singleton_rank': ht.transmitted_singleton & (ht.ac > 0),
-                             # 'adj_biallelic_singleton_rank': ~ht.was_split & ht.transmitted_singleton & (ht.ac > 0)
-                             # }
+                                 # 'adj_rank': ht.ac > 0,
+                                 # 'adj_biallelic_rank': ~ht.was_split & (ht.ac > 0),
+                                 # 'adj_singleton_rank': ht.transmitted_singleton & (ht.ac > 0),
+                                 # 'adj_biallelic_singleton_rank': ~ht.was_split & ht.transmitted_singleton & (ht.ac > 0)
+                             }
                              )
         # ht_ranked = ht_ranked.annotate(score=1-ht_ranked.rf_probability["TP"])
         ht_ranked = ht_ranked.annotate(score=1-ht_ranked.rf_probability["TP"])
         ht_ranked = ht_ranked.checkpoint(
-            f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_denovo_ddd_comp1.ht', overwrite=True)
+            f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_denovo_ddd_comp.ht', overwrite=True)
 
     if args.add_bin:
 
         # ht = hl.read_table(
         #    f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/{run_hash}_rf_result_ranked.ht')
         ht = hl.read_table(
-            f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/{run_hash}_rf_result_ranked_denovo_ddd_comp1.ht')
+            f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/{run_hash}_rf_result_ranked_denovo_ddd_comp.ht')
 
         # ht_bins = compute_quantile_bin(ht, ht.rf_probability["TP"], bin_expr={
         #    'biallelic_bin': ~ht.was_split,
@@ -440,7 +440,7 @@ def main(args):
         # }, compute_snv_indel_separately=True, n_bins=100, k=500, desc=True)
         ht_bins = create_binned_data_initial(ht, "exomes", "RF", n_bins=100)
         ht_bins.write(
-            f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_BINS_denovo_ddd_comp1.ht', overwrite=True)
+            f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_BINS_denovo_ddd_comp.ht', overwrite=True)
         # ht_grouped = compute_grouped_binned_ht(ht_bins)
         # ht_grouped.write(
         #    f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_BINS_Grouped.ht', overwrite=True)
