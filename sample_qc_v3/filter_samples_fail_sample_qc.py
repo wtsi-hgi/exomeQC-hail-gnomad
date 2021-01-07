@@ -55,13 +55,14 @@ if __name__ == "__main__":
     hadoop_config.set("fs.s3a.secret.key", credentials["mer"]["secret_key"])
 
     # read matrixtable = remove the
+    # mt = hl.read_matrix_table(
+    #    f'{temp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1-20-XY_new_cohorts_split_multi.mt')
     mt = hl.read_matrix_table(
-        f'{temp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1-20-XY_new_cohorts_split_multi.mt')
-
+        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_chr1-7and20_split.mt')
     samples_to_remove_filename = f"{temp_dir}/ddd-elgh-ukbb/filtering/samples_failed_QC.tsv"
 
     samples_to_remove = hl.import_table(samples_to_remove_filename).key_by('s')
     mt_filtered = mt.filter_cols(hl.is_defined(
         samples_to_remove[mt.s]), keep=False)
     mt_filtered.write(
-        f'{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1-20-XY_sampleQC_FILTERED.mt')
+        f'{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1-7and20_split_sampleqc_filtered.mt')
