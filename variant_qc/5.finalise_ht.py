@@ -401,28 +401,82 @@ def generate_final_rf_ht(
 # main
 ########################################
 
+# annotate with RF probability score 1-
+    # 'rf_probability': dict<str, float64>
+    #  'rf_train': bool
+    # 'rf_label': str
+    # 'rf_test': bool
+    # 'rf_probability': dict<str, float64> :  - rf_probability['TP']
+    # 'rf_prediction': str
+    # 'consequence': str
+    # 'inheritance': str
+    # 'rank': int64
+    # 'score': float64
 
+    # info rf_probability['TP']
+    # FILTER column to PASS for ≤80 InDels ≤90 SNVs
+   # ht = generate_final_rf_ht(
+   #     ht,
+   #     snp_cutoff=args.snp_cutoff,
+   #     indel_cutoff=args.indel_cutoff,
+   #     determine_cutoff_from_bin=False,
+   #     bin_id=ht.bin,
+   #     inbreeding_coeff_cutoff=INBREEDING_COEFF_HARD_CUTOFF,
+   # )
+    # This column is added by the RF module based on a 0.5 threshold which doesn't correspond to what we use
+    #ht = ht.drop(ht[PREDICTION_COL])
 def main(args):
 
     print("main")
-    ht = hl.read_table(
-        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_table_for_RF_by_variant_type.ht')
 
     run_hash = "91b132aa"
     ht = hl.read_table(
-        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/{run_hash}_rf_result_ranked_BINS_denovo_ddd_comp.ht')
+        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/{run_hash}_rf_result_ranked_denovo_ddd_comp.ht')
 
-    ht = generate_final_rf_ht(
-        ht,
-        snp_cutoff=args.snp_cutoff,
-        indel_cutoff=args.indel_cutoff,
-        determine_cutoff_from_bin=False,
-        bin_id=ht.bin,
-        inbreeding_coeff_cutoff=INBREEDING_COEFF_HARD_CUTOFF,
+    mt = hl.read_matrix_table(
+        f'{temp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1-7and20_split_sampleqc_filtered.mt')
+    mt = mt.annotate_rows(
+        Variant_Type=hl.cond((hl.is_snp(mt.alleles[0], mt.alleles[1])), "SNP",
+                             hl.cond(
+            hl.is_insertion(
+                mt.alleles[0], mt.alleles[1]),
+            "INDEL",
+            hl.cond(hl.is_deletion(mt.alleles[0],
+                                   mt.alleles[1]), "INDEL",
+                    "Other"))))
+    mt = mt.annotate_rows(
+        info=mt.info.annotate(
+            rf_probability=ht[mt.row_key].rf_probability['TP'])
     )
-    # This column is added by the RF module based on a 0.5 threshold which doesn't correspond to what we use
-    #ht = ht.drop(ht[PREDICTION_COL])
-    ht.write(f'{tmp_dir}/{run_hash}_rf_final.ht', overwrite=True)
+    mt = mt.annotate_rows(
+        info=mt.info.annotate(score=ht[mt.row_key].score)
+    )
+
+    filter_column_annotation = (
+        hl.case()
+        .when(((mt.Variant_Type == "SNP") & (mt.info.rf_probability <= 0.90)), "PASS")
+        .when(((mt.Variant_Type == "INDEL") & (mt.info.rf_probability <= 0.80)), "PASS")
+        .default(".")  # remove everything else
+    )
+
+# mt_annotated = mt.annotate_rows(mt.filters=filter_column_annotation)
+    mt1 = mt.annotate_rows(
+        filtercol=((filter_column_annotation))
+    )
+    mt_fail = mt1.filter_rows(mt1.filtercol == ".")
+    print(mt_fail.count())
+
+    mt2 = mt1.annotate_rows(filters=mt1.filters.add(mt1.filtercol))
+    mt_fail2 = mt2.filter_rows(mt2.filters.contains("."))
+    mt_pass = mt2.filter_rows(mt2.filters.contains("PASS"))
+    print(mt_fail2.count())
+    print(mt_pass.count())
+
+    mt2 = mt2.checkpoint(
+        f'{tmp_dir}/Sanger_cohorts_chr1-7and20_after_RF_final.mt', overwrite=True)
+
+    hl.export_vcf(
+        mt2, f'{tmp_dir}/Sanger_cohorts_chr1-7and20_after_RF_final.vcf.bgz')
 
 
 if __name__ == "__main__":
