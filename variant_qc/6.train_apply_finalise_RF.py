@@ -512,7 +512,7 @@ def main(args):
         pretty_print_runs(rf_runs)
         logger.info("Saving RF model")
         save_model(
-            rf_model, get_rf(data="model_unfiltered", run_hash=run_hash), overwrite=True)
+            rf_model, get_rf(data="model", run_hash=run_hash), overwrite=True)
         # f'{tmp_dir}/ddd-elgh-ukbb/rf_model.model')
     else:
         run_hash = args.run_hash

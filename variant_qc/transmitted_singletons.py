@@ -124,10 +124,11 @@ if __name__ == "__main__":
                                                 ((hl.is_defined(mt_filtered.father_entry.GT)) |
                                                  (hl.is_defined(mt_filtered.mother_entry.GT))))
 
-    untransmitted_singletons_count = mt_filtered.aggregate_entries(hl.agg.count_where((mt_filtered.info.AC[0] == 1) &
-
-                                                                                      ((hl.is_defined(mt_filtered.father_entry.GT)) |
-                                                                                       (hl.is_defined(mt_filtered.mother_entry.GT)))))
+    untransmitted_singletons_count = (mt_filtered.aggregate_entries(hl.agg.count_where((mt_filtered.info.AC[0] == 1) &
+                     (hl.is_missing(mt_filtered.proband_entry.GT))&
+                     ((hl.is_defined(mt_filtered.father_entry.GT)) |
+                     (hl.is_defined(mt_filtered.mother_entry.GT)))),
+))
     print(f"Untransmitted singletons count:{untransmitted_singletons_count}")
     transmitted_singletons_count = mt_filtered.aggregate_entries(hl.agg.count_where((mt_filtered.info.AC[0] == 2) &
                                                                                     (hl.is_defined(mt_filtered.proband_entry.GT)) &

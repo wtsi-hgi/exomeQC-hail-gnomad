@@ -34,3 +34,23 @@ echo $FILE
 bcftools +split-vep $FILE -f '%CHROM\t%POS\t%REF\t%ALT\t%Consequence\n' -s worst:synonymous >> "$output"
 
 done < "${CHUNK}"
+
+############################
+declare CHUNK="/lustre/scratch118/humgen/resources/gnomAD/release-3.1.1/gnomad_sites.fofn"
+declare BUCKET="s3://gnomad-release-3.1.1"
+while read -r FILE; do
+echo $FILE
+gs_name="$(basename "${FILE}")"
+echo $gs_name
+s3cmd sync --multipart-chunk-size-mb=100 "${FILE}" "${BUCKET}/${gs_name}"
+done < "${CHUNK}"
+
+declare CHUNK="/lustre/scratch118/humgen/resources/gnomAD/release-3.1.1/gnomad_sites.fofn"
+declare output="/lustre/scratch118/humgen/resources/gnomAD/release-3.1.1/sites_AF.tsv"
+while read -r FILE; do
+echo $FILE
+bcftools query  -f '%CHROM\t%POS\t%REF\t%ALT\t%AF\n' $FILE >> "$output"
+done < "${CHUNK}"
+
+
+#bcftools query  -f '%CHROM\t%POS\t%REF\t%ALT\t%AF\n' /lustre/scratch118/humgen/resources/gnomAD/release-3.0/gnomad.genomes.r3.0.sites.vcf.bgz -o /lustre/scratch119/realdata/mdt2/projects/interval_wgs/analysis/hail_analysis/gnomad_3.0_sites_AF.tsv
