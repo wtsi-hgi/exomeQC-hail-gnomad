@@ -1,3 +1,9 @@
+
+# Pavlos Antoniou
+# pa10@sanger.ac.uk
+# 18/01/2020
+# Import vcf files from s3 location to hail and convert to matrixtable
+
 import os
 import hail as hl
 import pyspark
@@ -29,9 +35,9 @@ with open(f"{thresholds}", 'r') as f:
 
 partitions = 1000
 
-
+# Create a file with only the header of the VCFs. Helps hail process import faster.
+# Define location of input VCFs and their header file
 s3location_input = storage["ddd_elgh_ukbb_exomes"]["s3"]["vcfs"]
-s3location_output = storage["ddd_elgh_ukbb_exomes"]["s3"]["mts"]
 vcf_header_file = storage["ddd_elgh_ukbb_exomes"]["s3"]["header_file"]
 
 
@@ -67,7 +73,7 @@ if __name__ == "__main__":
                                force_bgz=True, header_file=vcf_header_file)
 
             print("Imported vcf file for" + chromosome)
-  
+
             print("Write to disk:")
 
             mt.write(

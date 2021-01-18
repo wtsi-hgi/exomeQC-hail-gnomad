@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#Pavlos Antoniou
+# Pavlos Antoniou
 # pa10@sanger.ac.uk
 # 18/01/2020
 
