@@ -3,7 +3,7 @@
 # pa10@sanger.ac.uk
 # 18/01/2020
 # Import vcf files from s3 location to hail and convert to matrixtable
-
+# This will create one matrixtable per chromosome
 import os
 import hail as hl
 import pyspark
