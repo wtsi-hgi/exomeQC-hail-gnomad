@@ -67,9 +67,7 @@ if __name__ == "__main__":
                                force_bgz=True, header_file=vcf_header_file)
 
             print("Imported vcf file for" + chromosome)
-    # print("Start repartitioning:")
-    # if mt.n_partitions() > partitions:
-    # mt = mt.naive_coalesce(partitions)
+  
             print("Write to disk:")
 
             mt.write(

@@ -8,8 +8,10 @@ Please contact Pavlos (pa10) for any questions.
 
 ---
 
-Part 1: Import data to hail
+## Part 1: Import data to hail
 
-Part 2: Sample QC
 
-Part 3: Variant QC
+
+## Part 2: Sample QC
+
+## Part 3: Variant QC
