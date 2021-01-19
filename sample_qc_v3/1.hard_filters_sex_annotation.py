@@ -1,14 +1,62 @@
+# Pavlos Antoniou
+# Sample QC pipeline first step
+# Apply gnomad hard filters and calculate sex for each sample using hail's build in functions 
+# 19/01/2021
+#  Required: a list of known population label for each sample
+
 import os
 import hail as hl
+import pandas as pd
 import pyspark
 import json
 import sys
 import re
 from pathlib import Path
 import logging
+from typing import Any, Counter, List, Optional, Tuple, Union
+from bokeh.plotting import output_file, save, show
+from gnomad_ancestry import pc_project, run_pca_with_relateds, assign_population_pcs
+
 logging.basicConfig(format="%(levelname)s (%(name)s %(lineno)s): %(message)s")
-logger = logging.getLogger("unified_sample_qc_a")
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+
+
+def get_reference_genome(
+    locus: Union[hl.expr.LocusExpression, hl.expr.IntervalExpression],
+    add_sequence: bool = False,
+) -> hl.ReferenceGenome:
+    """
+    Returns the reference genome associated with the input Locus expression
+    :param locus: Input locus
+    :param add_sequence: If set, the fasta sequence is added to the reference genome
+    :return: Reference genome
+    """
+    if isinstance(locus, hl.expr.LocusExpression):
+        ref = locus.dtype.reference_genome
+    else:
+        assert isinstance(locus, hl.expr.IntervalExpression)
+        ref = locus.dtype.point_type.reference_genome
+    if add_sequence:
+        ref = add_reference_sequence(ref)
+    return ref
+
+
+def filter_to_autosomes(
+    t: Union[hl.MatrixTable, hl.Table]
+) -> Union[hl.MatrixTable, hl.Table]:
+    """
+    Filters the Table or MatrixTable to autosomes only.
+    This assumes that the input contains a field named `locus` of type Locus
+    :param t: Input MT/HT
+    :return:  MT/HT autosomes
+    """
+    reference = get_reference_genome(t.locus)
+    autosomes = hl.parse_locus_interval(
+        f"{reference.contigs[0]}-{reference.contigs[21]}", reference_genome=reference
+    )
+    return hl.filter_intervals(t, [autosomes])
+
 
 project_root = Path(__file__).parent.parent
 print(project_root)
@@ -30,6 +78,7 @@ with open(f"{storage}", 'r') as f:
 
 with open(f"{thresholds}", 'r') as f:
     thresholds = json.load(f)
+
 
 
 def annotate_sex(mt: hl.MatrixTable, out_internal_mt_prefix: str,
@@ -71,10 +120,7 @@ if __name__ == "__main__":
     hadoop_config.set("fs.s3a.access.key", credentials["mer"]["access_key"])
     hadoop_config.set("fs.s3a.secret.key", credentials["mer"]["secret_key"])
 
-    #####################################################################
-    ###################### INPUT DATA  ##############################
-    #####################################################################
-
+    # Read the matrixtable, chrX and chrY should be included
     mt = hl.read_matrix_table(
         f"{temp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_cohorts_split.mt")
 
@@ -109,5 +155,5 @@ if __name__ == "__main__":
 
     qc_ht = qc_ht.annotate(
         sex=sex_expr, data_type='exomes').key_by('data_type', 's')
-    qc_ht.write(f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_ambiguous_sex_samples.ht",
+    qc_ht.write(f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_sex_annotations.mt",
                 overwrite=True)
