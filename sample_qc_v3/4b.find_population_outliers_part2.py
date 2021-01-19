@@ -100,7 +100,7 @@ if __name__ == "__main__":
         f"{temp_dir}/ddd-elgh-ukbb/new_labels/chr1_chr20_ldpruned_updated.mt")
     # pca_scores_pop
     pca_scores_pop = hl.read_table(
-        f"{temp_dir}/ddd-elgh-ukbb/new_labels/pop_assignments_updated_august2020.ht")
+        f"{temp_dir}/ddd-elgh-ukbb/new_labels/pop_assignments_updated.ht")
 
     strata = {}
     mt_with_sampleqc = hl.read_matrix_table(

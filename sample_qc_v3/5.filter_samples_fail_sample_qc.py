@@ -1,6 +1,6 @@
 # Pavlos Antoniou
 # 16/09/2020
-#  trio matrixtable creation from fam file
+#  exclude samples that were outliers in population sample QC
 import os
 import hail as hl
 import pandas as pd

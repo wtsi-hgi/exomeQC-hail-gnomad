@@ -1,6 +1,6 @@
 # Pavlos Antoniou
 # 12/08/2020
-#  QC for population assignment
+#  QC for population assignment part 1
 import os
 import hail as hl
 import pandas as pd
