@@ -1,7 +1,7 @@
 # Sample QC pipeline second step
 # Population assignment and prediction using RF
 # Input: ld prune matrixtable from Step 2
-# Need AKT datasets:
+# Need AKT overlap with 1kg dataset: s3a://DDD-ELGH-UKBB-exomes/ancestry/WES_AKT_1kg_intersection.vcf.mt
 # Pavlos Antoniou
 # pa10@sanger.ac.uk
 # 19/01/2021
@@ -100,7 +100,7 @@ if __name__ == "__main__":
     cohorts_pop = hl.import_table(
         "s3a://DDD-ELGH-UKBB-exomes/ancestry/sanger_cohort_known_populations_ukbb_elgh_labels_updated.tsv", delimiter="\t").key_by('s')
 
-    # s3a://DDD-ELGH-UKBB-exomes/ancestry/WES_AKT_1kg_intersection.vcf.bgz
+    # s3a://DDD-ELGH-UKBB-exomes/ancestry/WES_AKT_1kg_intersection.vcf.mt
     # # overlap AKT dataset
     overlap_1kg_AKT = hl.import_matrix_table(
         f"{temp_dir}/ddd-elgh-ukbb/WES_AKT_1kg_intersection.mt")
