@@ -102,26 +102,6 @@ if __name__ == "__main__":
     pca_scores_pop = hl.read_table(
         f"{temp_dir}/ddd-elgh-ukbb/new_labels/pop_assignments_updated_august2020.ht")
 
-    ''' # pca_scores_superpop
-    pca_scores_superpop = hl.read_table(
-        f"{temp_dir}/ddd-elgh-ukbb/new_labels/pop_assignments_updated_august2020_superpops.ht")
-
-    # annotate mt with pop and superpop
-    mt = mt.annotate_cols(assigned_pop=pca_scores_pop[mt.s].pop)
-    mt = mt.annotate_cols(assigned_superpop=pca_scores_superpop[mt.s].pop)
-
-    # do sample_qc
-    # calculate and annotate with metric heterozygosity
-    mt_with_sampleqc = hl.sample_qc(mt, name='sample_qc')
-
-    mt_with_sampleqc = mt_with_sampleqc.annotate_cols(sample_qc=mt_with_sampleqc.sample_qc.annotate(
-        heterozygosity_rate=mt_with_sampleqc.sample_qc.n_het/mt_with_sampleqc.sample_qc.n_called))
-    # save sample_qc and heterozygosity table as ht table
-    mt_with_sampleqc.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/mt_pops_superpops_sampleqc.mt", overwrite=True)
-    mt_with_sampleqc.cols().write(
-        f"{tmp_dir}/ddd-elgh-ukbb/mt_pops_superpops_sampleqc.ht",  overwrite=True)
-    '''
     strata = {}
     mt_with_sampleqc = hl.read_matrix_table(
         f"{tmp_dir}/ddd-elgh-ukbb/mt_pops_superpops_sampleqc.mt")

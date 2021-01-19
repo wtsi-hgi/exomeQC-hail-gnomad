@@ -13,7 +13,7 @@ import logging
 from typing import Any, Counter, List, Optional, Tuple, Union, Dict, Iterable
 
 from bokeh.plotting import output_file, save, show
-from gnomad_filtering import compute_stratified_metrics_filter
+from sample_qc_v3.gnomad_methods.gnomad_filtering import compute_stratified_metrics_filter
 
 logging.basicConfig(format="%(levelname)s (%(name)s %(lineno)s): %(message)s")
 logger = logging.getLogger(__name__)
@@ -102,7 +102,7 @@ if __name__ == "__main__":
     pca_scores_pop = hl.read_table(
         f"{temp_dir}/ddd-elgh-ukbb/new_labels/pop_assignments_updated_august2020.ht")
 
-    ''' # pca_scores_superpop
+    # pca_scores_superpop
     pca_scores_superpop = hl.read_table(
         f"{temp_dir}/ddd-elgh-ukbb/new_labels/pop_assignments_updated_august2020_superpops.ht")
 
@@ -121,41 +121,33 @@ if __name__ == "__main__":
         f"{tmp_dir}/ddd-elgh-ukbb/mt_pops_superpops_sampleqc.mt", overwrite=True)
     mt_with_sampleqc.cols().write(
         f"{tmp_dir}/ddd-elgh-ukbb/mt_pops_superpops_sampleqc.ht",  overwrite=True)
-    '''
-    strata = {}
-    mt_with_sampleqc = hl.read_matrix_table(
-        f"{tmp_dir}/ddd-elgh-ukbb/mt_pops_superpops_sampleqc.mt")
     pop_ht = hl.read_table(
         f"{tmp_dir}/ddd-elgh-ukbb/mt_pops_superpops_sampleqc.ht")
     # run function on metrics including heterozygosity first for pops:
-    strata['assigned_pop'] = pop_ht.assigned_pop
-
-    qc_metrics = {
-        'sample_qc.heterozygosity_rate': pop_ht.sample_qc.heterozygosity_rate,
-        'sample_qc.n_snp': pop_ht.sample_qc.n_snp,
-        'sample_qc.r_ti_tv': pop_ht.sample_qc.r_ti_tv,
-        'sample_qc.r_insertion_deletion': pop_ht.sample_qc.r_insertion_deletion,
-        'sampleqc.n_insertion': pop_ht.sample_qc.n_insertion,
-        'sampleqc.n_deletion': pop_ht.sample_qc.n_deletion,
-        'sample_qc.r_het_hom_var': pop_ht.sample_qc.r_het_hom_var
-    }
+    qc_metrics = ['heterozygosity_rate', 'n_snp', 'r_ti_tv',
+                  'r_insertion_deletion', 'n_insertion', 'n_deletion', 'r_het_hom_var']
     pop_filter_ht = compute_stratified_metrics_filter(
-        pop_ht, qc_metrics, strata)
+        pop_ht, qc_metrics, ['assigned_pop'])
+    pop_ht = pop_ht.annotate_globals(hl.eval(pop_filter_ht.globals))
+    pop_ht = pop_ht.annotate(**pop_filter_ht[pop_ht.key]).persist()
 
-    #pop_ht = pop_ht.annotate_globals(hl.eval(pop_filter_ht.globals))
-    #pop_ht = pop_ht.annotate(**pop_filter_ht[pop_ht.key]).persist()
-
-    # checkpoint = pop_ht.aggregate(hl.agg.count_where(
-    #   hl.len(pop_ht.qc_metrics_filters) == 0))
-    #logger.info(f'{checkpoint} exome samples found passing pop filtering')
-    pop_filter_ht.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/mt_pops_QC_filters.ht", overwrite=True)
+    checkpoint = pop_ht.aggregate(hl.agg.count_where(
+        hl.len(pop_ht.qc_metrics_filters) == 0))
+    logger.info(f'{checkpoint} exome samples found passing pop filtering')
+    pop_ht.write(f"{tmp_dir}/ddd-elgh-ukbb/mt_pops_QC_filters.ht")
 
     # run function on metrics including heterozygosity  for superpops:
-    strata = {}
-    strata['assigned_superpop'] = pop_ht.assigned_superpop
-    pop_filter_ht_superpop = compute_stratified_metrics_filter(
-        pop_ht, qc_metrics, strata)
+    pop_ht_superpop = hl.read_table(
+        f"{tmp_dir}/ddd-elgh-ukbb/mt_pops_superpops_sampleqc.ht")
+    pop_filter_ht = compute_stratified_metrics_filter(
+        pop_ht_superpop, qc_metrics, ['assigned_superpop'])
+    pop_ht_superpop = pop_ht_superpop.annotate_globals(
+        hl.eval(pop_filter_ht.globals))
+    pop_ht_superpop = pop_ht_superpop.annotate(
+        **pop_filter_ht[pop_ht_superpop.key]).persist()
 
-    pop_filter_ht_superpop.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/mt_superpops_QC_filters.ht", overwrite=True)
+    checkpoint = pop_ht_superpop.aggregate(hl.agg.count_where(
+        hl.len(pop_ht_superpop.qc_metrics_filters) == 0))
+    logger.info(f'{checkpoint} exome samples found passing Superpop filtering')
+    pop_ht_superpop.write(
+        f"{tmp_dir}/ddd-elgh-ukbb/mt_superpops_QC_filters.ht")
