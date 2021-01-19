@@ -5,3 +5,13 @@ The scripts are adapted from the gnomad sample and variant QC v2 and v3 analysis
 
 Please visit https://confluence.sanger.ac.uk/display/HGI/WSI+Exome+Joint+Call for more information on the order of running the scripts, code snippets and results.
 Please contact Pavlos (pa10) for any questions.
+
+---
+
+## Part 1: Import data to hail
+
+
+
+## Part 2: Sample QC
+
+## Part 3: Variant QC
