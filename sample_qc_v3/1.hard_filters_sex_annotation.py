@@ -1,6 +1,6 @@
 # Pavlos Antoniou
 # Sample QC pipeline first step
-# Apply gnomad hard filters and calculate sex for each sample using hail's build in functions 
+# Apply gnomad hard filters and calculate sex for each sample using hail's build in functions
 # 19/01/2021
 #  Required: a list of known population label for each sample
 
@@ -80,7 +80,6 @@ with open(f"{thresholds}", 'r') as f:
     thresholds = json.load(f)
 
 
-
 def annotate_sex(mt: hl.MatrixTable, out_internal_mt_prefix: str,
                  male_threshold: float = 0.8, female_threshold: float = 0.5) -> hl.MatrixTable:
     """
@@ -130,6 +129,7 @@ if __name__ == "__main__":
                         (hl.agg.fraction(hl.is_defined(mt.GT)) > 0.99))
     mt.annotate_cols(callrate=hl.agg.fraction(hl.is_defined(mt.GT))).write(
         f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_annotated.mt", overwrite=True)
+
     print("Sex imputation:")
 
     mt_sex = annotate_sex(
@@ -155,5 +155,5 @@ if __name__ == "__main__":
 
     qc_ht = qc_ht.annotate(
         sex=sex_expr, data_type='exomes').key_by('data_type', 's')
-    qc_ht.write(f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_sex_annotations.mt",
+    qc_ht.write(f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_ambiguous_sex_samples.ht",
                 overwrite=True)
