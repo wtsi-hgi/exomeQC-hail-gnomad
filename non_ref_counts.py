@@ -47,8 +47,10 @@ if __name__ == "__main__":
 
     hadoop_config.set("fs.s3a.access.key", credentials["mer"]["access_key"])
     hadoop_config.set("fs.s3a.secret.key", credentials["mer"]["secret_key"])
-
     mt = hl.read_matrix_table(
-        f'{temp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1-7and20_split_sampleqc_filtered.mt')
-    print(mt.aggregate_entries(hl.agg.filter(
-        mt.GT.is_non_ref(), hl.agg.collect(mt.s))))
+        f"{temp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_cohorts_split.mt")
+
+    mt_result = (mt.group_cols_by(mt.s)
+                 .aggregate(n_non_ref=hl.agg.sum(mt.GT.is_non_ref())))
+    print(mt_result.n_non_ref.summarize())
+    mt_result.entries().export(f'{tmp_dir}/nonrefcounts.tsv.bgz')
