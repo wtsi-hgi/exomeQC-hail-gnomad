@@ -51,6 +51,6 @@ if __name__ == "__main__":
         f"{temp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_cohorts_split.mt")
 
     mt_result = (mt.group_cols_by(mt.s)
-                 .aggregate(n_non_ref=hl.agg.sum(mt.GT.is_non_ref())))
+                 .aggregate(n_non_ref=hl.agg.count_where(mt.GT.is_non_ref())))
     print(mt_result.n_non_ref.summarize())
     mt_result.entries().export(f'{tmp_dir}/nonrefcounts.tsv.bgz')
