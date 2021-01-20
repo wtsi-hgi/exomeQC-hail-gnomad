@@ -52,5 +52,9 @@ if __name__ == "__main__":
 
     mt_result = (mt.group_cols_by(mt.s)
                  .aggregate(n_non_ref=hl.agg.count_where(mt.GT.is_non_ref())))
+    mt_result2 = (mt.group_cols_by(mt.s)
+                  .aggregate(n_non_ref=hl.agg.sum(mt.GT.is_non_ref())))
     print(mt_result.n_non_ref.summarize())
-    mt_result.entries().export(f'{tmp_dir}/nonrefcounts.tsv.bgz')
+    print(mt_result2.n_non_ref.summarize())
+    mt_result.entries().export(f'{tmp_dir}/nonrefcounts_countwhere.tsv.bgz')
+    mt_result2.entries().export(f'{tmp_dir}/nonrefcounts_sum.tsv.bgz')
