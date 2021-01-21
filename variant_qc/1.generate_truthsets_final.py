@@ -1,6 +1,6 @@
 # Pavlos Antoniou
-# 16/09/2020
-#  trio matrixtable creation from fam file
+# 21/01/2021
+#  Generate files required for RF part 1
 import os
 import hail as hl
 import pandas as pd
@@ -22,7 +22,6 @@ from gnomad.sample_qc.relatedness import (
     generate_sib_stats_expr,
     generate_trio_stats_expr,
 )
-
 from hail import Table
 
 logging.basicConfig(format="%(levelname)s (%(name)s %(lineno)s): %(message)s")
@@ -57,29 +56,21 @@ PREDICTION_COL = "rf_prediction"
 TRUTH_DATA = ["hapmap", "omni", "mills", "kgp_phase1_hc"]
 INBREEDING_COEFF_HARD_CUTOFF = -0.3
 
-
-def get_truth_ht() -> Table:
-    """
-    Returns a table with the following annotations from the latest version of the corresponding truth data:
-    - hapmap
-    - kgp_omni (1000 Genomes intersection Onni 2.5M array)
-    - kgp_phase_1_hc (high confidence sites in 1000 genonmes)
-    - mills (Mills & Devine indels)
-    :return: A table with the latest version of popular truth data annotations
-    """
-    omni_ht = hl.read_table(omni)
-    mills_ht = hl.read_table(mills)
-    thousand_genomes_ht = hl.read_table(thousand_genomes)
-    hapmap_ht = hl.read_table(hapmap)
-    return (
-        hapmap_ht
-        .select(hapmap=True)
-        .join(omni_ht.select(omni=True), how="outer")
-        .join(thousand_genomes_ht.select(kgp_phase1_hc=True), how="outer")
-        .join(mills_ht.select(mills=True), how="outer")
-        .repartition(200, shuffle=False)
-        .persist()
-    )
+################################
+# Define the hail persistent storage directory
+tmp_dir = "hdfs://spark-master:9820/"
+temp_dir = "file:///home/ubuntu/data/tmp"
+plot_dir = "/home/ubuntu/data/tmp"
+######################################
+omni = f'{temp_dir}/ddd-elgh-ukbb/training_sets/1000G_omni2.5.hg38.ht'
+omni_ht = hl.read_table(omni)
+mills = f'{temp_dir}/ddd-elgh-ukbb/training_sets/Mills_and_1000G_gold_standard.indels.hg38.ht'
+mills_ht = hl.read_table(mills)
+thousand_genomes = f'{temp_dir}/ddd-elgh-ukbb/training_sets/1000G_phase1.snps.high_confidence.hg38.ht'
+thousand_genomes_ht = hl.read_table(thousand_genomes)
+hapmap = f'{temp_dir}/ddd-elgh-ukbb/training_sets/hapmap_3.3.hg38.ht'
+hapmap_ht = hl.read_table(hapmap)
+######################################
 
 
 def generate_trio_stats(
@@ -164,13 +155,34 @@ def generate_ac(mt: hl.MatrixTable, fam_file: str) -> hl.Table:
     return mt.rows()
 
 
+def get_truth_ht() -> Table:
+    """
+    Returns a table with the following annotations from the latest version of the corresponding truth data:
+    - hapmap
+    - kgp_omni (1000 Genomes intersection Onni 2.5M array)
+    - kgp_phase_1_hc (high confidence sites in 1000 genonmes)
+    - mills (Mills & Devine indels)
+    :return: A table with the latest version of popular truth data annotations
+    """
+    omni_ht = hl.read_table(omni)
+    mills_ht = hl.read_table(mills)
+    thousand_genomes_ht = hl.read_table(thousand_genomes)
+    hapmap_ht = hl.read_table(hapmap)
+    return (
+        hapmap_ht
+        .select(hapmap=True)
+        .join(omni_ht.select(omni=True), how="outer")
+        .join(thousand_genomes_ht.select(kgp_phase1_hc=True), how="outer")
+        .join(mills_ht.select(mills=True), how="outer")
+        .repartition(200, shuffle=False)
+        .persist()
+    )
+
+
 if __name__ == "__main__":
     # need to create spark cluster first before intiialising hail
     sc = pyspark.SparkContext()
-    # Define the hail persistent storage directory
-    tmp_dir = "hdfs://spark-master:9820/"
-    temp_dir = "file:///home/ubuntu/data/tmp"
-    plot_dir = "/home/ubuntu/data/tmp"
+
     hl.init(sc=sc, tmp_dir=tmp_dir, default_reference="GRCh38")
     # s3 credentials required for user to access the datasets in farm flexible compute s3 environment
     # you may use your own here from your .s3fg file in your home directory
@@ -179,56 +191,46 @@ if __name__ == "__main__":
     hadoop_config.set("fs.s3a.access.key", credentials["mer"]["access_key"])
     hadoop_config.set("fs.s3a.secret.key", credentials["mer"]["secret_key"])
 
-    ################################
-    omni = f'{temp_dir}/ddd-elgh-ukbb/training_sets/1000G_omni2.5.hg38.ht'
-    omni_ht = hl.read_table(omni)
-    mills = f'{temp_dir}/ddd-elgh-ukbb/training_sets/Mills_and_1000G_gold_standard.indels.hg38.ht'
-    mills_ht = hl.read_table(mills)
-    thousand_genomes = f'{temp_dir}/ddd-elgh-ukbb/training_sets/1000G_phase1.snps.high_confidence.hg38.ht'
-    thousand_genomes_ht = hl.read_table(thousand_genomes)
-    hapmap = f'{temp_dir}/ddd-elgh-ukbb/training_sets/hapmap_3.3.hg38.ht'
-    hapmap_ht = hl.read_table(hapmap)
-    truthset_table = hl.read_table(
-        f'{temp_dir}/ddd-elgh-ukbb/training_sets/truthset_table.ht')
-    #################################
-
-    # trio_stats_table = hl.read_table(
-    #    f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_trios_stats.ht')
     group = "raw"
 
-    # mt = hl.read_matrix_table(
-    #    f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_chr1-7and20_split.mt')
     mt = hl.read_matrix_table(
         f'{temp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1to6-20.mt')
 
-    mt = hl.variant_qc(mt)
-
+    # Truthset
+    truthset_ht = get_truth_ht()
+    truthset_ht.write(f'{tmp_dir}/ddd-elgh-ukbb/truthset.ht', overwrite=True)
+    # Trio data
     # trio annotation:
-    # mt_adj = annotate_adj(mt)
+    mt_adj = annotate_adj(mt)
     fam = f"{temp_dir}/ddd-elgh-ukbb/variant_qc/DDD_trios.fam"
     pedigree = hl.Pedigree.read(fam)
-  #  trio_dataset = hl.trio_matrix(mt_adj, pedigree, complete_trios=True)
-  #  trio_dataset.checkpoint(
-  #      f'{tmp_dir}/ddd-elgh-ukbb/mt_trios_adj.mt', overwrite=True)
-  #  trio_stats_ht = generate_trio_stats(
-  #      trio_dataset, autosomes_only=True, bi_allelic_only=True)
-  #  trio_stats_ht.write(
-  #      f'{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_trios_stats.ht', overwrite=True)
+    trio_dataset = hl.trio_matrix(mt_adj, pedigree, complete_trios=True)
+    trio_dataset.checkpoint(
+        f'{tmp_dir}/ddd-elgh-ukbb/mt_trios_adj.mt', overwrite=True)
+    trio_stats_ht = generate_trio_stats(
+        trio_dataset, autosomes_only=True, bi_allelic_only=True)
+    trio_stats_ht.write(
+        f'{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_trios_stats.ht', overwrite=True)
 
- #   mt_inbreeding = mt.annotate_rows(
- #       InbreedingCoeff=bi_allelic_site_inbreeding_expr(mt.GT))
+    # inbreeding ht
+    mt_inbreeding = mt.annotate_rows(
+        InbreedingCoeff=bi_allelic_site_inbreeding_expr(mt.GT))
 
     mt = mt.key_rows_by('locus').distinct_by_row(
     ).key_rows_by('locus', 'alleles')
 
-  #  ht_inbreeding = mt_inbreeding.rows()
+    ht_inbreeding = mt_inbreeding.rows()
+
+    # allele data and qc_ac ht
     allele_data_ht = generate_allele_data(mt)
 
     qc_ac_ht = generate_ac(mt, fam)
 
-#    ht_inbreeding.write(
-#        f'{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_inbreeding_new.ht', overwrite=True)
+    ht_inbreeding.write(
+        f'{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_inbreeding_new.ht', overwrite=True)
     qc_ac_ht.write(
         f'{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_qc_ac_new.ht', overwrite=True)
     allele_data_ht.write(
         f'{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_allele_data_new.ht', overwrite=True)
+
+    
