@@ -1,6 +1,8 @@
 # Pavlos Antoniou
-# 16/09/2020
-#  trio matrixtable creation from fam file
+# create Random Forest hail table
+#  based on gnomad code
+# 21/01/2021
+
 import os
 import hail as hl
 import pandas as pd
@@ -192,6 +194,8 @@ if __name__ == "__main__":
     ht = ht.annotate(ac_raw=ht.ac_qc_samples_raw)
     ht = ht.annotate(transmitted_singleton=(
         ht[f"n_transmitted_{group}"] == 1) & (ht[f"ac_qc_samples_{group}"] == 2))
+
+    # the following only selects the required RF fields but I commented it out because some of the fields excluded are needed later
     # ht = ht.select(
     #    "a_index",
     #    "was_split",
