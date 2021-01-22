@@ -73,19 +73,7 @@ INFO_FEATURES = [
     "AS_ReadPosRankSum",
     "AS_MQRankSum",
     "AS_SOR",
-]  # Note: AS_SOR is currently in VQSR HT and named SOR in the VQSR split HT
-# FEATURES = [
-#    "InbreedingCoeff",
-#    "variant_type",
-#    "n_alt_alleles",
-#    "allele_type",
-#    "has_star",
-# "was_mixed",
-#    "AS_QD",
-# "AS_MQRankSum",
-#    "AS_SOR",
-#    "AS_ReadPosRankSum",
-# ]
+]
 FEATURES = [
     "InbreedingCoeff",
     "variant_type",
@@ -419,95 +407,6 @@ def generate_final_rf_ht(
     return ht
 
 
-'''
-def train_rf_model_local(
-    ht: hl.Table,
-    rf_features: List[str],
-    tp_expr: hl.expr.BooleanExpression,
-    fp_expr: hl.expr.BooleanExpression,
-    fp_to_tp: float = 1.0,
-    num_trees: int = 500,
-    max_depth: int = 5,
-    test_expr: hl.expr.BooleanExpression = False,
-) -> Tuple[hl.Table, pyspark.ml.PipelineModel]:
-    """
-    Perform random forest (RF) training using a Table annotated with features and training data.
-    .. note::
-        This function uses `train_rf` and extends it by:
-            - Adding an option to apply the resulting model to test variants which are withheld from training.
-            - Uses a false positive (FP) to true positive (TP) ratio to determine what variants to use for RF training.
-    The returned Table includes the following annotations:
-        - rf_train: indicates if the variant was used for training of the RF model.
-        - rf_label: indicates if the variant is a TP or FP.
-        - rf_test: indicates if the variant was used in testing of the RF model.
-        - features: global annotation of the features used for the RF model.
-        - features_importance: global annotation of the importance of each feature in the model.
-        - test_results: results from testing the model on variants defined by `test_expr`.
-    :param ht: Table annotated with features for the RF model and the positive and negative training data.
-    :param rf_features: List of column names to use as features in the RF training.
-    :param tp_expr: TP training expression.
-    :param fp_expr: FP training expression.
-    :param fp_to_tp: Ratio of FPs to TPs for creating the RF model. If set to 0, all training examples are used.
-    :param num_trees: Number of trees in the RF model.
-    :param max_depth: Maxmimum tree depth in the RF model.
-    :param test_expr: An expression specifying variants to hold out for testing and use for evaluation only.
-    :return: Table with TP and FP training sets used in the RF training and the resulting RF model.
-    """
-
-    ht = ht.annotate(_tp=tp_expr, _fp=fp_expr, rf_test=test_expr)
-
-    rf_ht = sample_training_examples(
-        ht, tp_expr=ht._tp, fp_expr=ht._fp, fp_to_tp=fp_to_tp, test_expr=ht.rf_test
-    )
-    ht = ht.annotate(rf_train=rf_ht[ht.key].train,
-                     rf_label=rf_ht[ht.key].label)
-
-    summary = ht.group_by("_tp", "_fp", "rf_train", "rf_label", "rf_test").aggregate(
-        n=hl.agg.count()
-    )
-    logger.info("Summary of TP/FP and RF training data:")
-    summary.show(n=20)
-
-    logger.info(
-        "Training RF model:\nfeatures: {}\nnum_tree: {}\nmax_depth:{}".format(
-            ",".join(rf_features), num_trees, max_depth
-        )
-    )
-
-    rf_model = train_rf(
-        ht.filter(ht.rf_train),
-        features=rf_features,
-        label="rf_label",
-        num_trees=num_trees,
-        max_depth=max_depth,
-    )
-
-    test_results = None
-    if test_expr is not None:
-        logger.info(f"Testing model on specified variants or intervals...")
-        test_ht = ht.filter(hl.is_defined(ht.rf_label) & ht.rf_test)
-        test_results = test_model(
-            test_ht, rf_model, features=rf_features, label="rf_label"
-        )
-
-    print(test_results)
-
-    features_importance = get_features_importance(rf_model)
-    print("Test results:")
-    print(test_results)
-    print("Feature importance:")
-    print(features_importance)
-    print("RF featutes:")
-    print(rf_features)
-    ht = ht.select_globals(
-        features_importance=features_importance,
-        features=rf_features,
-        # test_results=test_results
-    )
-
-    return ht.select("rf_train", "rf_label", "rf_test"), rf_model
-'''
-
 ######################################
 # main
 ########################################
@@ -587,13 +486,6 @@ def main(args):
             f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_chr1-20-XY_sampleQC_FILTERED_FREQ_adj.ht')
         freq = freq_ht[ht.key]
 
-        # if not file_exists(
-        #    get_score_quantile_bins(args.run_hash, aggregated=True).path
-        # ):
-        #    sys.exit(
-        #        f"Could not find binned HT for RF  run {args.run_hash} (). Please run create_ranked_scores.py for that hash."
-        #    )
-        # aggregated_bin_ht = get_score_quantile_bins(ht, aggregated=True)
         print("created bin ht")
 
         ht = generate_final_rf_ht(
