@@ -1,6 +1,7 @@
 # Pavlos Antoniou
-# 16/09/2020
-#  trio matrixtable creation from fam file
+# 22/01/2021
+#  train and apply RF
+
 from hail import Table
 import os
 import pprint

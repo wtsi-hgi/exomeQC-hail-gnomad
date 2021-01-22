@@ -1,6 +1,7 @@
 # Pavlos Antoniou
-# 16/09/2020
-#  trio matrixtable creation from fam file
+# 22/01/2021
+#  rank and bin variants from RF
+
 from hail import Table
 import os
 import pprint
@@ -69,27 +70,6 @@ with open(f"{storage}", 'r') as f:
 with open(f"{thresholds}", 'r') as f:
     thresholds = json.load(f)
 
-LABEL_COL = "rf_label"
-TRAIN_COL = "rf_train"
-PREDICTION_COL = "rf_prediction"
-INFO_FEATURES = [
-    "AS_QD",
-    "AS_ReadPosRankSum",
-    "AS_MQRankSum",
-    "AS_SOR",
-]  # Note: AS_SOR is currently in VQSR HT and named SOR in the VQSR split HT
-FEATURES = [
-    "InbreedingCoeff",
-    "variant_type",
-    "allele_type",
-    "n_alt_alleles",
-    "was_mixed",
-    "has_star",
-    # "AS_QD",
-    #    "AS_MQRankSum",
-    #    "AS_SOR",
-    #    "AS_ReadPosRankSum",
-]
 
 TRUTH_DATA = ["hapmap", "omni", "mills", "kgp_phase1_hc"]
 INBREEDING_COEFF_HARD_CUTOFF = -0.3
