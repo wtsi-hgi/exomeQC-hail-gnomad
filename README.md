@@ -20,11 +20,11 @@ This script uploads data to s3 to be shared with hail cluster.
 
 ### import_data/2.import_vcf.py
 
-This scrip creates one chromosome per VCF file.
+This script imports the VCF files into hail and creates one hail matrixtable per chromosome.
 
 ## Part 2: Sample QC
 
-### sample_qc_v3/1.hard_filters_sex_annotation.py
+### sample_qc_v3/1.hard_filters_sex_annotation.py
 
 ### sample_qc_v3/2.ld_prune_relatednessPCA.py
 
