@@ -116,13 +116,13 @@ def main(args):
                         (hl.agg.mean(mt.GT.n_alt_alleles()) / 2 > 0.001) &
                         (hl.agg.fraction(hl.is_defined(mt.GT)) > 0.99))
     mt.annotate_cols(callrate=hl.agg.fraction(hl.is_defined(mt.GT))).write(
-        f"{args.output-dir}/mt_hard_filters_annotated.mt", overwrite=True)
+        f"{args.output_dir}/mt_hard_filters_annotated.mt", overwrite=True)
 
     print("Sex imputation:")
 
     mt_sex = annotate_sex(
-        mt, f"{args.output-dir}/sex_annotated", male_threshold=0.6)
-    mt_sex.write(f"{args.output-dir}/mt_sex_annotated.mt", overwrite=True)
+        mt, f"{args.output_dir}/sex_annotated", male_threshold=0.6)
+    mt_sex.write(f"{args.output_dir}/mt_sex_annotated.mt", overwrite=True)
 
     qc_ht = mt_sex.cols()
 
@@ -143,7 +143,7 @@ def main(args):
 
     qc_ht = qc_ht.annotate(
         sex=sex_expr, data_type='exomes').key_by('data_type', 's')
-    qc_ht.write(f"{args.output-dir}/mt_ambiguous_sex_samples.ht",
+    qc_ht.write(f"{args.output_dir}/mt_ambiguous_sex_samples.ht",
                 overwrite=True)
 
 
@@ -169,7 +169,7 @@ if __name__ == "__main__":
         type=str,
     )
     input_params.add_argument(
-        "--output-dir",
+        "--output_dir",
         help="Full path of output folder to store results. Preferably hdfs or secure lustre",
         default=tmp_dir,
         type=str
