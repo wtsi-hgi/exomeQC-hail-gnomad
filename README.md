@@ -25,6 +25,7 @@ This script imports the VCF files into hail and creates one hail matrixtable per
 ## Part 2: Sample QC
 
 ### sample_qc_v3/1.hard_filters_sex_annotation.py
+Input: A matrixtable that contains chrX and chrY variation. 
 
 ### sample_qc_v3/2.ld_prune_relatednessPCA.py
 
