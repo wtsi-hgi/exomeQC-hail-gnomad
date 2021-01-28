@@ -2,7 +2,7 @@
 # Apply ld_pruning and PCA relatedness
 # Pavlos Antoniou
 # pa10@sanger.ac.uk
-# 19/01/2021
+# 28/01/2021
 
 
 import os
@@ -13,8 +13,14 @@ import sys
 import re
 from pathlib import Path
 import logging
+import argparse
 from typing import List, Tuple
 from bokeh.plotting import output_file, save, show
+
+tmp_dir = "hdfs://spark-master:9820/"
+temp_dir = "file:///home/ubuntu/data/tmp"
+plot_dir = "/home/ubuntu/data/tmp"
+
 
 logging.basicConfig(format="%(levelname)s (%(name)s %(lineno)s): %(message)s")
 logger = logging.getLogger("unified_sample_qc_a")
@@ -79,32 +85,13 @@ def get_related_samples_to_drop(rank_table: hl.Table, relatedness_ht: hl.Table) 
     return related_samples_to_drop_ranked.select(**related_samples_to_drop_ranked.node.id).key_by('data_type', 's')
 
 
-if __name__ == "__main__":
-    # need to create spark cluster first before intiialising hail
-    sc = pyspark.SparkContext()
-    # Define the hail persistent storage directory
-    tmp_dir = "hdfs://spark-master:9820/"
-    temp_dir = os.path.join(os.environ["HAIL_HOME"], "tmp")
-    hl.init(sc=sc, tmp_dir=tmp_dir, default_reference="GRCh38")
-    # s3 credentials required for user to access the datasets in farm flexible compute s3 environment
-    # you may use your own here from your .s3fg file in your home directory
-    hadoop_config = sc._jsc.hadoopConfiguration()
-
-    hadoop_config.set("fs.s3a.access.key", credentials["mer"]["access_key"])
-    hadoop_config.set("fs.s3a.secret.key", credentials["mer"]["secret_key"])
-
-    #####################################################################
-    ###################### INPUT DATA  ##############################
-    #####################################################################
-
-    mt = hl.read_matrix_table(
-        f"{temp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_sex_annotations.mt")
-
+def main(args):
+    mt = hl.read_matrix_table(args.matrixtable)
     # ld pruning
     pruned_ht = hl.ld_prune(mt.GT, r2=0.1)
     pruned_mt = mt.filter_rows(hl.is_defined(pruned_ht[mt.row_key]))
     pruned_mt.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_ldpruned.mt", overwrite=True)
+        f"{args.output_dir}/mt_ldpruned.mt", overwrite=True)
 
     # PC relate
     pruned_mt = pruned_mt.select_entries(
@@ -113,17 +100,17 @@ if __name__ == "__main__":
     eig, scores, _ = hl.hwe_normalized_pca(
         pruned_mt.GT, k=10, compute_loadings=False)
     scores.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_pruned.pca_scores.ht", overwrite=True)
+        f"{args.output_dir}/mt_pruned.pca_scores.ht", overwrite=True)
 
     relatedness_ht = hl.pc_relate(pruned_mt.GT, min_individual_maf=0.05,
                                   scores_expr=scores[pruned_mt.col_key].scores, block_size=4096, min_kinship=0.05, statistics='kin2')
     relatedness_ht.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_relatedness.ht", overwrite=True)
+        f"{args.output_dir}/mt_relatedness.ht", overwrite=True)
     pairs = relatedness_ht.filter(relatedness_ht['kin'] > 0.125)
     related_samples_to_remove = hl.maximal_independent_set(
         pairs.i, pairs.j, keep=False)
     related_samples_to_remove.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_related_samples_to_remove.ht", overwrite=True)
+        f"{args.output_dir}/mt_related_samples_to_remove.ht", overwrite=True)
 
     pca_mt = pruned_mt.filter_cols(hl.is_defined(
         related_samples_to_remove[pruned_mt.col_key]), keep=False)
@@ -138,7 +125,7 @@ if __name__ == "__main__":
 
     plink_mt = pca_mt.annotate_cols(
         uid=pca_mt.s).key_cols_by('uid')
-    hl.export_plink(plink_mt, f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_unrelated.plink",
+    hl.export_plink(plink_mt, f"{args.output_dir}/mt_unrelated.plink",
                     fam_id=plink_mt.uid, ind_id=plink_mt.uid)
     pca_evals, pca_scores, pca_loadings = hl.hwe_normalized_pca(
         pca_mt.GT, k=20, compute_loadings=True)
@@ -146,10 +133,10 @@ if __name__ == "__main__":
         pca_af=hl.agg.mean(pca_mt.GT.n_alt_alleles()) / 2).rows()
     pca_loadings = pca_loadings.annotate(
         pca_af=pca_af_ht[pca_loadings.key].pca_af)
-    # pca_scores.write(
-    #    f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_pca_scores.ht", overwrite=True)
-    # pca_loadings.write(
-    #    f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_pca_loadings.ht", overwrite=True)
+    pca_scores.write(
+        f"{args.output_dir}/mt_pca_scores.ht", overwrite=True)
+    pca_loadings.write(
+        f"{args.output_dir}/mt_pca_loadings.ht", overwrite=True)
 
     pca_mt = pca_mt.annotate_cols(scores=pca_scores[pca_mt.col_key].scores)
 
@@ -160,9 +147,50 @@ if __name__ == "__main__":
     #relateds = relateds.annotate(scores=related_scores[relateds.key].scores)
 
     pca_mt.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_pca.mt", overwrite=True)
+        f"{args.output_dir}/mt_pca.mt", overwrite=True)
     p = hl.plot.scatter(pca_mt.scores[0],
                         pca_mt.scores[1],
                         title='PCA', xlabel='PC1', ylabel='PC2')
-    output_file(f"{temp_dir}/ddd-elgh-ukbb/pca.html")
+    output_file(f"{args.plot_dir}/pca.html")
     save(p)
+
+
+if __name__ == "__main__":
+    # need to create spark cluster first before intiialising hail
+    sc = pyspark.SparkContext()
+    # Define the hail persistent storage directory
+    hl.init(sc=sc, tmp_dir=tmp_dir, default_reference="GRCh38")
+    # s3 credentials required for user to access the datasets in farm flexible compute s3 environment
+    # you may use your own here from your .s3fg file in your home directory
+    hadoop_config = sc._jsc.hadoopConfiguration()
+
+    hadoop_config.set("fs.s3a.access.key", credentials["mer"]["access_key"])
+    hadoop_config.set("fs.s3a.secret.key", credentials["mer"]["secret_key"])
+
+    #####################################################################
+    ###################### INPUT DATA  ##############################
+    #####################################################################
+    parser = argparse.ArgumentParser()
+    # Read the matrixtable, chrX and chrY should be included
+    input_params = parser.add_argument_group("Input parameters")
+    input_params.add_argument(
+        "--matrixtable",
+        help="Full path of input matrixtable after sex annotation and hard filtering. Path format \"file:///home/ubuntu/data/tmp/path/to/.mt\"",
+        default=f"{temp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_sex_annotations.mt",
+        type=str,
+    )
+    input_params.add_argument(
+        "--output_dir",
+        help="Full path of output folder to store results. Preferably hdfs or secure lustre",
+        default=tmp_dir,
+        type=str
+    )
+    input_params.add_argument(
+        "--plot_dir",
+        help="Path to output plots. Must be of this format:\"file:///home/ubuntu/data/tmp\"",
+        default=temp_dir,
+        type=str
+    )
+
+    args = parser.parse_args()
+    main(args)

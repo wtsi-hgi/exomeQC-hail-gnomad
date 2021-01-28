@@ -30,7 +30,7 @@ This script will apply gnomad hard filters and assign sex to each sample.
 
 ```python
 usage: 1.hard_filters_sex_annotation.py [-h] [--matrixtable MATRIXTABLE]
-                                        [--output-dir OUTPUT_DIR]
+                                        [--output_dir OUTPUT_DIR]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -38,13 +38,34 @@ optional arguments:
 Input parameters:
   --matrixtable MATRIXTABLE
                         Full path of input matrixtable. chrX and chrY
-                        variation should be included
-  --output-dir OUTPUT_DIR
+                        variation should be included. Path format
+                        "file:///home/ubuntu/data/tmp/path/to/.mt"
+  --output_dir OUTPUT_DIR
                         Full path of output folder to store results.
                         Preferably hdfs or secure lustre
 ```
 
 ### sample_qc_v3/2.ld_prune_relatednessPCA.py
+
+```python
+usage: 2.ld_prune_relatednessPCA.py [-h] [--matrixtable MATRIXTABLE]
+                                    [--output_dir OUTPUT_DIR]
+                                    [--plot_dir PLOT_DIR]
+
+optional arguments:
+  -h, --help            show this help message and exit
+
+Input parameters:
+  --matrixtable MATRIXTABLE
+                        Full path of input matrixtable after sex annotation
+                        and hard filtering. Path format
+                        "file:///home/ubuntu/data/tmp/path/to/.mt"
+  --output_dir OUTPUT_DIR
+                        Full path of output folder to store results.
+                        Preferably hdfs or secure lustre
+  --plot_dir PLOT_DIR   Path to output plots. Must be of this
+                        format:"file:///home/ubuntu/data/tmp"
+```
 
 ### sample_qc_v3/3.population_PCA_prediction.py
 
