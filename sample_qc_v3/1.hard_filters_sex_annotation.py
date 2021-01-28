@@ -21,7 +21,8 @@ logging.basicConfig(format="%(levelname)s (%(name)s %(lineno)s): %(message)s")
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 tmp_dir = "hdfs://spark-master:9820/"
-temp_dir = os.path.join(os.environ["HAIL_HOME"], "tmp")
+temp_dir = "file:///home/ubuntu/data/tmp"
+plot_dir = "/home/ubuntu/data/tmp"
 
 
 def get_reference_genome(
