@@ -8,6 +8,7 @@ import os
 import hail as hl
 import pandas as pd
 import pyspark
+import argparse
 import json
 import sys
 import re
@@ -15,11 +16,13 @@ from pathlib import Path
 import logging
 from typing import Any, Counter, List, Optional, Tuple, Union
 from bokeh.plotting import output_file, save, show
-from gnomad_ancestry import pc_project, run_pca_with_relateds, assign_population_pcs
 
 logging.basicConfig(format="%(levelname)s (%(name)s %(lineno)s): %(message)s")
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+tmp_dir = "hdfs://spark-master:9820/"
+temp_dir = "file:///home/ubuntu/data/tmp"
+plot_dir = "/home/ubuntu/data/tmp"
 
 
 def get_reference_genome(
@@ -105,36 +108,21 @@ def annotate_sex(mt: hl.MatrixTable, out_internal_mt_prefix: str,
     return mt
 
 
-if __name__ == "__main__":
-    # need to create spark cluster first before intiialising hail
-    sc = pyspark.SparkContext()
-    # Define the hail persistent storage directory
-    tmp_dir = "hdfs://spark-master:9820/"
-    temp_dir = os.path.join(os.environ["HAIL_HOME"], "tmp")
-    hl.init(sc=sc, tmp_dir=tmp_dir, default_reference="GRCh38")
-    # s3 credentials required for user to access the datasets in farm flexible compute s3 environment
-    # you may use your own here from your .s3fg file in your home directory
-    hadoop_config = sc._jsc.hadoopConfiguration()
+def main(args):
+    mt = hl.read_matrix_table(args.matrixtable)
 
-    hadoop_config.set("fs.s3a.access.key", credentials["mer"]["access_key"])
-    hadoop_config.set("fs.s3a.secret.key", credentials["mer"]["secret_key"])
-
-    # Read the matrixtable, chrX and chrY should be included
-    mt = hl.read_matrix_table(
-        f"{temp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_cohorts_split.mt")
-
-   # From gnomad apply hard filters:
+    # From gnomad apply hard filters:
     mt = mt.filter_rows((hl.len(mt.alleles) == 2) & hl.is_snp(mt.alleles[0], mt.alleles[1]) &
                         (hl.agg.mean(mt.GT.n_alt_alleles()) / 2 > 0.001) &
                         (hl.agg.fraction(hl.is_defined(mt.GT)) > 0.99))
     mt.annotate_cols(callrate=hl.agg.fraction(hl.is_defined(mt.GT))).write(
-        f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_annotated.mt", overwrite=True)
+        f"{args.output_dir}/mt_hard_filters_annotated.mt", overwrite=True)
 
     print("Sex imputation:")
 
     mt_sex = annotate_sex(
-        mt, f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY", male_threshold=0.6)
-    mt_sex.write(f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_sex.mt")
+        mt, f"{args.output_dir}/sex_annotated", male_threshold=0.6)
+    mt_sex.write(f"{args.output_dir}/mt_sex_annotated.mt", overwrite=True)
 
     qc_ht = mt_sex.cols()
 
@@ -155,5 +143,37 @@ if __name__ == "__main__":
 
     qc_ht = qc_ht.annotate(
         sex=sex_expr, data_type='exomes').key_by('data_type', 's')
-    qc_ht.write(f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_ambiguous_sex_samples.ht",
+    qc_ht.write(f"{args.output_dir}/mt_ambiguous_sex_samples.ht",
                 overwrite=True)
+
+
+if __name__ == "__main__":
+    # need to create spark cluster first before intiialising hail
+    sc = pyspark.SparkContext()
+    # Define the hail persistent storage directory
+
+    hl.init(sc=sc, tmp_dir=tmp_dir, default_reference="GRCh38")
+    # s3 credentials required for user to access the datasets in farm flexible compute s3 environment
+    # you may use your own here from your .s3fg file in your home directory
+    hadoop_config = sc._jsc.hadoopConfiguration()
+
+    hadoop_config.set("fs.s3a.access.key", credentials["mer"]["access_key"])
+    hadoop_config.set("fs.s3a.secret.key", credentials["mer"]["secret_key"])
+    parser = argparse.ArgumentParser()
+    # Read the matrixtable, chrX and chrY should be included
+    input_params = parser.add_argument_group("Input parameters")
+    input_params.add_argument(
+        "--matrixtable",
+        help="Full path of input matrixtable. chrX and chrY variation should be included",
+        default=f"{temp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_cohorts_split.mt",
+        type=str,
+    )
+    input_params.add_argument(
+        "--output_dir",
+        help="Full path of output folder to store results. Preferably hdfs or secure lustre",
+        default=tmp_dir,
+        type=str
+    )
+
+    args = parser.parse_args()
+    main(args)
