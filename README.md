@@ -47,6 +47,8 @@ Input parameters:
 
 ### sample_qc_v3/2.ld_prune_relatednessPCA.py
 
+Perform ld pruning and calculate relatedness of samples. Create a basic preliminary PCA to cluster samples into groups from relatedness metrics.
+
 ```python
 usage: 2.ld_prune_relatednessPCA.py [-h] [--matrixtable MATRIXTABLE]
                                     [--output_dir OUTPUT_DIR]
