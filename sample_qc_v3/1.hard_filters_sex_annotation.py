@@ -164,7 +164,7 @@ if __name__ == "__main__":
     input_params = parser.add_argument_group("Input parameters")
     input_params.add_argument(
         "--matrixtable",
-        help="Full path of input matrixtable. chrX and chrY variation should be included",
+        help="Full path of input matrixtable. chrX and chrY variation should be included. Path format \"file:///home/ubuntu/data/tmp/path/to/.mt\"",
         default=f"{temp_dir}/ddd-elgh-ukbb/chr1_chr20_XY_cohorts_split.mt",
         type=str,
     )
