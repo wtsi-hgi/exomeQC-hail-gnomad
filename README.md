@@ -18,20 +18,21 @@ pip install gnomad
 
 This script uploads data to s3 to be shared with hail cluster.
 
-usage: 1.hard_filters_sex_annotation.py [-h] [--matrixtable MATRIXTABLE]\
-[--output-dir OUTPUT_DIR]\
-optional arguments:\
--h, --help show this help message and exit
+```python
+usage: 1.hard_filters_sex_annotation.py [-h] [--matrixtable MATRIXTABLE]
+                                        [--output-dir OUTPUT_DIR]
 
-Input parameters:\
+optional arguments:
+  -h, --help            show this help message and exit
 
---matrixtable MATRIXTABLE
-
-Full path of input matrixtable. chrX and chrY
-
-variation should be included
-
---output-dir OUTPUT_DIR
+Input parameters:
+  --matrixtable MATRIXTABLE
+                        Full path of input matrixtable. chrX and chrY
+                        variation should be included
+  --output-dir OUTPUT_DIR
+                        Full path of output folder to store results.
+                        Preferably hdfs or secure lustre
+```
 
 Full path of output folder to store results.Preferably hdfs or secure lustre
 
