@@ -17,6 +17,19 @@ pip install gnomad
 ### import_data/1.upload_vcf_from_farm_to_s3.sh
 
 This script uploads data to s3 to be shared with hail cluster.
+usage: 1.hard_filters_sex_annotation.py [-h] [--matrixtable MATRIXTABLE]
+[--output-dir OUTPUT_DIR]
+
+optional arguments:
+-h, --help show this help message and exit
+
+Input parameters:
+--matrixtable MATRIXTABLE
+Full path of input matrixtable. chrX and chrY
+variation should be included
+--output-dir OUTPUT_DIR
+Full path of output folder to store results.
+Preferably hdfs or secure lustre
 
 ### import_data/2.import_vcf.py
 
@@ -25,7 +38,8 @@ This script imports the VCF files into hail and creates one hail matrixtable per
 ## Part 2: Sample QC
 
 ### sample_qc_v3/1.hard_filters_sex_annotation.py
-Input: A matrixtable that contains chrX and chrY variation. 
+
+Input: A matrixtable that contains chrX and chrY variation.
 
 ### sample_qc_v3/2.ld_prune_relatednessPCA.py
 
