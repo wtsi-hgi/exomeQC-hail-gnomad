@@ -26,7 +26,7 @@ This script imports the VCF files into hail and creates one hail matrixtable per
 
 ### sample_qc_v3/1.hard_filters_sex_annotation.py
 
-Input: A matrixtable that contains chrX and chrY variation.
+This script will apply gnomad hard filters and assign sex to each sample.
 
 ```python
 usage: 1.hard_filters_sex_annotation.py [-h] [--matrixtable MATRIXTABLE]
