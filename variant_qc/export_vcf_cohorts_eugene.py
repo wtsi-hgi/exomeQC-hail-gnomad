@@ -88,13 +88,12 @@ if __name__ == "__main__":
         print(numofsamples)
         n_called = hl.agg.count_where(hl.is_defined(mt_cohort.GT))
         missingness = (n_called / numofsamples) * 2
-        call_stats = hl.agg.call_stats(mt_cohort.GT, mt_cohort.alleles)
-        AC = mt_cohort.call_stats.AC
-        AN = mt.call_stats.AN
-        maf = hl.float64(mt.final_AC[1]/mt.AN)
-
-        print(cohort)
-        print(missingness)
-        print(AC)
-        print(AN)
-        print(maf)
+        mt_cohort = mt_cohort.annotate_rows(
+            call_stats=hl.agg.call_stats(mt_cohort.GT, mt_cohort.alleles))
+        mt_cohort = mt_cohort.annotate_rows(AC=mt_cohort.call_stats.AC)
+        mt_cohort = mt_cohort.annotate_rows(AN=mt_cohort.call_stats.AN)
+        mt_cohort = mt_cohort.annotate_rows(
+            maf=hl.float64(mt_cohort.final_AC[1]/mt_cohort.final_AN))
+        print(mt_cohort.AC)
+        print(mt_cohort.AN)
+        print(mt_cohort.maf)
