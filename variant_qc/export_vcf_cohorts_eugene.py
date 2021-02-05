@@ -93,7 +93,7 @@ if __name__ == "__main__":
         mt_cohort = mt_cohort.annotate_rows(AC=mt_cohort.call_stats.AC)
         mt_cohort = mt_cohort.annotate_rows(AN=mt_cohort.call_stats.AN)
         mt_cohort = mt_cohort.annotate_rows(
-            maf=hl.float64(mt_cohort.final_AC[1]/mt_cohort.final_AN))
+            maf=hl.float64(mt_cohort.AC[1]/mt_cohort.AN))
         print(mt_cohort.AC)
         print(mt_cohort.AN)
         print(mt_cohort.maf)
