@@ -114,6 +114,12 @@ if __name__ == "__main__":
         info=mt.info.annotate(missingness_cohorts=mt.missingness_cohorts)
     )
 
-    mt = mt.checkpoint(f'{tmp_dir}/matrixtable_with_stats.mt', overwrite=True)
+    mt = mt.checkpoint(
+        f'{tmp_dir}/Sanger_WES_mt_with_stats.mt', overwrite=True)
     hl.export_vcf(
-        mt, f'{tmp_dir}/Sanger_cohorts_chr1-7and20_after_RF_stats.vcf.bgz', parallel='separate_header')
+        mt, f'{tmp_dir}/Sanger_WES_chr1-7and20_after_RF_cohort_stats.vcf.bgz', parallel='separate_header')
+
+    mt1 = mt.select_entries()
+    mt_fin = mt1.filter_cols(mt1['s'] == 'sample')
+    hl.export_vcf(
+        mt_fin, f"{tmp_dir}/Sanger_WES_chr1-7and20_stats_for_VEP.vcf.bgz", parallel='separate_header')
