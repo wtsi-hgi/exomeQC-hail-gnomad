@@ -76,24 +76,44 @@ if __name__ == "__main__":
     table_cohort = hl.import_table(
         f"{temp_dir}/ddd-elgh-ukbb/sanger_cohorts_corrected_ukbb_july_2020.tsv", delimiter="\t").key_by('s')
 
-    mt_result = mt.annotate_cols(cohort=table_cohort[mt.s].cohort)
+    mt = mt.annotate_cols(cohort=table_cohort[mt.s].cohort)
     df = pd.read_csv(
         f"{temp_dir}/ddd-elgh-ukbb/sanger_cohorts_corrected_ukbb_july_2020.tsv", sep="\t")
     cohorts_array = df.cohort.unique()
 
-    for cohort in cohorts_array:
-        mt_cohort = mt_result.filter_cols(mt_result['cohort'] == cohort)
-        numofsamples = mt_cohort.aggregate_cols(
-            hl.agg.count_where(hl.is_defined('s')))
-        print(numofsamples)
-        n_called = hl.agg.count_where(hl.is_defined(mt_cohort.GT))
-        missingness = (n_called / numofsamples) * 2
-        mt_cohort = mt_cohort.annotate_rows(
-            call_stats=hl.agg.call_stats(mt_cohort.GT, mt_cohort.alleles))
-        mt_cohort = mt_cohort.annotate_rows(AC=mt_cohort.call_stats.AC)
-        mt_cohort = mt_cohort.annotate_rows(AN=mt_cohort.call_stats.AN)
-        mt_cohort = mt_cohort.annotate_rows(
-            maf=hl.float64(mt_cohort.AC[1]/mt_cohort.AN))
-        print(mt_cohort.AC)
-        print(mt_cohort.AN)
-        print(mt_cohort.maf)
+    mt = mt.annotate_rows(
+        MAF_cohorts=hl.agg.group_by(mt.cohort,
+                                    hl.min(hl.agg.call_stats(mt.GT, mt.alleles).AF))
+    )
+    mt = mt.annotate_rows(
+        AN_cohorts=hl.agg.group_by(mt.cohort,
+                                   hl.min(hl.agg.call_stats(mt.GT, mt.alleles).AN))
+    )
+
+    mt = mt.annotate_rows(
+        AC_cohorts=hl.agg.group_by(mt.cohort,
+                                   hl.min(hl.agg.call_stats(mt.GT, mt.alleles).AC))
+    )
+
+    mt = mt.annotate_rows(
+        missingness_cohorts=hl.agg.group_by(mt.cohort, hl.min(
+            (hl.agg.count_where(hl.is_missing(mt['GT']))) / mt.count_rows()*2))
+
+    )
+
+    mt = mt.annotate_rows(
+        info=mt.info.annotate(MAF_cohorts=mt.MAF_cohorts)
+    )
+    mt = mt.annotate_rows(
+        info=mt.info.annotate(AN_cohorts=mt.AN_cohorts)
+    )
+    mt = mt.annotate_rows(
+        info=mt.info.annotate(AC_cohorts=mt.AC_cohorts)
+    )
+    mt = mt.annotate_rows(
+        info=mt.info.annotate(missingness_cohorts=mt.missingness_cohorts)
+    )
+
+    mt = mt.checkpoint(f'{tmp_dir}/matrixtable_with_stats.mt', overwite=True)
+    hl.export_vcf(
+        mt, f'{tmp_dir}/Sanger_cohorts_chr1-7and20_after_RF_stats.vcf.bgz', parallel='separate_header')
