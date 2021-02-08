@@ -102,16 +102,23 @@ if __name__ == "__main__":
     )
 
     mt = mt.annotate_rows(
-        info=mt.info.annotate(MAF_cohorts=mt.MAF_cohorts)
+        info=mt.info.annotate(cohort_names=mt.MAF_cohorts.keys())
     )
     mt = mt.annotate_rows(
-        info=mt.info.annotate(AN_cohorts=mt.AN_cohorts)
+        info=mt.info.annotate(MAF_cohorts_values=mt.MAF_cohorts.values())
     )
+
     mt = mt.annotate_rows(
-        info=mt.info.annotate(AC_cohorts=mt.AC_cohorts)
+        info=mt.info.annotate(AN_cohorts_values=mt.AN_cohorts.values())
     )
+
     mt = mt.annotate_rows(
-        info=mt.info.annotate(missingness_cohorts=mt.missingness_cohorts)
+        info=mt.info.annotate(AC_cohorts=mt.AC_cohorts.values())
+    )
+
+    mt = mt.annotate_rows(
+        info=mt.info.annotate(
+            missingness_cohorts_values=mt.missingness_cohorts.values())
     )
 
     # mt = mt.checkpoint(
