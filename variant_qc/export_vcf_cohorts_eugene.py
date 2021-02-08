@@ -114,8 +114,8 @@ if __name__ == "__main__":
         info=mt.info.annotate(missingness_cohorts=mt.missingness_cohorts)
     )
 
-    mt = mt.checkpoint(
-        f'{tmp_dir}/Sanger_WES_mt_with_stats.mt', overwrite=True)
+    # mt = mt.checkpoint(
+    #    f'{tmp_dir}/Sanger_WES_mt_with_stats.mt', overwrite=True)
     hl.export_vcf(
         mt, f'{tmp_dir}/Sanger_WES_chr1-7and20_after_RF_cohort_stats.vcf.bgz', parallel='separate_header')
 
