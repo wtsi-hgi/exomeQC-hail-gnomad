@@ -52,7 +52,7 @@ with open(f"{thresholds}", 'r') as f:
 
 tmp_dir = "hdfs://spark-master:9820/"
 temp_dir = "file:///home/ubuntu/data/tmp"
-lustre_dir = "/lustre/scratch123/teams/hgi/mercury/pavlos-test"
+lustre_dir = "file:///lustre/scratch123/teams/hgi/mercury/pavlos-test"
 plot_dir = "/home/ubuntu/data/tmp"
 
 if __name__ == "__main__":
@@ -70,7 +70,8 @@ if __name__ == "__main__":
     n_partitions = 500
 
     mt = hl.read_matrix_table(
-        f'{lustre_dir}/Sanger_cohorts_chr1-7and20_after_RF_final.mt')
+        f'{lustre_dir}/Sanger_cohorts_chr1-7and20_after_RF_final/Sanger_cohorts_chr1-7and20_after_RF_final.mt')
+        
 
     table_cohort = hl.import_table(
         f"{lustre_dir}/sanger_cohorts_corrected_ukbb_july_2020.tsv", delimiter="\t").key_by('s')
