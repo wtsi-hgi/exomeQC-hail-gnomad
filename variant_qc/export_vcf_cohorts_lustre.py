@@ -70,8 +70,8 @@ if __name__ == "__main__":
     n_partitions = 500
 
     mt = hl.read_matrix_table(
-        f'{lustre_dir}/Sanger_cohorts_chr1-7and20_after_RF_final/Sanger_cohorts_chr1-7and20_after_RF_final.mt')
-        
+        f'{lustre_dir}/Sanger_cohorts_chr1-7and20_after_RF_final.mt')
+
 
     table_cohort = hl.import_table(
         f"{lustre_dir}/sanger_cohorts_corrected_ukbb_july_2020.tsv", delimiter="\t").key_by('s')
