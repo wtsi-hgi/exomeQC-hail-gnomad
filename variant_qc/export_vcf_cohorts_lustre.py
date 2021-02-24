@@ -72,7 +72,6 @@ if __name__ == "__main__":
     mt = hl.read_matrix_table(
         f'{lustre_dir}/Sanger_cohorts_chr1-7and20_after_RF_final.mt')
 
-
     table_cohort = hl.import_table(
         f"{lustre_dir}/sanger_cohorts_corrected_ukbb_july_2020.tsv", delimiter="\t").key_by('s')
 
@@ -122,11 +121,11 @@ if __name__ == "__main__":
     )
 
     mt = mt.checkpoint(
-        f'{lustre_dir}/Sanger_WES_mt_with_stats.mt', overwrite=True)
+        f'{lustre_dir}/Sanger_WES_mt_with_stats_w30.mt', overwrite=True)
     hl.export_vcf(
-        mt, f'{lustre_dir}/Sanger_WES_chr1-7and20_after_RF_cohort_stats.vcf.bgz', parallel='separate_header')
+        mt, f'{lustre_dir}/Sanger_WES_chr1-7and20_after_RF_cohort_stats_w30.vcf.bgz', parallel='separate_header')
 
     mt1 = mt.select_entries()
     mt_fin = mt1.filter_cols(mt1['s'] == 'sample')
     hl.export_vcf(
-        mt_fin, f"{lustre_dir}/Sanger_WES_chr1-7and20_stats_for_VEP.vcf.bgz", parallel='separate_header')
+        mt_fin, f"{lustre_dir}/Sanger_WES_chr1-7and20_stats_for_VEP_w30.vcf.bgz", parallel='separate_header')
