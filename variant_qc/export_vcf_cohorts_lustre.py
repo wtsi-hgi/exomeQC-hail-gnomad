@@ -121,11 +121,11 @@ if __name__ == "__main__":
     )
 
     mt = mt.checkpoint(
-        f'{lustre_dir}/Sanger_WES_mt_with_stats_w30.mt', overwrite=True)
+        f'{lustre_dir}/Sanger_WES_mt_with_stats_w20.mt', overwrite=True)
     hl.export_vcf(
-        mt, f'{lustre_dir}/Sanger_WES_chr1-7and20_after_RF_cohort_stats_w30.vcf.bgz', parallel='separate_header')
+        mt, f'{lustre_dir}/Sanger_WES_chr1-7and20_after_RF_cohort_stats_w20.vcf.bgz', parallel='separate_header')
 
     mt1 = mt.select_entries()
     mt_fin = mt1.filter_cols(mt1['s'] == 'sample')
     hl.export_vcf(
-        mt_fin, f"{lustre_dir}/Sanger_WES_chr1-7and20_stats_for_VEP_w30.vcf.bgz", parallel='separate_header')
+        mt_fin, f"{lustre_dir}/Sanger_WES_chr1-7and20_stats_for_VEP_w20.vcf.bgz", parallel='separate_header')
