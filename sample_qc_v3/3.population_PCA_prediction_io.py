@@ -15,9 +15,17 @@ import sys
 import re
 from pathlib import Path
 import logging
+import argparse
 from typing import Any, Counter, List, Optional, Tuple, Union
 from bokeh.plotting import output_file, save, show
 from gnomad_ancestry import pc_project, run_pca_with_relateds, assign_population_pcs
+
+tmp_dir = "hdfs://spark-master:9820/"
+temp_dir = "file:///home/ubuntu/data/tmp"
+plot_dir = "/home/ubuntu/data/tmp"
+AKT_overlap = "s3a://DDD-ELGH-UKBB-exomes/ancestry/WES_AKT_1kg_intersection.vcf.mt"
+cohorts_populations = "s3a://DDD-ELGH-UKBB-exomes/ancestry/sanger_cohort_known_populations_ukbb_elgh_labels_updated.tsv"
+locations_exclude_from_pca = f"{temp_dir}/1000g/price_high_ld.bed.txt"
 
 logging.basicConfig(format="%(levelname)s (%(name)s %(lineno)s): %(message)s")
 logger = logging.getLogger(__name__)
@@ -81,41 +89,28 @@ with open(f"{storage}", 'r') as f:
 with open(f"{thresholds}", 'r') as f:
     thresholds = json.load(f)
 
-if __name__ == "__main__":
-    # need to create spark cluster first before intiialising hail
-    sc = pyspark.SparkContext()
-    # Define the hail persistent storage directory
-    tmp_dir = "hdfs://spark-master:9820/"
-    temp_dir = os.path.join(os.environ["HAIL_HOME"], "tmp")
-    hl.init(sc=sc, tmp_dir=tmp_dir, default_reference="GRCh38")
-    # s3 credentials required for user to access the datasets in farm flexible compute s3 environment
-    # you may use your own here from your .s3fg file in your home directory
-    hadoop_config = sc._jsc.hadoopConfiguration()
 
-    hadoop_config.set("fs.s3a.access.key", credentials["mer"]["access_key"])
-    hadoop_config.set("fs.s3a.secret.key", credentials["mer"]["secret_key"])
+def main(args):
 
     bed_to_exclude_pca = hl.import_bed(
-        f"{temp_dir}/1000g/price_high_ld.bed.txt", reference_genome='GRCh38')
+        locations_exclude_from_pca, reference_genome='GRCh38')
     cohorts_pop = hl.import_table(
-        "s3a://DDD-ELGH-UKBB-exomes/ancestry/sanger_cohort_known_populations_ukbb_elgh_labels_updated.tsv", delimiter="\t").key_by('s')
+        cohorts_populations, delimiter="\t").key_by('s')
 
-    # s3a://DDD-ELGH-UKBB-exomes/ancestry/WES_AKT_1kg_intersection.vcf.mt
     # # overlap AKT dataset
-    overlap_1kg_AKT = hl.import_matrix_table(
-        f"{temp_dir}/ddd-elgh-ukbb/WES_AKT_1kg_intersection.mt")
+    overlap_1kg_AKT = hl.import_matrix_table(AKT_overlap)
     # drop cohorts
     # annotate with cohorts and populations from s3 table.
     # save matrixtable
     mt = hl.read_matrix_table(
-        f"{temp_dir}/ddd-elgh-ukbb/relatedness_ancestry/ddd-elgh-ukbb/chr1_chr20_XY_ldpruned.mt")
+        args.matrixtable)
     mt = mt.annotate_cols(cohort=cohorts_pop[mt.s].cohort)
     mt = mt.annotate_cols(original_pop=cohorts_pop[mt.s].known_population)
     mt = mt.annotate_cols(known_pop=cohorts_pop[mt.s].known_population_updated)
-    mt = mt.annotate_cols(superpopulation=cohorts_pop[mt.s].superpopulation)
+   # mt = mt.annotate_cols(superpopulation=cohorts_pop[mt.s].superpopulation)
     mt = mt.annotate_cols(gVCF=cohorts_pop[mt.s].gVCF_ID)
     mt.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/Sanger_chr1-20-XY_new_cohorts_split_multi_pops.mt", overwrite=True)
+        f"{args.output_dir}/ddd-elgh-ukbb/Sanger_chr1-20-XY_new_cohorts_split_multi_pops.mt", overwrite=True)
     # filter matrixtable
     logger.info("wrote mt ")
     # filter mt
@@ -151,7 +146,7 @@ if __name__ == "__main__":
     pruned_mt = pruned_mt.filter_rows(pruned_mt.locus.in_autosome())
 
     pruned_mt.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/chr1_chr20_ldpruned_updated.mt", overwrite=True)
+        f"{args.output_dir}/ddd-elgh-ukbb/chr1_chr20_ldpruned_updated.mt", overwrite=True)
     # pruned_mt = hl.read_matrix_table(
     #    f"{temp_dir}/ddd-elgh-ukbb/relatedness_ancestry/ddd-elgh-ukbb/chr1_chr20_XY_ldpruned.mt")
 
@@ -170,10 +165,10 @@ if __name__ == "__main__":
     # mt = mt.annotate_cols(known_pop="unk")
     # pca_scores = pca_scores.annotate(known_pop="unk")
     pca_scores.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/pca_scores_after_pruning.ht", overwrite=True)
+        f"{args.output_dir}/ddd-elgh-ukbb/pca_scores_after_pruning.ht", overwrite=True)
     pca_loadings.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/pca_loadings_after_pruning.ht", overwrite=True)
-    with open(f"{temp_dir}/ddd-elgh-ukbb/pca_evals_after_pruning.txt", 'w') as f:
+        f"{args.output_dir}/ddd-elgh-ukbb/pca_loadings_after_pruning.ht", overwrite=True)
+    with open(f"{args.output_dir}/ddd-elgh-ukbb/pca_evals_after_pruning.txt", 'w') as f:
         for val in pca_evals:
             f.write(str(val))
 
@@ -182,7 +177,53 @@ if __name__ == "__main__":
     pop_ht, pop_clf = assign_population_pcs(
         pca_scores, pca_scores.scores, known_col="known_pop", n_estimators=100, prop_train=0.8, min_prob=0.5)
     pop_ht.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/pop_assignments_updated.ht", overwrite=True)
+        f"{args.output_dir}/ddd-elgh-ukbb/pop_assignments_updated.ht", overwrite=True)
     pop_ht.export(
-        f"{temp_dir}/ddd-elgh-ukbb/pop_assignments_updated.tsv.gz")
+        f"{args.output_dir}/ddd-elgh-ukbb/pop_assignments_updated.tsv.gz")
 
+
+if __name__ == "__main__":
+    # need to create spark cluster first before intiialising hail
+    sc = pyspark.SparkContext()
+    # Define the hail persistent storage directory
+    hl.init(sc=sc, tmp_dir=tmp_dir, default_reference="GRCh38")
+    # s3 credentials required for user to access the datasets in farm flexible compute s3 environment
+    # you may use your own here from your .s3fg file in your home directory
+    hadoop_config = sc._jsc.hadoopConfiguration()
+
+    hadoop_config.set("fs.s3a.access.key", credentials["mer"]["access_key"])
+    hadoop_config.set("fs.s3a.secret.key", credentials["mer"]["secret_key"])
+
+    #####################################################################
+    ###################### INPUT DATA  ##############################
+    #####################################################################
+    parser = argparse.ArgumentParser()
+    # Read the matrixtable, chrX and chrY should be included
+    input_params = parser.add_argument_group("Input parameters")
+    input_params.add_argument(
+        "--matrixtable",
+        help="Full path of input matrixtable after ld_pruning. Path format \"file:///home/ubuntu/data/tmp/path/to/.mt\"",
+        default=f"{temp_dir}/ddd-elgh-ukbb/relatedness_ancestry/ddd-elgh-ukbb/chr1_chr20_XY_ldpruned.mt",
+        type=str,
+    )
+    input_params.add_argument(
+        "--bed_exclude_pca",
+        help="Full path to BED file with locations to exclude from PCA.",
+        default=locations_exclude_from_pca,
+        type=str
+    )
+    input_params.add_argument(
+        "--cohorts_pop",
+        help="Path to file containing the known populations assigned to the samples of the cohort.",
+        default=cohorts_populations,
+        type=str
+    )
+    input_params.add_argument(
+        "--output_dir",
+        help="Full path of output folder to store results. Preferably hdfs or secure lustre",
+        default=tmp_dir,
+        type=str
+    )
+
+    args = parser.parse_args()
+    main(args)
