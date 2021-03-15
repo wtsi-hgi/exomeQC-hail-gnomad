@@ -5,56 +5,24 @@ import os
 import hail as hl
 import pandas as pd
 import pyspark
+import argparse
 import json
 import sys
 import re
 from pathlib import Path
 import logging
 from typing import Any, Counter, List, Optional, Tuple, Union, Dict, Iterable
-
-from bokeh.plotting import output_file, save, show
 from sample_qc_v3.gnomad_methods.gnomad_filtering import compute_stratified_metrics_filter
 
 logging.basicConfig(format="%(levelname)s (%(name)s %(lineno)s): %(message)s")
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-
-
-def get_reference_genome(
-    locus: Union[hl.expr.LocusExpression, hl.expr.IntervalExpression],
-    add_sequence: bool = False,
-) -> hl.ReferenceGenome:
-    """
-    Returns the reference genome associated with the input Locus expression
-    :param locus: Input locus
-    :param add_sequence: If set, the fasta sequence is added to the reference genome
-    :return: Reference genome
-    """
-    if isinstance(locus, hl.expr.LocusExpression):
-        ref = locus.dtype.reference_genome
-    else:
-        assert isinstance(locus, hl.expr.IntervalExpression)
-        ref = locus.dtype.point_type.reference_genome
-    if add_sequence:
-        ref = add_reference_sequence(ref)
-    return ref
-
-
-def filter_to_autosomes(
-    t: Union[hl.MatrixTable, hl.Table]
-) -> Union[hl.MatrixTable, hl.Table]:
-    """
-    Filters the Table or MatrixTable to autosomes only.
-    This assumes that the input contains a field named `locus` of type Locus
-    :param t: Input MT/HT
-    :return:  MT/HT autosomes
-    """
-    reference = get_reference_genome(t.locus)
-    autosomes = hl.parse_locus_interval(
-        f"{reference.contigs[0]}-{reference.contigs[21]}", reference_genome=reference
-    )
-    return hl.filter_intervals(t, [autosomes])
-
+tmp_dir = "hdfs://spark-master:9820/"
+temp_dir = "file:///home/ubuntu/data/tmp"
+plot_dir = "/home/ubuntu/data/tmp"
+AKT_overlap = "s3a://DDD-ELGH-UKBB-exomes/ancestry/WES_AKT_1kg_intersection.vcf.mt"
+cohorts_populations = "s3a://DDD-ELGH-UKBB-exomes/ancestry/sanger_cohort_known_populations_ukbb_elgh_labels_updated.tsv"
+locations_exclude_from_pca = f"{temp_dir}/1000g/price_high_ld.bed.txt"
 
 project_root = Path(__file__).parent.parent
 print(project_root)
@@ -77,38 +45,16 @@ with open(f"{storage}", 'r') as f:
 with open(f"{thresholds}", 'r') as f:
     thresholds = json.load(f)
 
-if __name__ == "__main__":
-    # need to create spark cluster first before intiialising hail
-    sc = pyspark.SparkContext()
-    # Define the hail persistent storage directory
-    tmp_dir = "hdfs://spark-master:9820/"
-    temp_dir = os.path.join(os.environ["HAIL_HOME"], "tmp")
-    hl.init(sc=sc, tmp_dir=tmp_dir, default_reference="GRCh38")
-    # s3 credentials required for user to access the datasets in farm flexible compute s3 environment
-    # you may use your own here from your .s3fg file in your home directory
-    hadoop_config = sc._jsc.hadoopConfiguration()
 
-    hadoop_config.set("fs.s3a.access.key", credentials["mer"]["access_key"])
-    hadoop_config.set("fs.s3a.secret.key", credentials["mer"]["secret_key"])
+def main(args):
 
-    bed_to_exclude_pca = hl.import_bed(
-        f"{temp_dir}/1000g/price_high_ld.bed.txt", reference_genome='GRCh38')
-    cohorts_pop = hl.import_table(
-        "s3a://DDD-ELGH-UKBB-exomes/ancestry/sanger_cohort_known_populations_ukbb_elgh_labels_updated.tsv", delimiter="\t").key_by('s')
     # Read mt
-    mt = hl.read_matrix_table(
-        f"{temp_dir}/ddd-elgh-ukbb/new_labels/chr1_chr20_ldpruned_updated.mt")
+    mt = hl.read_matrix_table(args.matrixtable)
     # pca_scores_pop
-    pca_scores_pop = hl.read_table(
-        f"{temp_dir}/ddd-elgh-ukbb/new_labels/pop_assignments_updated_august2020.ht")
-
-    # pca_scores_superpop
-    pca_scores_superpop = hl.read_table(
-        f"{temp_dir}/ddd-elgh-ukbb/new_labels/pop_assignments_updated_august2020_superpops.ht")
+    pca_scores_pop = hl.read_table(args.pca_scores_population)
 
     # annotate mt with pop and superpop
     mt = mt.annotate_cols(assigned_pop=pca_scores_pop[mt.s].pop)
-    mt = mt.annotate_cols(assigned_superpop=pca_scores_superpop[mt.s].pop)
 
     # do sample_qc
     # calculate and annotate with metric heterozygosity
@@ -118,11 +64,11 @@ if __name__ == "__main__":
         heterozygosity_rate=mt_with_sampleqc.sample_qc.n_het/mt_with_sampleqc.sample_qc.n_called))
     # save sample_qc and heterozygosity table as ht table
     mt_with_sampleqc.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/mt_pops_superpops_sampleqc.mt", overwrite=True)
+        f"{args.output_dir}/ddd-elgh-ukbb/mt_pops_superpops_sampleqc.mt", overwrite=True)
     mt_with_sampleqc.cols().write(
-        f"{tmp_dir}/ddd-elgh-ukbb/mt_pops_superpops_sampleqc.ht",  overwrite=True)
+        f"{args.output_dir}/ddd-elgh-ukbb/mt_pops_superpops_sampleqc.ht",  overwrite=True)
     pop_ht = hl.read_table(
-        f"{tmp_dir}/ddd-elgh-ukbb/mt_pops_superpops_sampleqc.ht")
+        f"{args.output_dir}/ddd-elgh-ukbb/mt_pops_superpops_sampleqc.ht")
     # run function on metrics including heterozygosity first for pops:
     qc_metrics = ['heterozygosity_rate', 'n_snp', 'r_ti_tv',
                   'r_insertion_deletion', 'n_insertion', 'n_deletion', 'r_het_hom_var']
@@ -134,20 +80,67 @@ if __name__ == "__main__":
     checkpoint = pop_ht.aggregate(hl.agg.count_where(
         hl.len(pop_ht.qc_metrics_filters) == 0))
     logger.info(f'{checkpoint} exome samples found passing pop filtering')
-    pop_ht.write(f"{tmp_dir}/ddd-elgh-ukbb/mt_pops_QC_filters.ht")
+    pop_ht.write(f"{args.output_dir}/ddd-elgh-ukbb/mt_pops_QC_filters.ht")
 
     # run function on metrics including heterozygosity  for superpops:
-    pop_ht_superpop = hl.read_table(
-        f"{tmp_dir}/ddd-elgh-ukbb/mt_pops_superpops_sampleqc.ht")
-    pop_filter_ht = compute_stratified_metrics_filter(
-        pop_ht_superpop, qc_metrics, ['assigned_superpop'])
-    pop_ht_superpop = pop_ht_superpop.annotate_globals(
-        hl.eval(pop_filter_ht.globals))
-    pop_ht_superpop = pop_ht_superpop.annotate(
-        **pop_filter_ht[pop_ht_superpop.key]).persist()
+    # pca_scores_superpop
 
-    checkpoint = pop_ht_superpop.aggregate(hl.agg.count_where(
-        hl.len(pop_ht_superpop.qc_metrics_filters) == 0))
-    logger.info(f'{checkpoint} exome samples found passing Superpop filtering')
-    pop_ht_superpop.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/mt_superpops_QC_filters.ht")
+    # pca_scores_superpop = hl.read_table(
+    #    f"{temp_dir}/ddd-elgh-ukbb/new_labels/pop_assignments_updated_august2020_superpops.ht")
+    #mt = mt.annotate_cols(assigned_superpop=pca_scores_superpop[mt.s].pop)
+    # pop_ht_superpop = hl.read_table(
+    #    f"{tmp_dir}/ddd-elgh-ukbb/mt_pops_superpops_sampleqc.ht")
+    # pop_filter_ht = compute_stratified_metrics_filter(
+    #    pop_ht_superpop, qc_metrics, ['assigned_superpop'])
+    # pop_ht_superpop = pop_ht_superpop.annotate_globals(
+    #    hl.eval(pop_filter_ht.globals))
+    # pop_ht_superpop = pop_ht_superpop.annotate(
+    #    **pop_filter_ht[pop_ht_superpop.key]).persist()
+
+    # checkpoint = pop_ht_superpop.aggregate(hl.agg.count_where(
+    #    hl.len(pop_ht_superpop.qc_metrics_filters) == 0))
+    #logger.info(f'{checkpoint} exome samples found passing Superpop filtering')
+    # pop_ht_superpop.write(
+    #   f"{tmp_dir}/ddd-elgh-ukbb/mt_superpops_QC_filters.ht")
+
+
+if __name__ == "__main__":
+    # need to create spark cluster first before intiialising hail
+    sc = pyspark.SparkContext()
+    # Define the hail persistent storage directory
+    hl.init(sc=sc, tmp_dir=tmp_dir, default_reference="GRCh38")
+    # s3 credentials required for user to access the datasets in farm flexible compute s3 environment
+    # you may use your own here from your .s3fg file in your home directory
+    hadoop_config = sc._jsc.hadoopConfiguration()
+
+    hadoop_config.set("fs.s3a.access.key", credentials["mer"]["access_key"])
+    hadoop_config.set("fs.s3a.secret.key", credentials["mer"]["secret_key"])
+
+    #####################################################################
+    ###################### INPUT DATA  ##############################
+    #####################################################################
+    parser = argparse.ArgumentParser()
+    # Read the matrixtable, chrX and chrY should be included
+    input_params = parser.add_argument_group("Input parameters")
+    input_params.add_argument(
+        "--matrixtable",
+        help="Full path of input matrixtable after ld_pruning. Path format \"file:///home/ubuntu/data/tmp/path/to/.mt\"",
+        default=f"{temp_dir}/ddd-elgh-ukbb/new_labels/chr1_chr20_ldpruned_updated.mt",
+        type=str,
+    )
+    input_params.add_argument(
+        "--pca_scores_population",
+        help="Full path to hail table file .ht with PCA scores from previous PCA prediction script",
+        default=f"{temp_dir}/ddd-elgh-ukbb/new_labels/pop_assignments_updated_august2020.ht",
+        type=str
+    )
+
+    input_params.add_argument(
+        "--output_dir",
+        help="Full path of output folder to store results. Preferably hdfs or secure lustre",
+        default=tmp_dir,
+        type=str
+    )
+
+    args = parser.parse_args()
+    main(args)
