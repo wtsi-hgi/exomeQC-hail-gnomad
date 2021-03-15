@@ -10,6 +10,7 @@ import sys
 import re
 from pathlib import Path
 import logging
+import argparse
 from typing import Any, Counter, List, Optional, Tuple, Union
 from bokeh.plotting import output_file, save, show
 from gnomad.resources.grch38 import gnomad
@@ -62,14 +63,14 @@ tmp_dir = "hdfs://spark-master:9820/"
 temp_dir = "file:///home/ubuntu/data/tmp"
 plot_dir = "/home/ubuntu/data/tmp"
 ######################################
-omni = f'{temp_dir}/ddd-elgh-ukbb/training_sets/1000G_omni2.5.hg38.ht'
-omni_ht = hl.read_table(omni)
-mills = f'{temp_dir}/ddd-elgh-ukbb/training_sets/Mills_and_1000G_gold_standard.indels.hg38.ht'
-mills_ht = hl.read_table(mills)
-thousand_genomes = f'{temp_dir}/ddd-elgh-ukbb/training_sets/1000G_phase1.snps.high_confidence.hg38.ht'
-thousand_genomes_ht = hl.read_table(thousand_genomes)
-hapmap = f'{temp_dir}/ddd-elgh-ukbb/training_sets/hapmap_3.3.hg38.ht'
-hapmap_ht = hl.read_table(hapmap)
+#omni = f'{temp_dir}/ddd-elgh-ukbb/training_sets/1000G_omni2.5.hg38.ht'
+#omni_ht = hl.read_table(args.omni)
+#mills = f'{temp_dir}/ddd-elgh-ukbb/training_sets/Mills_and_1000G_gold_standard.indels.hg38.ht'
+#mills_ht = hl.read_table(mills)
+#thousand_genomes = f'{temp_dir}/ddd-elgh-ukbb/training_sets/1000G_phase1.snps.high_confidence.hg38.ht'
+#thousand_genomes_ht = hl.read_table(thousand_genomes)
+#hapmap = f'{temp_dir}/ddd-elgh-ukbb/training_sets/hapmap_3.3.hg38.ht'
+#hapmap_ht = hl.read_table(hapmap)
 ######################################
 
 
@@ -155,7 +156,7 @@ def generate_ac(mt: hl.MatrixTable, fam_file: str) -> hl.Table:
     return mt.rows()
 
 
-def get_truth_ht() -> Table:
+def get_truth_ht(omni, mills, thousand_genomes, hapmap) -> Table:
     """
     Returns a table with the following annotations from the latest version of the corresponding truth data:
     - hapmap
@@ -179,38 +180,29 @@ def get_truth_ht() -> Table:
     )
 
 
-if __name__ == "__main__":
-    # need to create spark cluster first before intiialising hail
-    sc = pyspark.SparkContext()
-
-    hl.init(sc=sc, tmp_dir=tmp_dir, default_reference="GRCh38")
-    # s3 credentials required for user to access the datasets in farm flexible compute s3 environment
-    # you may use your own here from your .s3fg file in your home directory
-    hadoop_config = sc._jsc.hadoopConfiguration()
-
-    hadoop_config.set("fs.s3a.access.key", credentials["mer"]["access_key"])
-    hadoop_config.set("fs.s3a.secret.key", credentials["mer"]["secret_key"])
-
+def main(args):
     group = "raw"
 
     mt = hl.read_matrix_table(
-        f'{temp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1to6-20.mt')
+        args.matrixtable)
 
     # Truthset
-    truthset_ht = get_truth_ht()
-    truthset_ht.write(f'{tmp_dir}/ddd-elgh-ukbb/truthset.ht', overwrite=True)
+    truthset_ht = get_truth_ht(
+        args.onmi, args.mills, args.thousand_genomes, args.hapmap)
+    truthset_ht.write(
+        f'{args.output_dir}/ddd-elgh-ukbb/truthset.ht', overwrite=True)
     # Trio data
     # trio annotation:
     mt_adj = annotate_adj(mt)
-    fam = f"{temp_dir}/ddd-elgh-ukbb/variant_qc/DDD_trios.fam"
+    fam = args.trio_fam
     pedigree = hl.Pedigree.read(fam)
     trio_dataset = hl.trio_matrix(mt_adj, pedigree, complete_trios=True)
     trio_dataset.checkpoint(
-        f'{tmp_dir}/ddd-elgh-ukbb/mt_trios_adj.mt', overwrite=True)
+        f'{args.output_dir}/ddd-elgh-ukbb/mt_trios_adj.mt', overwrite=True)
     trio_stats_ht = generate_trio_stats(
         trio_dataset, autosomes_only=True, bi_allelic_only=True)
     trio_stats_ht.write(
-        f'{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_trios_stats.ht', overwrite=True)
+        f'{args.output_dir}/ddd-elgh-ukbb/Sanger_cohorts_trios_stats.ht', overwrite=True)
 
     # inbreeding ht
     mt_inbreeding = mt.annotate_rows(
@@ -227,10 +219,86 @@ if __name__ == "__main__":
     qc_ac_ht = generate_ac(mt, fam)
 
     ht_inbreeding.write(
-        f'{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_inbreeding_new.ht', overwrite=True)
+        f'{args.output_dir}/ddd-elgh-ukbb/Sanger_cohorts_inbreeding_new.ht', overwrite=True)
     qc_ac_ht.write(
-        f'{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_qc_ac_new.ht', overwrite=True)
+        f'{args.output_dir}/ddd-elgh-ukbb/Sanger_cohorts_qc_ac_new.ht', overwrite=True)
     allele_data_ht.write(
-        f'{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts_allele_data_new.ht', overwrite=True)
+        f'{args.output_dir}/ddd-elgh-ukbb/Sanger_cohorts_allele_data_new.ht', overwrite=True)
 
-    
+
+if __name__ == "__main__":
+    # need to create spark cluster first before intiialising hail
+    sc = pyspark.SparkContext()
+    # Define the hail persistent storage directory
+    hl.init(sc=sc, tmp_dir=tmp_dir, default_reference="GRCh38")
+    # s3 credentials required for user to access the datasets in farm flexible compute s3 environment
+    # you may use your own here from your .s3fg file in your home directory
+    hadoop_config = sc._jsc.hadoopConfiguration()
+
+    hadoop_config.set("fs.s3a.access.key", credentials["mer"]["access_key"])
+    hadoop_config.set("fs.s3a.secret.key", credentials["mer"]["secret_key"])
+
+    # need to create spark cluster first before intiialising hail
+    sc = pyspark.SparkContext()
+    # Define the hail persistent storage directory
+
+    hl.init(sc=sc, tmp_dir=tmp_dir, default_reference="GRCh38")
+    # s3 credentials required for user to access the datasets in farm flexible compute s3 environment
+    # you may use your own here from your .s3fg file in your home directory
+    hadoop_config = sc._jsc.hadoopConfiguration()
+
+    hadoop_config.set("fs.s3a.access.key", credentials["mer"]["access_key"])
+    hadoop_config.set("fs.s3a.secret.key", credentials["mer"]["secret_key"])
+
+    #####################################################################
+    ###################### INPUT DATA  ##############################
+    #####################################################################
+    parser = argparse.ArgumentParser()
+    # Read the matrixtable
+    input_params = parser.add_argument_group("Input parameters")
+    input_params.add_argument(
+        "--matrixtable",
+        help="Full path of input matrixtable. Path format \"file:///home/ubuntu/data/tmp/path/to/.mt\"",
+        default=f'{temp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1to6-20.mt',
+        type=str,
+    )
+    input_params.add_argument(
+        "--omni",
+        help="Full path of Omni truset hail table GRCh38",
+        default=f'{temp_dir}/ddd-elgh-ukbb/training_sets/1000G_omni2.5.hg38.ht',
+        type=str,
+    )
+    input_params.add_argument(
+        "--mills",
+        help="Full path of Mills_1000G_indels truset hail table GRCh38",
+        default=f'{temp_dir}/ddd-elgh-ukbb/training_sets/Mills_and_1000G_gold_standard.indels.hg38.ht',
+        type=str,
+    )
+    input_params.add_argument(
+        "--thousand_genomes",
+        help="Full path of 1000 genomes project truset hail table GRCh38",
+        default=f'{temp_dir}/ddd-elgh-ukbb/training_sets/1000G_phase1.snps.high_confidence.hg38.ht',
+        type=str,
+    )
+    input_params.add_argument(
+        "--hapmap",
+        help="Full path of Hapmap truset hail table GRCh38",
+        default=f'{temp_dir}/ddd-elgh-ukbb/training_sets/hapmap_3.3.hg38.ht',
+        type=str,
+    )
+    input_params.add_argument(
+        "--trio_fam",
+        help="Full path of trio fam file for cohort",
+        default=f"{temp_dir}/ddd-elgh-ukbb/variant_qc/DDD_trios.fam",
+        type=str,
+    )
+
+    input_params.add_argument(
+        "--output_dir",
+        help="Full path of output folder to store results. Preferably hdfs or secure lustre",
+        default=tmp_dir,
+        type=str
+    )
+
+    args = parser.parse_args()
+    main(args)
