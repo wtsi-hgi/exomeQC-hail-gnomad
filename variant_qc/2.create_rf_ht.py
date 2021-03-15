@@ -10,8 +10,10 @@ import pyspark
 import json
 import sys
 import re
+
 from pathlib import Path
 import logging
+import argparse
 from typing import Any, Counter, List, Optional, Tuple, Union
 from bokeh.plotting import output_file, save, show
 from gnomad.resources.grch38 import gnomad
@@ -26,6 +28,12 @@ from gnomad.variant_qc.random_forest import (
 
 from hail import Table
 
+################################
+# Define the hail persistent storage directory
+tmp_dir = "hdfs://spark-master:9820/"
+temp_dir = "file:///home/ubuntu/data/tmp"
+plot_dir = "/home/ubuntu/data/tmp"
+######################################
 logging.basicConfig(format="%(levelname)s (%(name)s %(lineno)s): %(message)s")
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -78,31 +86,6 @@ TRUTH_DATA = ["hapmap", "omni", "mills", "kgp_phase1_hc"]
 INBREEDING_COEFF_HARD_CUTOFF = -0.3
 
 
-def split_info() -> hl.Table:
-    """
-    Generates an info table that splits multi-allelic sites from
-    the multi-allelic info table.
-
-    :return: Info table with split multi-allelics
-    :rtype: Table
-    """
-    info_ht = get_info(split=False).ht()
-
-    # Create split version
-    info_ht = hl.split_multi(info_ht)
-
-    # Index AS annotations
-    info_ht = info_ht.annotate(
-        info=info_ht.info.annotate(
-            **{f: info_ht.info[f][info_ht.a_index - 1] for f in info_ht.info if f.startswith("AC") or (f.startswith("AS_") and not f == 'AS_SB_TABLE')},
-            AS_SB_TABLE=info_ht.info.AS_SB_TABLE[0].extend(
-                info_ht.info.AS_SB_TABLE[info_ht.a_index])
-        ),
-        lowqual=info_ht.lowqual[info_ht.a_index - 1]
-    )
-    return info_ht
-
-
 def generate_allele_data(mt: hl.MatrixTable) -> hl.Table:
     """
     Writes bi-allelic sites MT with the following annotations:
@@ -130,40 +113,23 @@ def generate_allele_data(mt: hl.MatrixTable) -> hl.Table:
     return ht
 
 
-if __name__ == "__main__":
-    # need to create spark cluster first before intiialising hail
-    sc = pyspark.SparkContext()
-    # Define the hail persistent storage directory
-    tmp_dir = "hdfs://spark-master:9820/"
-    temp_dir = "file:///home/ubuntu/data/tmp"
-    plot_dir = "/home/ubuntu/data/tmp"
-    hl.init(sc=sc, tmp_dir=tmp_dir, default_reference="GRCh38")
-    # s3 credentials required for user to access the datasets in farm flexible compute s3 environment
-    # you may use your own here from your .s3fg file in your home directory
-    hadoop_config = sc._jsc.hadoopConfiguration()
-
-    hadoop_config.set("fs.s3a.access.key", credentials["mer"]["access_key"])
-    hadoop_config.set("fs.s3a.secret.key", credentials["mer"]["secret_key"])
+def main(args):
     n_partitions = 500
 
     # ANNOTATION TABLES:
-    truth_data_ht = hl.read_table(
-        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/truthset_table.ht')
-    trio_stats_table = hl.read_table(
-        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_trios_stats.ht')
+    truth_data_ht = hl.read_table(args.truthset_table)
+    trio_stats_table = hl.read_table(args.trio_stats_table)
+
     #inbreeding_ht = hl.read_table(f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_inbreeding.ht')
-    allele_data_ht = hl.read_table(
-        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_allele_data_new.ht')
-    allele_counts_ht = hl.read_table(
-        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_qc_ac_new.ht')
+    allele_data_ht = hl.read_table(args.allele_data)
+    allele_counts_ht = hl.read_table(args.allele_count)
     allele_counts_ht = allele_counts_ht.select(
         *['ac_qc_samples_raw', 'ac_qc_samples_adj'])
-    inbreeding_ht = hl.read_table(
-        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_inbreeding_new.ht')
+    inbreeding_ht = hl.read_table(args.inbreeding)
     group = "raw"
 
     mt = hl.read_matrix_table(
-        f'{temp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1to6-20.mt')
+        args.matrixtable)
     mt = mt.key_rows_by('locus').distinct_by_row(
     ).key_rows_by('locus', 'alleles')
     # mt = mt.select_entries(
@@ -212,7 +178,83 @@ if __name__ == "__main__":
 
     ht = ht.repartition(n_partitions, shuffle=False)
     ht = ht.checkpoint(
-        f'{tmp_dir}/ddd-elgh-ukbb/Sanger_table_for_RF_all_cols.ht', overwrite=True)
+        f'{args.output_dir}/ddd-elgh-ukbb/Sanger_table_for_RF_all_cols.ht', overwrite=True)
     ht = median_impute_features(ht, {"variant_type": ht.variant_type})
     ht = ht.checkpoint(
-        f'{tmp_dir}/ddd-elgh-ukbb/Sanger_table_for_RF_by_variant_type_all_cols.ht', overwrite=True)
+        f'{args.output_dir}/ddd-elgh-ukbb/Sanger_table_for_RF_by_variant_type_all_cols.ht', overwrite=True)
+
+
+if __name__ == "__main__":
+    # need to create spark cluster first before intiialising hail
+    sc = pyspark.SparkContext()
+    # Define the hail persistent storage directory
+    hl.init(sc=sc, tmp_dir=tmp_dir, default_reference="GRCh38")
+    # s3 credentials required for user to access the datasets in farm flexible compute s3 environment
+    # you may use your own here from your .s3fg file in your home directory
+    hadoop_config = sc._jsc.hadoopConfiguration()
+
+    hadoop_config.set("fs.s3a.access.key", credentials["mer"]["access_key"])
+    hadoop_config.set("fs.s3a.secret.key", credentials["mer"]["secret_key"])
+
+    # need to create spark cluster first before intiialising hail
+    sc = pyspark.SparkContext()
+    # Define the hail persistent storage directory
+
+    hl.init(sc=sc, tmp_dir=tmp_dir, default_reference="GRCh38")
+    # s3 credentials required for user to access the datasets in farm flexible compute s3 environment
+    # you may use your own here from your .s3fg file in your home directory
+    hadoop_config = sc._jsc.hadoopConfiguration()
+
+    hadoop_config.set("fs.s3a.access.key", credentials["mer"]["access_key"])
+    hadoop_config.set("fs.s3a.secret.key", credentials["mer"]["secret_key"])
+
+    #####################################################################
+    ###################### INPUT DATA  ##############################
+    #####################################################################
+    parser = argparse.ArgumentParser()
+    # Read the matrixtable
+    input_params = parser.add_argument_group("Input parameters")
+    input_params.add_argument(
+        "--matrixtable",
+        help="Full path of input matrixtable. Path format \"file:///home/ubuntu/data/tmp/path/to/.mt\"",
+        default=f'{temp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1to6-20.mt',
+        type=str,
+    )
+    input_params.add_argument(
+        "--truthset_table",
+        help="Full path of the truthset table created in variant qc step 1.",
+        default=f'{temp_dir}/ddd-elgh-ukbb/training_sets/truthset_table.ht',
+        type=str,
+    )
+    input_params.add_argument(
+        "--trio_stats_table",
+        help="Full path of trio stats table created at variant qc step 1a",
+        default=f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_trios_stats.ht',
+        type=str,
+    )
+    input_params.add_argument(
+        "--allele_data",
+        help="Full path of allele data hail table created at variant qc step 1a",
+        default=f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_allele_data_new.ht',
+        type=str,
+    )
+    input_params.add_argument(
+        "--allele_counts",
+        help="Full path of allele counts hail table created at variant qc step 1a",
+        default=f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_qc_ac_new.ht',
+        type=str,
+    )
+    input_params.add_argument(
+        "--inbreeding",
+        help="Full path of inbrreeding coefficients hail table created at variant qc step 1a",
+        default=f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_inbreeding_new.ht',
+        type=str,
+    )
+    input_params.add_argument(
+        "--output_dir",
+        help="Full path of output folder to store results. Preferably hdfs or secure lustre",
+        default=tmp_dir,
+        type=str
+    )
+    args = parser.parse_args()
+    main(args)
