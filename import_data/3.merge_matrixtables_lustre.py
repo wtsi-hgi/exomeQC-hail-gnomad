@@ -28,7 +28,10 @@ with open(f"{thresholds}", 'r') as f:
     thresholds = json.load(f)
 
 partitions = 1000
-
+tmp_dir = "hdfs://spark-master:9820/"
+temp_dir = "file:///home/ubuntu/data/tmp"
+lustre_dir = "file:///lustre/scratch123/teams/hgi/mercury/megaWES-variantqc"
+plot_dir = "/home/ubuntu/data/tmp"
 
 CHROMOSOMES = ["chr2",
                "chr3",
@@ -76,9 +79,8 @@ if __name__ == "__main__":
     # need to create spark cluster first before intiialising hail
     sc = pyspark.SparkContext()
     # Define the hail persistent storage directory
-    tmp_dir = "hdfs://spark-master:9820/"
-    temp_dir = os.path.join(os.environ["HAIL_HOME"], "tmp")
-    hl.init(sc=sc, tmp_dir=tmp_dir, default_reference="GRCh38")
+
+    hl.init(sc=sc, tmp_dir=lustre_dir, default_reference="GRCh38")
     # s3 credentials required for user to access the datasets in farm flexible compute s3 environment
     # you may use your own here from your .s3fg file in your home directory
     hadoop_config = sc._jsc.hadoopConfiguration()
@@ -92,22 +94,21 @@ if __name__ == "__main__":
     matrixtables_folder = f"{tmp_dir}/ddd-elgh-ukbb"
 
     print("Reading all matrixtables and joining them")
-    mt = hl.read_matrix_table(f"{temp_dir}/ddd-elgh-ukbb/chr1.mt")
+    mt = hl.read_matrix_table(f"{lustre_dir}/chr1.mt")
     for chromosome in CHROMOSOMES:
-        mt2 = hl.read_matrix_table(f"{temp_dir}/ddd-elgh-ukbb/{chromosome}.mt")
+        mt2 = hl.read_matrix_table(f"{lustre_dir}/{chromosome}.mt")
         mt = mt.union_rows(mt2)
 
-    print("Now writing joined matrixtable to disk:")
+    print("Now annotating joined matrixtable with cohort info:")
     # annotate with cohorts
-    #mt_annotated = annotate_samples_with_cohort_info(mt, table_cohort)
+    mt_annotated = annotate_samples_with_cohort_info(mt, table_cohort)
 
-    # mt_annotated = mt_annotated.key_rows_by('locus').distinct_by_row(
-    # ).key_rows_by('locus', 'alleles')
+    mt_annotated = mt_annotated.key_rows_by('locus').distinct_by_row().key_rows_by('locus', 'alleles')
     # mt_split = hl.split_multi_hts(
     #    mt, keep_star=False, left_aligned=False, permit_shuffle=True)
     # mt_split = mt_split.checkpoint(
     #   f"{tmp_dir}/ddd-elgh-ukbb/{CHROMOSOME}-split-multi_cohorts.mt",  overwrite=True)
-
-    mt.write(
-        f"{tmp_dir}/ddd-elgh-ukbb/Sanger_cohorts.mt", overwrite=True)
+    print("Now writing joined matrixtable to disk:")
+    mt_annotated.write(
+        f"{lustre_dir}/MegaWESSanger_cohorts.mt", overwrite=True)
     print(f"Wrote matrixtable for whole genome.")
