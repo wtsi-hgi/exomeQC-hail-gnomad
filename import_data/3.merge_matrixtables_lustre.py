@@ -91,7 +91,8 @@ if __name__ == "__main__":
     #####################################################################
     ###################### INPUT DATA  ##############################
     #####################################################################
-    matrixtables_folder = f"{tmp_dir}/ddd-elgh-ukbb"
+    PARTITIONS=20000
+    
 
     print("Reading all matrixtables and joining them")
     mt = hl.read_matrix_table(f"{lustre_dir}/chr1.mt")
@@ -99,6 +100,8 @@ if __name__ == "__main__":
         mt2 = hl.read_matrix_table(f"{lustre_dir}/{chromosome}.mt")
         mt = mt.union_rows(mt2)
 
+    if mt.n_partitions() > PARTITIONS:
+        mt = mt.naive_coalesce(PARTITIONS)
     print("Now annotating joined matrixtable with cohort info:")
     # annotate with cohorts
     mt_annotated = annotate_samples_with_cohort_info(mt, table_cohort)
