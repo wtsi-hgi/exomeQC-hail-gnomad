@@ -31,6 +31,7 @@ partitions = 1000
 tmp_dir = "hdfs://spark-master:9820/"
 temp_dir = "file:///home/ubuntu/data/tmp"
 lustre_dir = "file:///lustre/scratch123/teams/hgi/mercury/megaWES-variantqc"
+
 plot_dir = "/home/ubuntu/data/tmp"
 
 CHROMOSOMES = ["chr2",
@@ -80,7 +81,7 @@ if __name__ == "__main__":
     sc = pyspark.SparkContext()
     # Define the hail persistent storage directory
 
-    hl.init(sc=sc, tmp_dir=lustre_dir, default_reference="GRCh38")
+    hl.init(sc=sc, tmp_dir=lustre_dir, local_tmpdir=lustre_dir, min_block_size=512, default_reference="GRCh38")
     # s3 credentials required for user to access the datasets in farm flexible compute s3 environment
     # you may use your own here from your .s3fg file in your home directory
     hadoop_config = sc._jsc.hadoopConfiguration()
