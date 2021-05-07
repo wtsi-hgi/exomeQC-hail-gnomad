@@ -101,6 +101,7 @@ if __name__ == "__main__":
         mt = mt.union_rows(mt2)
 
     if mt.n_partitions() > PARTITIONS:
+        print("Performing naive coalescing")
         mt = mt.naive_coalesce(PARTITIONS)
     print("Now annotating joined matrixtable with cohort info:")
     # annotate with cohorts
