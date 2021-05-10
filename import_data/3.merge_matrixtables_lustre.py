@@ -78,7 +78,14 @@ table_cohort = "s3a://DDD-ELGH-UKBB-exomes/samples_cohorts.tsv"
 
 if __name__ == "__main__":
     # need to create spark cluster first before intiialising hail
-    sc = pyspark.SparkContext()
+    sc = pyspark.SparkContext("local[*]")
+    
+    rdd1 = sc.parallelize([1,2])
+    rdd1.persist( pyspark.StorageLevel.MEMORY_AND_DISK_2 )
+    rdd1.getStorageLevel()
+
+    print(rdd1.getStorageLevel())
+    rdd1.unpersist()
     # Define the hail persistent storage directory
 
     hl.init(sc=sc, tmp_dir=lustre_dir, local_tmpdir=lustre_dir, min_block_size=256, default_reference="GRCh38")
