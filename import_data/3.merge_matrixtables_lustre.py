@@ -78,7 +78,7 @@ table_cohort = "s3a://DDD-ELGH-UKBB-exomes/samples_cohorts.tsv"
 
 if __name__ == "__main__":
     # need to create spark cluster first before intiialising hail
-    sc = pyspark.SparkContext("local[*]")
+    sc = pyspark.SparkContext()
     
     rdd1 = sc.parallelize([1,2])
     rdd1.persist( pyspark.StorageLevel.MEMORY_AND_DISK_2 )
