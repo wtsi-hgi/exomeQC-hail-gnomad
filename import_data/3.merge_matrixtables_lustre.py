@@ -81,7 +81,7 @@ if __name__ == "__main__":
     sc = pyspark.SparkContext()
     
     rdd1 = sc.parallelize([1,2])
-    rdd1.persist( pyspark.StorageLevel.MEMORY_AND_DISK_2 )
+    rdd1.persist( pyspark.StorageLevel.MEMORY_AND_DISK )
     rdd1.getStorageLevel()
 
     print(rdd1.getStorageLevel())
@@ -116,6 +116,8 @@ if __name__ == "__main__":
     mt_annotated = annotate_samples_with_cohort_info(mt, table_cohort)
 
     mt_annotated = mt_annotated.key_rows_by('locus').distinct_by_row().key_rows_by('locus', 'alleles')
+    sc._jvm.System.gc()
+    rdd1.unpersist()
     sc._jvm.System.gc()
     # mt_split = hl.split_multi_hts(
     #    mt, keep_star=False, left_aligned=False, permit_shuffle=True)
