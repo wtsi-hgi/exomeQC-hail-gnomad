@@ -109,6 +109,7 @@ if __name__ == "__main__":
     mt_annotated = annotate_samples_with_cohort_info(mt, table_cohort)
 
     mt_annotated = mt_annotated.key_rows_by('locus').distinct_by_row().key_rows_by('locus', 'alleles')
+    sc._jvm.System.gc()
     # mt_split = hl.split_multi_hts(
     #    mt, keep_star=False, left_aligned=False, permit_shuffle=True)
     # mt_split = mt_split.checkpoint(
@@ -116,4 +117,5 @@ if __name__ == "__main__":
     print("Now writing joined matrixtable to disk:")
     mt_annotated.write(
         f"{lustre_dir}/MegaWESSanger_cohorts.mt", overwrite=True)
+    sc._jvm.System.gc()
     print(f"Wrote matrixtable for whole genome.")
