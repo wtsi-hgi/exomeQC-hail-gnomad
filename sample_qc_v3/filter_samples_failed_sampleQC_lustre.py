@@ -100,7 +100,7 @@ if __name__ == "__main__":
 
     print("Read mt")
     mt = hl.read_matrix_table(f"{lustre_dir}/MegaWESSanger_cohorts.mt")
-    samples_to_remove_filename = f"{lustre_dir}/filtering/samples_failed_QC.tsv"
+    samples_to_remove_filename = f"{lustre_dir}/filtering/samples_failed_sample_qc.tsv"
 
     samples_to_remove = hl.import_table(samples_to_remove_filename).key_by('s')
     mt_filtered = mt.filter_cols(hl.is_defined(
