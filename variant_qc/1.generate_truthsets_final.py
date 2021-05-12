@@ -188,7 +188,7 @@ def main(args):
 
     # Truthset
     truthset_ht = get_truth_ht(
-        args.onmi, args.mills, args.thousand_genomes, args.hapmap)
+        args.omni, args.mills, args.thousand_genomes, args.hapmap)
     truthset_ht.write(
         f'{args.output_dir}/ddd-elgh-ukbb/truthset.ht', overwrite=True)
     # Trio data
