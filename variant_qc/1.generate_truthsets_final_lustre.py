@@ -187,8 +187,7 @@ def main(args):
         args.matrixtable)
 
     # Truthset
-    truthset_ht = get_truth_ht(
-        args.onmi, args.mills, args.thousand_genomes, args.hapmap)
+    truthset_ht = get_truth_ht(args.onmi, args.mills, args.thousand_genomes, args.hapmap)
     truthset_ht.write(
         f'{args.output_dir}/variant_qc/truthset.ht', overwrite=True)
     # Trio data
