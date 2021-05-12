@@ -190,7 +190,7 @@ def main(args):
     truthset_ht = get_truth_ht(
         args.onmi, args.mills, args.thousand_genomes, args.hapmap)
     truthset_ht.write(
-        f'{args.output_dir}/ddd-elgh-ukbb/truthset.ht', overwrite=True)
+        f'{args.output_dir}/variant_qc/truthset.ht', overwrite=True)
     # Trio data
     # trio annotation:
     mt_adj = annotate_adj(mt)
@@ -198,11 +198,11 @@ def main(args):
     pedigree = hl.Pedigree.read(fam)
     trio_dataset = hl.trio_matrix(mt_adj, pedigree, complete_trios=True)
     trio_dataset.checkpoint(
-        f'{args.output_dir}/ddd-elgh-ukbb/mt_trios_adj.mt', overwrite=True)
+        f'{args.output_dir}/variant_qc/mt_trios_adj.mt', overwrite=True)
     trio_stats_ht = generate_trio_stats(
         trio_dataset, autosomes_only=True, bi_allelic_only=True)
     trio_stats_ht.write(
-        f'{args.output_dir}/ddd-elgh-ukbb/Sanger_cohorts_trios_stats.ht', overwrite=True)
+        f'{args.output_dir}/variant_qc/Sanger_cohorts_trios_stats.ht', overwrite=True)
 
     # inbreeding ht
     mt_inbreeding = mt.annotate_rows(
@@ -227,22 +227,14 @@ def main(args):
 
 
 if __name__ == "__main__":
-    # need to create spark cluster first before intiialising hail
+     # need to create spark cluster first before intiialising hail
     sc = pyspark.SparkContext()
-    # Define the hail persistent storage directory
-    hl.init(sc=sc, tmp_dir=tmp_dir, default_reference="GRCh38")
-    # s3 credentials required for user to access the datasets in farm flexible compute s3 environment
-    # you may use your own here from your .s3fg file in your home directory
-    hadoop_config = sc._jsc.hadoopConfiguration()
+    
+   
 
-    hadoop_config.set("fs.s3a.access.key", credentials["mer"]["access_key"])
-    hadoop_config.set("fs.s3a.secret.key", credentials["mer"]["secret_key"])
-
-    # need to create spark cluster first before intiialising hail
-    sc = pyspark.SparkContext()
     # Define the hail persistent storage directory
 
-    hl.init(sc=sc, tmp_dir=tmp_dir, default_reference="GRCh38")
+    hl.init(sc=sc, tmp_dir=lustre_dir, local_tmpdir=lustre_dir, default_reference="GRCh38")
     # s3 credentials required for user to access the datasets in farm flexible compute s3 environment
     # you may use your own here from your .s3fg file in your home directory
     hadoop_config = sc._jsc.hadoopConfiguration()
