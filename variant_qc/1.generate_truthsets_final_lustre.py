@@ -182,7 +182,7 @@ def get_truth_ht(omni, mills, thousand_genomes, hapmap) -> Table:
 
 def main(args):
     group = "raw"
-
+    print(args)
     mt = hl.read_matrix_table(
         args.matrixtable)
 
