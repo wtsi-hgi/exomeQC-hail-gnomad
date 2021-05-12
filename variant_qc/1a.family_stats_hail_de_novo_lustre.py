@@ -529,7 +529,7 @@ if __name__ == "__main__":
     input_params.add_argument(
         "--truthset_table",
         help="Full path of the truthset table created in variant qc step 1.",
-        default=f'{lustre_dir}/variant_qc/truthset_table.ht',
+        default=f'{lustre_dir}/variant_qc/truthset.ht',
         type=str,
     )
     input_params.add_argument(
