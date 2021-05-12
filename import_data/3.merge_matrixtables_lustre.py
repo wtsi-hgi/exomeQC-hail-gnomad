@@ -27,7 +27,7 @@ with open(f"{storage}", 'r') as f:
 with open(f"{thresholds}", 'r') as f:
     thresholds = json.load(f)
 
-partitions = 1000
+
 tmp_dir = "hdfs://spark-master:9820/"
 temp_dir = "file:///home/ubuntu/data/tmp"
 lustre_dir = "file:///lustre/scratch123/teams/hgi/mercury/megaWES-variantqc"
