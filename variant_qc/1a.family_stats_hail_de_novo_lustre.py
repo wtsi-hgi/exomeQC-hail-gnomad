@@ -535,7 +535,7 @@ if __name__ == "__main__":
     input_params.add_argument(
         "--trio_fam",
         help="Full path of trio fam file for cohort",
-        default=f"{lustre_dir}/variant_qc/DDD_trios.fam",
+        default=f"{lustre_dir}/trios/DDD_trios.fam",
         type=str,
     )
     input_params.add_argument(
