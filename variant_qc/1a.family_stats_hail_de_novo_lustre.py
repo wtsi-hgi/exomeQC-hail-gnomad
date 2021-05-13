@@ -31,7 +31,6 @@ tmp_dir = "hdfs://spark-master:9820/"
 temp_dir = "file:///home/ubuntu/data/tmp"
 plot_dir = "/home/ubuntu/data/tmp"
 lustre_dir = "file:///lustre/scratch123/teams/hgi/mercury/megaWES-variantqc"
-
 ######################################
 
 logging.basicConfig(format="%(levelname)s (%(name)s %(lineno)s): %(message)s")
@@ -504,9 +503,11 @@ def main(args):
 
 
 if __name__ == "__main__":
-     # need to create spark cluster first before intiialising hail
+    # need to create spark cluster first before intiialising hail
     sc = pyspark.SparkContext()
+    
    
+
     # Define the hail persistent storage directory
 
     hl.init(sc=sc, tmp_dir=lustre_dir, local_tmpdir=lustre_dir, default_reference="GRCh38")
@@ -516,6 +517,7 @@ if __name__ == "__main__":
 
     hadoop_config.set("fs.s3a.access.key", credentials["mer"]["access_key"])
     hadoop_config.set("fs.s3a.secret.key", credentials["mer"]["secret_key"])
+
     #####################################################################
     ###################### INPUT DATA  ##############################
     #####################################################################
