@@ -470,26 +470,11 @@ def main(args):
     truthset_table = hl.read_table(args.truthset_table)
     #################################
     group = "raw"
-
-    mt = hl.read_matrix_table(args.matrixtable)
-    mt = hl.split_multi_hts(
-        mt, keep_star=False, left_aligned=False, permit_shuffle=True)
-    mt=mt.checkpoint(f'{args.output_dir}/Sanger_cohort_split_multi.mt', overwrite=True)
     fam = args.trio_fam
     pedigree = hl.Pedigree.read(fam)
-    trio_dataset = hl.trio_matrix(mt, pedigree, complete_trios=True)
-    trio_dataset.write(
-        f'{args.output_dir}/Sanger_cohort_trio_table.mt', overwrite=True)
-
-    (mt1, famstats_ht) = generate_family_stats(mt, fam)
-    print("Writing mt and family stats_ht")
-    mt1.write(f'{args.output_dir}/Sanger_cohorts_family_stats.mt',
-              overwrite=True)
-    famstats_ht.write(
-        f'{args.output_dir}/Sanger_cohorts_family_stats.ht', overwrite=True)
     #mt = mt.annotate_rows(family_stats=famstats_ht[mt.row_key].family_stats)
     #mt=mt.checkpoint(f'{args.output_dir}/Sanger_cohorts_family_stats.mt', overwrite=True)
-    
+    mt=hl.read_matrix_table(f'{args.output_dir}/Sanger_cohorts_family_stats.mt')
     priors = hl.read_table(args.priors)
     mt = mt.annotate_rows(gnomad_maf=priors[mt.row_key].maf)
     mt = mt.checkpoint(
