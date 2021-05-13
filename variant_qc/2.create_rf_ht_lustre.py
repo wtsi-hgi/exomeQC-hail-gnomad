@@ -123,7 +123,7 @@ def main(args):
 
     #inbreeding_ht = hl.read_table(f'{temp_dir}/ddd-elgh-ukbb/variant_qc/Sanger_cohorts_inbreeding.ht')
     allele_data_ht = hl.read_table(args.allele_data)
-    allele_counts_ht = hl.read_table(args.allele_count)
+    allele_counts_ht = hl.read_table(args.allele_counts)
     allele_counts_ht = allele_counts_ht.select(
         *['ac_qc_samples_raw', 'ac_qc_samples_adj'])
     inbreeding_ht = hl.read_table(args.inbreeding)
