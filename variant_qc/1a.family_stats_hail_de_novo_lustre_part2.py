@@ -474,7 +474,7 @@ def main(args):
     pedigree = hl.Pedigree.read(fam)
     #mt = mt.annotate_rows(family_stats=famstats_ht[mt.row_key].family_stats)
     #mt=mt.checkpoint(f'{args.output_dir}/Sanger_cohorts_family_stats.mt', overwrite=True)
-    mt=hl.read_matrix_table(f'{args.output_dir}/Sanger_cohorts_family_stats.mt')
+    mt=hl.read_matrix_table(f'{args.output_dir}/Sanger_cohort_split_multi.mt')
     priors = hl.read_table(args.priors)
     mt = mt.annotate_rows(gnomad_maf=priors[mt.row_key].maf)
     mt = mt.checkpoint(
