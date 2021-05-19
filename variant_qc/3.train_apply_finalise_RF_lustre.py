@@ -226,10 +226,15 @@ def train_rf(ht, args):
             hl.parse_locus_interval(x, reference_genome="GRCh38")
             for x in test_intervals
         ]
+        print("Resulting intervals")
         print(hl.eval(test_intervals))
 
     ht = ht.annotate(tp=tp_expr, fp=fp_expr)
-
+    logger.info("Now runnning train_rf_model method")
+    test_expr=hl.literal(test_intervals).any(
+            lambda interval: interval.contains(ht.locus))
+    print("Test_expr")
+    print(test_expr)
     rf_ht, rf_model = train_rf_model(
         ht,
         rf_features=features,
@@ -427,6 +432,7 @@ def main(args):
         rf_runs = get_rf_runs(f'{lustre_dir}/variant_qc/')
         while run_hash in rf_runs:
             run_hash = str(uuid.uuid4())[:8]
+        logger.info("Running train_rf method")
         ht_result, rf_model = train_rf(ht, args)
         print("Writing out ht_training data")
         ht_result = ht_result.checkpoint(
