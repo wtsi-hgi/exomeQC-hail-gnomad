@@ -488,7 +488,7 @@ def main(args):
     if args.finalize:
         run_hash = args.run_hash
         ht = hl.read_table(
-            f'{lustre}/variant_qc/models/{run_hash}/rf_result_ac_added.ht')
+            f'{lustre_dir}/variant_qc/models/{run_hash}/rf_result_ac_added.ht')
         # ht = create_grouped_bin_ht(
         #    model_id=run_hash, overwrite=True)
         freq_ht = hl.read_table(
@@ -567,7 +567,7 @@ if __name__ == "__main__":
         help='The specified interval(s) will be held out for testing and evaluation only. (default to "chr20")',
         nargs="+",
         type=str,
-        default="chr20",
+        default="chr21",
     )
     rf_params.add_argument(
         "--num_trees",
