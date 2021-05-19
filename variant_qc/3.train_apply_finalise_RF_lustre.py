@@ -239,7 +239,7 @@ def train_rf(ht, args):
         num_trees=args.num_trees,
         max_depth=args.max_depth,
         test_expr=hl.literal(test_intervals).any(
-            lambda interval: interval.contains(hl.is_defined(ht.locus))),
+            lambda interval: interval.contains(ht.locus)),
     )
 
     logger.info("Joining original RF Table with training information")
@@ -560,7 +560,7 @@ if __name__ == "__main__":
         help='The specified interval(s) will be held out for testing and evaluation only. (default to "chr20")',
         nargs="+",
         type=str,
-        default="chr20",
+        default="chr20:1-64444167",
     )
     rf_params.add_argument(
         "--num_trees",
