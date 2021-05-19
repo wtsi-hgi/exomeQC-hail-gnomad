@@ -233,6 +233,7 @@ def train_rf(ht, args):
     logger.info("Now runnning train_rf_model method")
     test_expr=hl.literal(test_intervals).any(
             lambda interval: interval.contains(ht.locus))
+    print(ht.locus.show())
     print("Test_expr")
     print(test_expr)
     rf_ht, rf_model = train_rf_model(
