@@ -239,7 +239,7 @@ def train_rf(ht, args):
         num_trees=args.num_trees,
         max_depth=args.max_depth,
         test_expr=hl.literal(test_intervals).any(
-            lambda interval: interval.contains(ht.locus)),
+            lambda interval: interval.contains(hl.is_defined(ht.locus))),
     )
 
     logger.info("Joining original RF Table with training information")
