@@ -29,7 +29,7 @@ from gnomad.variant_qc.pipeline import test_model, sample_training_examples, get
 from gnomad.utils.file_utils import file_exists
 from gnomad.resources.resource_utils import TableResource, MatrixTableResource
 from gnomad.utils.filtering import add_filters_expr
-
+from gnomad.utils.reference_genome import * 
 from gnomad.variant_qc.random_forest import (
     apply_rf_model,
     load_model,
@@ -414,6 +414,40 @@ def generate_final_rf_ht(
 
     return ht
 
+def get_reference_genome(
+    locus: Union[hl.expr.LocusExpression, hl.expr.IntervalExpression],
+    add_sequence: bool = False,
+) -> hl.ReferenceGenome:
+    """
+    Returns the reference genome associated with the input Locus expression
+    :param locus: Input locus
+    :param add_sequence: If set, the fasta sequence is added to the reference genome
+    :return: Reference genome
+    """
+    if isinstance(locus, hl.expr.LocusExpression):
+        ref = locus.dtype.reference_genome
+    else:
+        assert isinstance(locus, hl.expr.IntervalExpression)
+        ref = locus.dtype.point_type.reference_genome
+    if add_sequence:
+        ref = add_reference_sequence(ref)
+    return ref
+
+def filter_to_autosomes(
+    t: Union[hl.MatrixTable, hl.Table]
+) -> Union[hl.MatrixTable, hl.Table]:
+    """
+    Filters the Table or MatrixTable to autosomes only.
+    This assumes that the input contains a field named `locus` of type Locus
+    :param t: Input MT/HT
+    :return:  MT/HT autosomes
+    """
+    reference = get_reference_genome(t.locus)
+    autosomes = hl.parse_locus_interval(
+        f"{reference.contigs[0]}-{reference.contigs[21]}", reference_genome=reference
+    )
+    return hl.filter_intervals(t, [autosomes])
+
 
 ######################################
 # main
@@ -424,7 +458,7 @@ def main(args):
 
     print("main table")
     ht = hl.read_table(
-        f'{lustre_dir}/variant_qc/Sanger_table_for_RF_all_cols.ht')
+        f'{lustre_dir}/variant_qc/Sanger_table_for_RF_all_autosomes.ht')
 
     if args.train_rf:
         # ht = hl.read_table(
@@ -567,7 +601,7 @@ if __name__ == "__main__":
         help='The specified interval(s) will be held out for testing and evaluation only. (default to "chr20")',
         nargs="+",
         type=str,
-        default="chr21",
+        default="chr20",
     )
     rf_params.add_argument(
         "--num_trees",
