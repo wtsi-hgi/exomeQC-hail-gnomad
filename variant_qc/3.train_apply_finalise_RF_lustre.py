@@ -114,9 +114,9 @@ def get_rf(
     """
 
     if data == "model":
-        return f"{tmp_dir}/models/{run_hash}/{data}.model"
+        return f"{lustre_dir}/models/{run_hash}/{data}.model"
     else:
-        return TableResource(f"{tmp_dir}/models/{run_hash}/{data}.ht")
+        return TableResource(f"{lustre_dir}/models/{run_hash}/{data}.ht")
 
 
 def get_rf_runs(rf_json_fp: str) -> Dict:
@@ -304,7 +304,7 @@ def get_run_data(
 
 def get_score_quantile_bins(model_id: str, aggregated: bool) -> TableResource:
     return TableResource('{}/{}.{}.ht'.format(
-        f"{tmp_dir}",
+        f"{lustre_dir}",
         model_id,
         'binned' if aggregated else 'rank'
     ))
@@ -546,7 +546,7 @@ def main(args):
         )
         # This column is added by the RF module based on a 0.5 threshold which doesn't correspond to what we use
         # ht = ht.drop(ht[PREDICTION_COL])
-        ht.write(f'{tmp_dir}/rf_final.ht', overwrite=True)
+        ht.write(f'{lustre_dir}/rf_final.ht', overwrite=True)
 
 
 if __name__ == "__main__":
