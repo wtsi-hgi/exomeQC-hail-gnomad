@@ -114,9 +114,9 @@ def get_rf(
     """
 
     if data == "model":
-        return f"{lustre_dir}/models/{run_hash}/{data}.model"
+        return f"{lustre_dir}/variant_qc/models/{run_hash}/{data}.model"
     else:
-        return TableResource(f"{lustre_dir}/models/{run_hash}/{data}.ht")
+        return TableResource(f"{lustre_dir}/variant_qc/models/{run_hash}/{data}.ht")
 
 
 def get_rf_runs(rf_json_fp: str) -> Dict:
