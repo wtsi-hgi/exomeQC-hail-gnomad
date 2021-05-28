@@ -546,7 +546,7 @@ if __name__ == "__main__":
     input_params.add_argument(
         "--priors",
         help="Full path of prior AF for gnomad cohort",
-        default=f'{lustre_dir}/variant_qc/gnomad.genomes.r3.0.sites.ht',
+        default=f'{lustre_dir}/gnomad_v3-0_AF.ht',
         type=str,
     )
     input_params.add_argument(
