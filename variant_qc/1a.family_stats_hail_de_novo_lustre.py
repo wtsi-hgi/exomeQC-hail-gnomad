@@ -472,9 +472,9 @@ def main(args):
     group = "raw"
 
     mt = hl.read_matrix_table(args.matrixtable)
-    mt = hl.split_multi_hts(
-        mt, keep_star=False, left_aligned=False, permit_shuffle=True)
-    mt=mt.checkpoint(f'{args.output_dir}/Sanger_cohort_split_multi.mt', overwrite=True)
+    #mt = hl.split_multi_hts(
+    #    mt, keep_star=False, left_aligned=False, permit_shuffle=True)
+   # mt=mt.checkpoint(f'{args.output_dir}/Sanger_cohort_split_multi.mt', overwrite=True)
     fam = args.trio_fam
     pedigree = hl.Pedigree.read(fam)
     trio_dataset = hl.trio_matrix(mt, pedigree, complete_trios=True)
@@ -494,6 +494,8 @@ def main(args):
     mt = mt.annotate_rows(gnomad_maf=priors[mt.row_key].maf)
     mt = mt.checkpoint(
         f'{lustre_dir}/Sanger_cohorts_family_stats_gnomad_AF.mt', overwrite=True)
+    #mt = hl.split_multi_hts(mt, keep_star=False, left_aligned=False, permit_shuffle=True)
+    
     de_novo_table = hl.de_novo(
         mt, pedigree, mt.gnomad_maf)
 
