@@ -475,6 +475,9 @@ def main(args):
     #mt = mt.annotate_rows(family_stats=famstats_ht[mt.row_key].family_stats)
     #mt=mt.checkpoint(f'{args.output_dir}/Sanger_cohorts_family_stats.mt', overwrite=True)
     mt=hl.read_matrix_table(f'{args.output_dir}/MegaWESSanger_cohorts_sampleQC_filtered.mt')
+    mt = hl.split_multi_hts(
+        mt, keep_star=False, left_aligned=False, permit_shuffle=True)
+    mt=mt.checkpoint(f'{args.output_dir}/MegaWESSanger_cohorts_sampleQC_filtered_split_multi.mt', overwrite=True)
     priors = hl.read_table(args.priors)
     mt = mt.annotate_rows(gnomad_maf=priors[mt.row_key].maf)
     mt = mt.checkpoint(
