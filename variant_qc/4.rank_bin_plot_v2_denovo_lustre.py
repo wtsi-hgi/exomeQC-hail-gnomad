@@ -381,8 +381,7 @@ def main(args):
 
     # ht after random model
     run_hash = args.run_hash
-    ht = hl.read_table(
-        f'{lustre_dir}/variant_qc/models/{run_hash}/rf_result_sanger_cohorts_new_SYNONYMOUS_denovo.ht')
+    ht = hl.read_table(f'{lustre_dir}/variant_qc/models/{run_hash}_rf_result_sanger_cohorts_new_SYNONYMOUS_denovo_family_stats.ht')
 
     if args.add_rank:
         ht_ranked = add_rank(ht,
