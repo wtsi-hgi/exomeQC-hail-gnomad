@@ -334,8 +334,8 @@ def create_binned_data_initial(ht: hl.Table, data: str, data_type: str, n_bins: 
             n_singleton=hl.agg.count_where(ht.transmitted_singleton),
             n_high_quality_de_novos=hl.agg.count_where(
                 ht.de_novo_data.p_de_novo[0] > 0.99),
-            n_validated_DDD_denovos=hl.agg.count_where(
-                ht.inheritance.contains("De novo")),
+            #n_validated_DDD_denovos=hl.agg.count_where(
+            #    ht.inheritance.contains("De novo")),
             n_medium_quality_de_novos=hl.agg.count_where(
                 ht.de_novo_data.p_de_novo[0] > 0.5),
             n_high_confidence_de_novos=hl.agg.count_where(
