@@ -269,7 +269,7 @@ def create_binned_data_initial(ht: hl.Table, data: str, data_type: str, n_bins: 
     logger.info(
         f"Found the following variant counts:\n {pformat(rank_variant_counts)}")
     ht_truth_data = hl.read_table(
-        f"{lustre_dir}/ddd-elgh-ukbb/variant_qc/truthset_table.ht")
+        f"{lustre_dir}/variant_qc/truthset.ht")
     ht = ht.annotate_globals(rank_variant_counts=rank_variant_counts)
     ht = ht.annotate(
         **ht_truth_data[ht.key],
