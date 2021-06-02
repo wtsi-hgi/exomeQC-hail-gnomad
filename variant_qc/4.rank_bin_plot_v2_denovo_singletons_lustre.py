@@ -372,11 +372,11 @@ def create_binned_data_initial(ht: hl.Table, data: str, data_type: str, n_bins: 
             n_trans_singletons=hl.agg.filter((ht.ac_raw < 3) & (
                 ht.family_stats.unrelated_qc_callstats.AC[0][1] == 1), hl.agg.sum(ht.family_stats.tdt[0].t)),
             n_trans_singletons_synonymous=hl.agg.count_where(
-                ht.variant_transmitted_singletons > 0),
+                ht.transmitted_singletons > 0),
             n_untrans_singletons=hl.agg.filter((ht.ac_raw < 3) & (
                 ht.family_stats.unrelated_qc_callstats.AC[0][1] == 1), hl.agg.sum(ht.family_stats.tdt[0].u)),
             n_untrans_singletons_synonymous=hl.agg.count_where(
-                ht.variant_untransmitted_singletons > 0),
+                ht.untransmitted_singletons > 0),
             n_train_trans_singletons=hl.agg.count_where(
                 (ht.family_stats.unrelated_qc_callstats.AC[0][1] == 1) & (ht.family_stats.tdt[0].t == 1)),
             n_omni=hl.agg.count_where(ht.omni),
@@ -444,7 +444,7 @@ def main(args):
         # ht_grouped = compute_grouped_binned_ht(ht_bins)
         # ht_grouped.write(
         #    f'{tmp_dir}/ddd-elgh-ukbb/{run_hash}_rf_result_ranked_BINS_Grouped.ht', overwrite=True)
-        
+
 if __name__ == "__main__":
     # need to create spark cluster first before intiialising hail
     sc = pyspark.SparkContext()

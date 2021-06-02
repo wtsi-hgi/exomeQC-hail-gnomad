@@ -475,7 +475,7 @@ def main(args):
     print(mt_pass.count())
 
     mt2 = mt2.checkpoint(
-        f'{tmp_dir}/Sanger_cohorts_chr1-7and20_after_RF_final.mt', overwrite=True)
+        f'{tmp_dir}/megaW', overwrite=True)
 
     hl.export_vcf(
         mt2, f'{tmp_dir}/Sanger_cohorts_chr1-7and20_after_RF_final.vcf.bgz',parallel='separate_header')
