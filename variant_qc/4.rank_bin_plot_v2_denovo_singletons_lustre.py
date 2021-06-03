@@ -405,7 +405,7 @@ def main(args):
     # ht after random model
     run_hash = args.run_hash
 
-    ht = hl.read_table(f'{lustre_dir}/variant_qc/models/{run_hash}_rf_result_transmitted_singletons_eugene.ht')
+    ht = hl.read_table(f'{lustre_dir}/variant_qc/models/{run_hash}_rf_result_transmitted_singletons_final.ht')
 
 
     if args.add_rank:
