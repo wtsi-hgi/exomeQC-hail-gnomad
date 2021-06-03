@@ -371,12 +371,16 @@ def create_binned_data_initial(ht: hl.Table, data: str, data_type: str, n_bins: 
             #    ht.family_stats.unrelated_qc_callstats.AC[1] == 0), hl.agg.count_where(ht.family_stats.mendel.errors > 0)),
             n_trans_singletons=hl.agg.filter((ht.ac_raw < 3) & (
                 ht.family_stats.unrelated_qc_callstats.AC[0][1] == 1), hl.agg.sum(ht.family_stats.tdt[0].t)),
-            n_trans_singletons_synonymous=hl.agg.count_where(
-                ht.variant_transmitted_singletons == 1 ),
+            #n_trans_singletons_synonymous=hl.agg.count_where(
+            #    ht.variant_transmitted_singletons > 0 ),
+            n_trans_singletons_synonymous=hl.agg.filter((ht.ac_raw < 3) & (ht.consequence == "synonymous_variant") & (
+                ht.family_stats.unrelated_qc_callstats.AC[0][1] == 1), hl.agg.sum(ht.family_stats.tdt[0].t)),
             n_untrans_singletons=hl.agg.filter((ht.ac_raw < 3) & (
                 ht.family_stats.unrelated_qc_callstats.AC[0][1] == 1), hl.agg.sum(ht.family_stats.tdt[0].u)),
-            n_untrans_singletons_synonymous=hl.agg.count_where(
-                ht.variant_untransmitted_singletons == 1),
+            #n_untrans_singletons_synonymous=hl.agg.count_where(
+            #    ht.variant_untransmitted_singletons > 0),
+            n_untrans_singletons_synonymous=hl.agg.filter((ht.ac_raw < 3) & (ht.consequence == "synonymous_variant") & (
+                ht.family_stats.unrelated_qc_callstats.AC[0][1] == 1), hl.agg.sum(ht.family_stats.tdt[0].u)),
             n_train_trans_singletons=hl.agg.count_where(
                 (ht.family_stats.unrelated_qc_callstats.AC[0][1] == 1) & (ht.family_stats.tdt[0].t == 1)),
             n_omni=hl.agg.count_where(ht.omni),
