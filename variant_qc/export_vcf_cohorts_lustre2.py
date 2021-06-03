@@ -55,7 +55,7 @@ temp_dir = "file:///home/ubuntu/data/tmp"
 #plot_dir = "/home/ubuntu/data/tmp"
 plot_dir="/lustre/scratch123/teams/hgi/mercury/megaWES-variantqc"
 lustre_dir = "file:///lustre/scratch123/teams/hgi/mercury/megaWES-variantqc"
-
+lustre_dir1="file:///lustre/scratch123/teams/hgi/mercury/pavlos-test"
 if __name__ == "__main__":
     # need to create spark cluster first before intiialising hail
     sc = pyspark.SparkContext()
@@ -74,11 +74,11 @@ if __name__ == "__main__":
         f'{lustre_dir}/variant_qc/megaWES_final_after_RF.mt')
 
     table_cohort = hl.import_table(
-        f"{lustre_dir}/sanger_cohorts_corrected_ukbb_july_2020.tsv", delimiter="\t").key_by('s')
+        f"{lustre_dir1}/sanger_cohorts_corrected_ukbb_july_2020.tsv", delimiter="\t").key_by('s')
 
     mt = mt.annotate_cols(cohort=table_cohort[mt.s].cohort)
     df = pd.read_csv(
-        f"{lustre_dir}/sanger_cohorts_corrected_ukbb_july_2020.tsv", sep="\t")
+        f"{lustre_dir1}/sanger_cohorts_corrected_ukbb_july_2020.tsv", sep="\t")
     cohorts_array = df.cohort.unique()
 
     mt = mt.annotate_rows(
