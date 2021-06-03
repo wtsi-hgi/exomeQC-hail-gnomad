@@ -436,7 +436,7 @@ def main(args):
         f'{lustre_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/{run_hash}_rf_result_ranked_denovo_ddd_comp.ht')
 
     mt = hl.read_matrix_table(
-        f'{temp_dir}/ddd-elgh-ukbb/Sanger_cohorts_chr1-7and20_split_sampleqc_filtered.mt')
+        f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered.mt')
     mt = mt.annotate_rows(
         Variant_Type=hl.cond((hl.is_snp(mt.alleles[0], mt.alleles[1])), "SNP",
                              hl.cond(
@@ -475,10 +475,10 @@ def main(args):
     print(mt_pass.count())
 
     mt2 = mt2.checkpoint(
-        f'{tmp_dir}/megaW', overwrite=True)
+        f'{lustre_dir}/variant_qc/megaWES_final_after_RF.mt', overwrite=True)
 
     hl.export_vcf(
-        mt2, f'{tmp_dir}/Sanger_cohorts_chr1-7and20_after_RF_final.vcf.bgz',parallel='separate_header')
+        mt2, f'{lustre_dir}/variant_qc/megaWES_final_after_RF_final.vcf.bgz',parallel='separate_header')
 
 
 if __name__ == "__main__":
