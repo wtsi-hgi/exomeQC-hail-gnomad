@@ -137,7 +137,7 @@ if __name__ == "__main__":
     ht2 = ht1.annotate(
         variant_untransmitted_singletons=ht_untrans_entries[ht1.key].untransmitted_singletons_count)
     print(ht2.describe())
-    print(ht2.transmitted_singletons.show())
-    print(ht2.untransmitted_singletons.show())
+    print(ht2.variant_transmitted_singletons.show())
+    print(ht2.variant_untransmitted_singletons.show())
     ht2.write(
         f'{lustre_dir}/variant_qc/models/{run_hash}_rf_result_transmitted_singletons_eugene.ht', overwrite=True)
