@@ -433,7 +433,7 @@ def main(args):
 
     run_hash = "94f5cc00"
     ht = hl.read_table(
-        f'{lustre_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/{run_hash}_rf_result_ranked_denovo_ddd_comp.ht')
+        f'{lustre_dir}/variant_qc/models/{run_hash}_rf_result_ranked_denovo_ddd_comp.ht')
 
     mt = hl.read_matrix_table(
         f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered.mt')
