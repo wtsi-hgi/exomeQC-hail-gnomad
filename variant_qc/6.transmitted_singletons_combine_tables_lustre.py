@@ -130,12 +130,12 @@ if __name__ == "__main__":
 
     ht_entries = mt_trans.entries().key_by('locus', 'alleles')
     ht1 = ht.annotate(
-        transmitted_singletons=ht_entries[ht.key].transmitted_singletons_count)
+        variant_transmitted_singletons=ht_entries[ht.key].transmitted_singletons_count)
     ht1 = ht1.annotate(family_id=ht_entries[ht1.key].id)
 
     ht_untrans_entries = mt_untrans.entries().key_by('locus', 'alleles')
     ht2 = ht1.annotate(
-        untransmitted_singletons=ht_untrans_entries[ht1.key].untransmitted_singletons_count)
+        variant_untransmitted_singletons=ht_untrans_entries[ht1.key].untransmitted_singletons_count)
     print(ht2.describe())
     print(ht2.transmitted_singletons.show())
     print(ht2.untransmitted_singletons.show())
