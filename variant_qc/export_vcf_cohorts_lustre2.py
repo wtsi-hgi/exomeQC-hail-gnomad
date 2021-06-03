@@ -52,8 +52,9 @@ with open(f"{thresholds}", 'r') as f:
 
 tmp_dir = "hdfs://spark-master:9820/"
 temp_dir = "file:///home/ubuntu/data/tmp"
-lustre_dir = "file:///lustre/scratch123/teams/hgi/mercury/pavlos-test"
-plot_dir = "/home/ubuntu/data/tmp"
+#plot_dir = "/home/ubuntu/data/tmp"
+plot_dir="/lustre/scratch123/teams/hgi/mercury/megaWES-variantqc"
+lustre_dir = "file:///lustre/scratch123/teams/hgi/mercury/megaWES-variantqc"
 
 if __name__ == "__main__":
     # need to create spark cluster first before intiialising hail
