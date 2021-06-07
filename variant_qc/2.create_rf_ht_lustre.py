@@ -223,7 +223,7 @@ if __name__ == "__main__":
     input_params.add_argument(
         "--trio_stats_table",
         help="Full path of trio stats table created at variant qc step 1a",
-        default=f'{lustre_dir}/variant_qc/megaWES_stats.ht',
+        default=f'{lustre_dir}/variant_qc/MegaWES_stats.ht',
         type=str,
     )
     input_params.add_argument(
