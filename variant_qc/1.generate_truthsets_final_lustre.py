@@ -199,11 +199,11 @@ def main(args):
     pedigree = hl.Pedigree.read(fam)
     trio_dataset = hl.trio_matrix(mt_adj, pedigree, complete_trios=True)
     trio_dataset.checkpoint(
-        f'{args.output_dir}/variant_qc/mt_trios_adj.mt', overwrite=True)
+        f'{args.output_dir}/variant_qc/MegaWES_trios_adj.mt', overwrite=True)
     trio_stats_ht = generate_trio_stats(
         trio_dataset, autosomes_only=True, bi_allelic_only=True)
     trio_stats_ht.write(
-        f'{args.output_dir}/variant_qc/Sanger_cohorts_trios_stats.ht', overwrite=True)
+        f'{args.output_dir}/variant_qc/MegaWES_stats.ht', overwrite=True)
 
     # inbreeding ht
     mt_inbreeding = mt.annotate_rows(
@@ -220,11 +220,11 @@ def main(args):
     qc_ac_ht = generate_ac(mt, fam)
 
     ht_inbreeding.write(
-        f'{args.output_dir}/ddd-elgh-ukbb/Sanger_cohorts_inbreeding_new.ht', overwrite=True)
+        f'{args.output_dir}/MegaWES_inbreeding_new.ht', overwrite=True)
     qc_ac_ht.write(
-        f'{args.output_dir}/ddd-elgh-ukbb/Sanger_cohorts_qc_ac_new.ht', overwrite=True)
+        f'{args.output_dir}/MegaWES_qc_ac_new.ht', overwrite=True)
     allele_data_ht.write(
-        f'{args.output_dir}/ddd-elgh-ukbb/Sanger_cohorts_allele_data_new.ht', overwrite=True)
+        f'{args.output_dir}/MegaWES_allele_data_new.ht', overwrite=True)
 
 
 if __name__ == "__main__":
@@ -252,7 +252,7 @@ if __name__ == "__main__":
     input_params.add_argument(
         "--matrixtable",
         help="Full path of input matrixtable. Path format \"file:///home/ubuntu/data/tmp/path/to/.mt\"",
-        default=f'{lustre_dir}/MegaWESSanger_cohorts_sampleQC_filtered.mt',
+        default=f'{lustre_dir}/MegaWESSanger_cohorts_sampleQC_filtered_autosomes.mt',
         type=str,
     )
     input_params.add_argument(

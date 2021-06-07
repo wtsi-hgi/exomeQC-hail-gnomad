@@ -479,21 +479,21 @@ def main(args):
     pedigree = hl.Pedigree.read(fam)
     trio_dataset = hl.trio_matrix(mt, pedigree, complete_trios=True)
     trio_dataset.write(
-        f'{args.output_dir}/Sanger_cohort_trio_table.mt', overwrite=True)
+        f'{args.output_dir}/MegaWES_trio_table.mt', overwrite=True)
 
     (mt1, famstats_ht) = generate_family_stats(mt, fam)
     print("Writing mt and family stats_ht")
-    mt1.write(f'{args.output_dir}/Sanger_cohorts_family_stats.mt',
+    mt1.write(f'{args.output_dir}/MegaWES_family_stats.mt',
               overwrite=True)
     famstats_ht.write(
-        f'{args.output_dir}/Sanger_cohorts_family_stats.ht', overwrite=True)
+        f'{args.output_dir}/MegaWES_family_stats.ht', overwrite=True)
     #mt = mt.annotate_rows(family_stats=famstats_ht[mt.row_key].family_stats)
     #mt=mt.checkpoint(f'{args.output_dir}/Sanger_cohorts_family_stats.mt', overwrite=True)
     
     priors = hl.read_table(args.priors)
     mt = mt.annotate_rows(gnomad_maf=priors[mt.row_key].maf)
     mt = mt.checkpoint(
-        f'{lustre_dir}/Sanger_cohorts_family_stats_gnomad_AF.mt', overwrite=True)
+        f'{lustre_dir}/MegaWES_family_stats_gnomad_AF.mt', overwrite=True)
     #mt = hl.split_multi_hts(mt, keep_star=False, left_aligned=False, permit_shuffle=True)
     
     de_novo_table = hl.de_novo(
@@ -530,7 +530,7 @@ if __name__ == "__main__":
     input_params.add_argument(
         "--matrixtable",
         help="Full path of input matrixtable. Path format \"file:///home/ubuntu/data/tmp/path/to/.mt\"",
-        default=f'{lustre_dir}/MegaWESSanger_cohorts_sampleQC_filtered.mt',
+        default=f'{lustre_dir}/MegaWESSanger_cohorts_sampleQC_filtered_autosomes.mt',
         type=str,
     )
     input_params.add_argument(
