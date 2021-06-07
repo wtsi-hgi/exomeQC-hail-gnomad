@@ -229,7 +229,7 @@ if __name__ == "__main__":
     input_params.add_argument(
         "--allele_data",
         help="Full path of allele data hail table created at variant qc step 1a",
-        default=f'{lustre_dir}/variant_qc/megaWES_allele_data_new.ht',
+        default=f'{lustre_dir}/variant_qc/MegaWES_allele_data_new.ht',
         type=str,
     )
     input_params.add_argument(
