@@ -241,7 +241,7 @@ if __name__ == "__main__":
     input_params.add_argument(
         "--inbreeding",
         help="Full path of inbrreeding coefficients hail table created at variant qc step 1a",
-        default=f'{lustre_dir}/variant_qc/megaWES_inbreeding_new.ht',
+        default=f'{lustre_dir}/variant_qc/MegaWES_inbreeding_new.ht',
         type=str,
     )
     input_params.add_argument(
