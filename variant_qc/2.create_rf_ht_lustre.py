@@ -235,7 +235,7 @@ if __name__ == "__main__":
     input_params.add_argument(
         "--allele_counts",
         help="Full path of allele counts hail table created at variant qc step 1a",
-        default=f'{lustre_dir}/variant_qc/megaWES_qc_ac_new.ht',
+        default=f'{lustre_dir}/variant_qc/MegaWES_qc_ac_new.ht',
         type=str,
     )
     input_params.add_argument(
