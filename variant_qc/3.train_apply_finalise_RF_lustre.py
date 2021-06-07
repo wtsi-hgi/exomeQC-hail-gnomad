@@ -458,7 +458,7 @@ def main(args):
 
     print("main table")
     ht = hl.read_table(
-        f'{lustre_dir}/variant_qc/Sanger_table_for_RF_all_autosomes.ht')
+        f'{lustre_dir}/variant_qc/MegaWES_for_RF_by_variant_type_all_cols.ht')
 
     if args.train_rf:
         # ht = hl.read_table(
@@ -510,10 +510,9 @@ def main(args):
         logger.info("Finished applying RF model")
         ht = ht.annotate_globals(rf_hash=run_hash)
         ht = ht.checkpoint(
-            get_rf("rf_result_sanger_cohorts_new",
+            get_rf("rf_result_MegaWES_new",
                    run_hash=run_hash).path, overwrite=True,
         )
-
         ht_summary = ht.group_by(
             "tp", "fp", TRAIN_COL, LABEL_COL, PREDICTION_COL
         ).aggregate(n=hl.agg.count())
