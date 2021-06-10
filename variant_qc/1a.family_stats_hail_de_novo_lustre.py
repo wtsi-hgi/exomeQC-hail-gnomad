@@ -472,9 +472,9 @@ def main(args):
     group = "raw"
 
     mt = hl.read_matrix_table(args.matrixtable)
-    #mt = hl.split_multi_hts(
-    #    mt, keep_star=False, left_aligned=False, permit_shuffle=True)
-   # mt=mt.checkpoint(f'{args.output_dir}/Sanger_cohort_split_multi.mt', overwrite=True)
+    mt = hl.split_multi_hts(
+        mt, keep_star=False, left_aligned=False, permit_shuffle=True)
+    mt=mt.checkpoint(f'{args.output_dir}/variant_qc/MegaWESSanger_cohorts_sampleQC_filtered_autosomes.mt', overwrite=True)
     fam = args.trio_fam
     pedigree = hl.Pedigree.read(fam)
     trio_dataset = hl.trio_matrix(mt, pedigree, complete_trios=True)
