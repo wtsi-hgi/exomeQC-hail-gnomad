@@ -99,7 +99,7 @@ if __name__ == "__main__":
     ht=ht.checkpoint(f'{lustre_dir}/variant_qc/models/{run_hash}_megaWES_RF_SYNONYMOUS_denovo_family_stats.ht', overwrite=True)
     
     #annotate with transmitted singletons counts
-    mt_filtered=hl.read_matrix_table(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_sampleQC_filtered_autosomes.mt')
+    mt_filtered=hl.read_matrix_table(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered.mt')
     mt_trans = mt_filtered.filter_entries(mt_filtered.info.AC[0] == 2)
     mt_untrans = mt_filtered.filter_entries(mt_filtered.info.AC[0] == 1)
     
