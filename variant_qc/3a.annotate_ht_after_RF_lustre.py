@@ -92,9 +92,9 @@ if __name__ == "__main__":
     ht_denovo=hl.read_table(
         f'{lustre_dir}/variant_qc/MegaWES_denovo_table.ht')
     ht=ht.annotate(de_novo_data=ht_denovo[ht.key].de_novo_data)
+
     #annotate with family stats
-    ht_familystats=hl.read_table(
-        f'{lustre_dir}/MegaWES_family_stats.ht')
+    ht_familystats=hl.read_table(f'{lustre_dir}/variant_qc/MegaWES_family_stats.ht')
     ht=ht.annotate(family_stats=ht_familystats[ht.key].family_stats)
     ht=ht.checkpoint(f'{lustre_dir}/variant_qc/models/{run_hash}_megaWES_RF_SYNONYMOUS_denovo_family_stats.ht', overwrite=True)
     
