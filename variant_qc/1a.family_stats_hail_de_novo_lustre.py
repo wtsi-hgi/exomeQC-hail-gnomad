@@ -493,7 +493,7 @@ def main(args):
     priors = hl.read_table(args.priors)
     mt = mt.annotate_rows(gnomad_maf=priors[mt.row_key].maf)
     mt = mt.checkpoint(
-        f'{lustre_dir}/MegaWES_family_stats_gnomad_AF.mt', overwrite=True)
+        f'{lustre_dir}/variant_qc/MegaWES_family_stats_gnomad_AF.mt', overwrite=True)
     #mt = hl.split_multi_hts(mt, keep_star=False, left_aligned=False, permit_shuffle=True)
     
     de_novo_table = hl.de_novo(
@@ -502,7 +502,7 @@ def main(args):
     de_novo_table = de_novo_table.key_by(
         'locus', 'alleles').collect_by_key('de_novo_data')
     de_novo_table.write(
-        f'{args.output_dir}/Sanger_cohort_denovo_table.ht', overwrite=True)
+        f'{args.output_dir}/variant_qc/MegaWES_denovo_table.ht', overwrite=True)
 
 
 if __name__ == "__main__":
