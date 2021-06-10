@@ -97,11 +97,11 @@ if __name__ == "__main__":
     hadoop_config.set("fs.s3a.secret.key", credentials["mer"]["secret_key"])
 
     ################################
-
+    ### DO NOT RUN THIS, this is now part of 3a.annotate_ht_after_RF_lustre.py
     #################################
 
    
-    run_hash = "94f5cc00"
+    run_hash = "045e8bae"
     ht = hl.read_table(
         f'{lustre_dir}/variant_qc/models/{run_hash}_rf_result_sanger_cohorts_new_SYNONYMOUS_denovo_family_stats.ht')
 

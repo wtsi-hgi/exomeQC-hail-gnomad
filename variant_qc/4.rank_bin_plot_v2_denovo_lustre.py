@@ -400,8 +400,8 @@ def main(args):
                                  # 'adj_biallelic_singleton_rank': ~ht.was_split & ht.transmitted_singleton & (ht.ac > 0)
                              }
                              )
-        # ht_ranked = ht_ranked.annotate(score=1-ht_ranked.rf_probability["TP"])
-        ht_ranked = ht_ranked.annotate(score=ht_ranked.rf_probability["TP"])
+        ht_ranked = ht_ranked.annotate(score=1-ht_ranked.rf_probability["TP"])
+        #ht_ranked = ht_ranked.annotate(score=ht_ranked.rf_probability["TP"])
         ht_ranked = ht_ranked.checkpoint(
             f'{lustre_dir}/variant_qc/models/{run_hash}_rf_result_ranked_denovo_ddd.ht', overwrite=True)
 
