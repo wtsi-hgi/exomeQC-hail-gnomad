@@ -405,13 +405,13 @@ def main(args):
     # ht after random model
     run_hash = args.run_hash
 
-    ht = hl.read_table(f'{lustre_dir}/variant_qc/models/{run_hash}_rf_result_transmitted_singletons_final.ht')
+    ht = hl.read_table(f'{lustre_dir}/variant_qc/models/{run_hash}_rf_result_FINAL_for_RANKING.ht')
 
 
     if args.add_rank:
         ht_ranked = add_rank(ht,
-                             # score_expr=1-ht.rf_probability["TP"],
-                             score_expr=ht.rf_probability["TP"],
+                             score_expr=1-ht.rf_probability["TP"],
+                             #score_expr=ht.rf_probability["TP"],
                              subrank_expr={
                                  'singleton_rank': ht.transmitted_singleton,
                                  'biallelic_rank': ~ht.was_split,
