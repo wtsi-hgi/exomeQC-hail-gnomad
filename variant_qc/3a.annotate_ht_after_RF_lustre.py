@@ -90,7 +90,7 @@ if __name__ == "__main__":
     print(ht.consequence.summarize())
      #annotate with de novo table
     ht_denovo=hl.read_table(
-        f'{lustre_dir}/variant_qc/MEgaWES_denovo_table.ht')
+        f'{lustre_dir}/variant_qc/MegaWES_denovo_table.ht')
     ht=ht.annotate(de_novo_data=ht_denovo[ht.key].de_novo_data)
     #annotate with family stats
     ht_familystats=hl.read_table(
