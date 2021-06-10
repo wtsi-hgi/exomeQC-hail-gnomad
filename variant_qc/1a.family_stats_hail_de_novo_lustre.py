@@ -530,7 +530,7 @@ if __name__ == "__main__":
     input_params.add_argument(
         "--matrixtable",
         help="Full path of input matrixtable. Path format \"file:///home/ubuntu/data/tmp/path/to/.mt\"",
-        default=f'{lustre_dir}/MegaWESSanger_cohorts_sampleQC_filtered_autosomes.mt',
+        default=f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_sampleQC_filtered_autosomes.mt',
         type=str,
     )
     input_params.add_argument(
