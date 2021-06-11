@@ -132,7 +132,7 @@ if __name__ == "__main__":
     
     #annotate with transmitted singletons counts
     mt_filtered=hl.read_matrix_table(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered.mt')
-    mt_filtered=filter_to_autosomes(mt_filtered)
+    #mt_filtered=filter_to_autosomes(mt_filtered)
     mt_trans = mt_filtered.filter_entries(mt_filtered.info.AC[0] == 2)
     mt_untrans = mt_filtered.filter_entries(mt_filtered.info.AC[0] == 1)
     
