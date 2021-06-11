@@ -51,7 +51,39 @@ with open(f"{storage}", 'r') as f:
 with open(f"{thresholds}", 'r') as f:
     thresholds = json.load(f)
 
+def get_reference_genome(
+    locus: Union[hl.expr.LocusExpression, hl.expr.IntervalExpression],
+    add_sequence: bool = False,
+) -> hl.ReferenceGenome:
+    """
+    Returns the reference genome associated with the input Locus expression
+    :param locus: Input locus
+    :param add_sequence: If set, the fasta sequence is added to the reference genome
+    :return: Reference genome
+    """
+    if isinstance(locus, hl.expr.LocusExpression):
+        ref = locus.dtype.reference_genome
+    else:
+        assert isinstance(locus, hl.expr.IntervalExpression)
+        ref = locus.dtype.point_type.reference_genome
+    if add_sequence:
+        ref = add_reference_sequence(ref)
+    return ref
 
+def filter_to_autosomes(
+    t: Union[hl.MatrixTable, hl.Table]
+) -> Union[hl.MatrixTable, hl.Table]:
+    """
+    Filters the Table or MatrixTable to autosomes only.
+    This assumes that the input contains a field named `locus` of type Locus
+    :param t: Input MT/HT
+    :return:  MT/HT autosomes
+    """
+    reference = get_reference_genome(t.locus)
+    autosomes = hl.parse_locus_interval(
+        f"{reference.contigs[0]}-{reference.contigs[21]}", reference_genome=reference
+    )
+    return hl.filter_intervals(t, [autosomes])
 
 tmp_dir = "hdfs://spark-master:9820/"
 temp_dir = "file:///home/ubuntu/data/tmp"
@@ -100,6 +132,7 @@ if __name__ == "__main__":
     
     #annotate with transmitted singletons counts
     mt_filtered=hl.read_matrix_table(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered.mt')
+    mt_filtered=filter_to_autosomes(mt_filtered)
     mt_trans = mt_filtered.filter_entries(mt_filtered.info.AC[0] == 2)
     mt_untrans = mt_filtered.filter_entries(mt_filtered.info.AC[0] == 1)
     
