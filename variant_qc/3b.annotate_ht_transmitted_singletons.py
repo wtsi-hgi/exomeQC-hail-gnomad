@@ -103,7 +103,7 @@ if __name__ == "__main__":
    
     run_hash = "045e8bae"
     ht = hl.read_table(
-        f'{lustre_dir}/variant_qc/models/{run_hash}_rf_result_sanger_cohorts_new_SYNONYMOUS_denovo_family_stats.ht')
+        f'{lustre_dir}/variant_qc/models/{run_hash}_megaWES_RF_SYNONYMOUS_denovo_family_stats.ht')
 
     
     mt_filtered=hl.read_matrix_table(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered.mt')
@@ -135,4 +135,5 @@ if __name__ == "__main__":
 
     ht=ht.annotate(variant_transmitted_singletons=mt2.rows()[ht.key].variant_transmitted_singletons)
     ht=ht.annotate(variant_untransmitted_singletons=mt3.rows()[ht.key].variant_untransmitted_singletons)
-    ht.write(f'{lustre_dir}/variant_qc/models/{run_hash}_rf_result_transmitted_singletons_final.ht', overwrite=True)
+    ht.write(f'{lustre_dir}/variant_qc/models/{run_hash}_rf_result_FINAL_for_RANKING.ht', overwrite=True)
+    #ht.write(f'{lustre_dir}/variant_qc/models/{run_hash}_rf_result_transmitted_singletons_final.ht', overwrite=True)
