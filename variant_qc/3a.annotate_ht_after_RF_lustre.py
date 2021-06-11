@@ -77,7 +77,7 @@ if __name__ == "__main__":
     #################################
 
    
-    run_hash="045e8bae"
+    run_hash="ae281191"
 
     ht = hl.read_table(
         f'{lustre_dir}/variant_qc/models/{run_hash}/rf_result_MegaWES_new.ht')
