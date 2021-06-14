@@ -131,8 +131,18 @@ if __name__ == "__main__":
     ht=ht.checkpoint(f'{lustre_dir}/variant_qc/models/{run_hash}_megaWES_RF_SYNONYMOUS_denovo_family_stats.ht', overwrite=True)
     
     #annotate with transmitted singletons counts
-    mt_filtered=hl.read_matrix_table(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered.mt')
+    mt_trios = hl.read_matrix_table(
+        f'{lustre_dir}/variant_qc/MegaWES_trios_adj.mt')
+   
+    mt_trios = mt_trios.annotate_rows(consequence=ht[mt_trios.row_key].consequence)
+
+    # mt_trios = mt_trios.checkpoint(
+    #    f'{tmp_dir}/sanger_cohorts_trios_consequence.mt', overwrite=True)
+    mt_filtered = mt_trios.filter_rows((mt_trios.info.AC[0] <= 2) & (
+        mt_trios.consequence == "synonymous_variant"))
+    #mt_filtered=hl.read_matrix_table(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered.mt')
     #mt_filtered=filter_to_autosomes(mt_filtered)
+    mt_filtered=mt_filtered.checkpoint(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered_june_2021.mt',overwrite=True)
     mt_trans = mt_filtered.filter_entries(mt_filtered.info.AC[0] == 2)
     mt_untrans = mt_filtered.filter_entries(mt_filtered.info.AC[0] == 1)
     
