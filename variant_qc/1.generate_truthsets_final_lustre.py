@@ -187,7 +187,8 @@ def main(args):
         args.matrixtable)
 
     # Truthset
-
+    mt = hl.split_multi_hts(
+        mt, keep_star=False, left_aligned=False, permit_shuffle=True)
 
     truthset_ht = get_truth_ht( args.omni, args.mills, args.thousand_genomes, args.hapmap)
     truthset_ht.write(
