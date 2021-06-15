@@ -187,8 +187,7 @@ def main(args):
         args.matrixtable)
 
     # Truthset
-    mt = hl.split_multi_hts(
-        mt, keep_star=False, left_aligned=False, permit_shuffle=True)
+    mt = hl.variant_qc(mt)
 
     truthset_ht = get_truth_ht( args.omni, args.mills, args.thousand_genomes, args.hapmap)
     truthset_ht.write(
@@ -253,7 +252,7 @@ if __name__ == "__main__":
     input_params.add_argument(
         "--matrixtable",
         help="Full path of input matrixtable. Path format \"file:///home/ubuntu/data/tmp/path/to/.mt\"",
-        default=f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_sampleQC_filtered_autosomes.mt',
+        default=f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_sampleQC_filtered_autosomes_split.mt',
         type=str,
     )
     input_params.add_argument(
