@@ -483,13 +483,20 @@ def main(args):
 
     (mt1, famstats_ht) = generate_family_stats(mt, fam)
     print("Writing mt and family stats_ht")
-    mt1.write(f'{args.output_dir}/MegaWES_family_stats.mt',
+    mt1.write(f'{args.output_dir}/MegaWES_family_stats_notannoted.mt',
               overwrite=True)
     famstats_ht.write(
         f'{args.output_dir}/MegaWES_family_stats.ht', overwrite=True)
-    #mt = mt.annotate_rows(family_stats=famstats_ht[mt.row_key].family_stats)
-    #mt=mt.checkpoint(f'{args.output_dir}/Sanger_cohorts_family_stats.mt', overwrite=True)
-    
+    mt = mt.annotate_rows(family_stats=famstats_ht[mt.row_key].family_stats)
+    mt=mt.checkpoint(f'{args.output_dir}/MegaWES_family_stats.mt', overwrite=True)
+    #(mt1, famstats_ht) = generate_family_stats(mt, fam)
+    #print("Writing mt and family stats_ht")
+    #mt1.write(f'{tmp_dir}/Sanger_cohorts_family_stats.mt', overwrite=True)
+    # famstats_ht.write(
+    #    f'{tmp_dir}/Sanger_cohorts_family_stats.ht', overwrite=True)
+    #mt = mt.annotate_rows(family_stats=ht[mt.row_key].family_stats)
+    #mt.write(f'{tmp_dir}/Sanger_cohorts_family_stats.mt', overwrite=True)
+
     priors = hl.read_table(args.priors)
     mt = mt.annotate_rows(gnomad_maf=priors[mt.row_key].maf)
     mt = mt.checkpoint(
