@@ -128,14 +128,19 @@ if __name__ == "__main__":
     #annotate with family stats
     ht_familystats=hl.read_table(f'{lustre_dir}/variant_qc/MegaWES_family_stats.ht')
     ht=ht.annotate(family_stats=ht_familystats[ht.key].family_stats)
+    ht_stats=hl.read_table(f'{lustre_dir}/variant_qc/MegaWES_stats.ht')
+    ht=ht.annotate(fam=ht_stats[ht.key])
     ht=ht.checkpoint(f'{lustre_dir}/variant_qc/models/{run_hash}_megaWES_RF_SYNONYMOUS_denovo_family_stats.ht', overwrite=True)
     
+    '''
     #annotate with transmitted singletons counts
     #mt_trios = hl.read_matrix_table(
     #    f'{lustre_dir}/variant_qc/MegaWES_trios_adj.mt')
     mt_trios = hl.read_matrix_table(
         f'{lustre_dir}/MegaWES_trio_table.mt')
     mt_trios = mt_trios.annotate_rows(consequence=ht[mt_trios.row_key].consequence)
+
+
 
     # mt_trios = mt_trios.checkpoint(
     #    f'{tmp_dir}/sanger_cohorts_trios_consequence.mt', overwrite=True)
@@ -172,5 +177,7 @@ if __name__ == "__main__":
 
     ht=ht.annotate(variant_transmitted_singletons=mt2.rows()[ht.key].variant_transmitted_singletons)
     ht=ht.annotate(variant_untransmitted_singletons=mt3.rows()[ht.key].variant_untransmitted_singletons)
+    '''
+    
     ht.write(f'{lustre_dir}/variant_qc/models/{run_hash}_rf_result_FINAL_for_RANKING.ht', overwrite=True)
 
