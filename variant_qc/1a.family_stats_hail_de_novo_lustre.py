@@ -481,13 +481,13 @@ def main(args):
     trio_dataset.write(
         f'{args.output_dir}/MegaWES_trio_table.mt', overwrite=True)
 
-    (mt1, famstats_ht) = generate_family_stats(mt, fam)
+    (ht1, famstats_ht) = generate_family_stats(mt, fam)
     print("Writing mt and family stats_ht")
-    mt1.write(f'{args.output_dir}/MegaWES_family_stats_notannoted.mt',
+    ht1.write(f'{args.output_dir}/MegaWES_family_stats.ht',
               overwrite=True)
-    famstats_ht.write(
-        f'{args.output_dir}/MegaWES_family_stats.ht', overwrite=True)
-    mt = mt.annotate_rows(family_stats=famstats_ht[mt.row_key].family_stats)
+    #famstats_ht.write(
+    #    f'{args.output_dir}/MegaWES_family_stats.ht', overwrite=True)
+    mt = mt.annotate_rows(family_stats=ht1[mt.row_key].family_stats)
     mt=mt.checkpoint(f'{args.output_dir}/MegaWES_family_stats.mt', overwrite=True)
     #(mt1, famstats_ht) = generate_family_stats(mt, fam)
     #print("Writing mt and family stats_ht")

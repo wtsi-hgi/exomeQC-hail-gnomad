@@ -131,9 +131,10 @@ if __name__ == "__main__":
     ht=ht.checkpoint(f'{lustre_dir}/variant_qc/models/{run_hash}_megaWES_RF_SYNONYMOUS_denovo_family_stats.ht', overwrite=True)
     
     #annotate with transmitted singletons counts
+    #mt_trios = hl.read_matrix_table(
+    #    f'{lustre_dir}/variant_qc/MegaWES_trios_adj.mt')
     mt_trios = hl.read_matrix_table(
-        f'{lustre_dir}/variant_qc/MegaWES_trios_adj.mt')
-   
+        f'{lustre_dir}/MegaWES_trio_table.mt')
     mt_trios = mt_trios.annotate_rows(consequence=ht[mt_trios.row_key].consequence)
 
     # mt_trios = mt_trios.checkpoint(
