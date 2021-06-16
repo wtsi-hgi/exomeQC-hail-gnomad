@@ -375,7 +375,7 @@ def create_binned_data_initial(ht: hl.Table, data: str, data_type: str, n_bins: 
             ht.ac_raw == 2, hl.agg.sum(ht.fam.n_transmitted_raw)
             ),
             n_untrans_singletons=hl.agg.filter(
-            (ht.ac_raw < 3) & (ht.ac_qc_samples_unrelated_raw == 1),
+            (ht.ac_raw < 3) & (ht.ac_qc_samples_raw == 1),
             hl.agg.sum(ht.fam.n_untransmitted_raw),
             ),
             n_trans_singletons_synonymous=hl.agg.count_where(
