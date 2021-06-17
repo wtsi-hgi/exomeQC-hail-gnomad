@@ -135,7 +135,7 @@ if __name__ == "__main__":
     untransmitted_singletons_count=hl.agg.count_where((mt_untrans.info.AC[0] == 1) & 
                      (mt_untrans.proband_entry.GT.is_hom_ref()) & (
                      (mt_untrans.father_entry.GT.is_non_ref()) |
-                     (mt_untrans.mother_entry.GT.is_het_non_ref()) )
+                     (mt_untrans.mother_entry.GT.is_non_ref()) )
                                                      ))
     
 Total_transmitted_singletons=mt_trans_count.aggregate_entries(hl.agg.count_where(mt_trans_count.transmitted_singletons_count >0))
