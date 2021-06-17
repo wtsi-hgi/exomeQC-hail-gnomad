@@ -147,3 +147,18 @@ Total_untransmitted_singletons=mt_untrans_count.aggregate_entries(hl.agg.count_w
 print(Total_untransmitted_singletons)
 Ratio_transmitted_untransmitted=Total_transmitted_singletons/Total_untransmitted_singletons
 print(Ratio_transmitted_untransmitted)
+
+mt2=mt_trans_count.annotate_rows(variant_transmitted_singletons=hl.agg.count_where(mt_trans_count.transmitted_singletons_count==1))
+mt2.variant_transmitted_singletons.summarize()
+
+mt3=mt_untrans_count.annotate_rows(variant_untransmitted_singletons=hl.agg.count_where(mt_untrans_count.untransmitted_singletons_count==1))
+mt3.variant_untransmitted_singletons.summarize()
+run_hash = "ae281191"
+ht = hl.read_table(
+        f'{lustre_dir}/variant_qc/models/{run_hash}_megaWES_RF_SYNONYMOUS_denovo_family_stats.ht')
+ht=ht.annotate(variant_transmitted_singletons=mt2.rows()[ht.key].variant_transmitted_singletons)
+ht=ht.annotate(variant_untransmitted_singletons=mt3.rows()[ht.key].variant_untransmitted_singletons)
+print(ht.variant_transmitted_singletons.summarize())
+print(ht.variant_untransmitted_singletons.summarize())
+ht.write(f'{lustre_dir}/variant_qc/models/{run_hash}_trans_singletons.ht', overwrite=True)
+
