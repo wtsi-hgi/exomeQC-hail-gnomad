@@ -144,7 +144,7 @@ if __name__ == "__main__":
     #print(mt_untrans.mother_entry.GT.show())
     #print(mt_untrans.proband_entry.GT.show())
     #group_cols_by(mt_untrans.id)
-    mt_untrans_count = mt_untrans.group_rows(mt_untrans.locus).aggregate(
+    mt_untrans_count = mt_untrans.group_rows_by(mt_untrans.locus).aggregate(
     untransmitted_singletons_count=hl.agg.count_where(
                      (mt_untrans.proband_entry.GT == hl.Call([0, 0])) 
                       & (
