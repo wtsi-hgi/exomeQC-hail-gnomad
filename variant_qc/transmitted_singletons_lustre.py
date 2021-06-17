@@ -126,7 +126,7 @@ if __name__ == "__main__":
     intervals=["chr5"]
     mt_filtered=hl.filter_intervals(mt_filtered, [hl.parse_locus_interval(x, reference_genome='GRCh38') for x in intervals])
     mt_trans=mt_filtered.filter_rows(mt_filtered.info.AC[0] ==2,keep=True)
-    mt_untrans=mt_filtered
+    mt_untrans=mt_filtered.filter_rows(mt_filtered.info.AC[0] ==1,keep=True)
     #.filter_rows(mt_filtered.info.AC[0] ==, keep=True)
     print(mt_filtered.info.AC.summarize())
     print(mt_filtered.info.AC.show())
