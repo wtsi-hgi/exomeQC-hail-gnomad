@@ -117,14 +117,14 @@ if __name__ == "__main__":
     # mt_filtered = mt_trios.filter_rows((mt_trios.info.AC[0] <= 2) & (
     #    mt_trios.consequence == "synonymous_variant"))
 
-    #mt_filtered=hl.read_matrix_table(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered_june_2021.mt')
-    mt_filtered=hl.read_matrix_table(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered.mt')
+    mt_filtered=hl.read_matrix_table(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered_june_2021.mt')
+    #mt_filtered=hl.read_matrix_table(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered.mt')
     # mt_filtered = mt_filtered.checkpoint(
     #    f'{tmp_dir}/sanger_cohorts_AC_synonymous_filtered.mt', overwrite=True)
 
     # Calculations based on Eugene's logic for the matrixtable, calculations are done on entries, so cannot be done on hail table. 
 
-    mt_trans=mt_filtered.filter_entries(mt_filtered.info.AC[0] <=2)
+    mt_trans=mt_filtered.filter_entries(mt_filtered.info.AC[0] ==2)
     mt_untrans=mt_filtered.filter_entries(mt_filtered.info.AC[0] < 2)
     print(mt_filtered.info.AC.summarize())
     print(mt_filtered.info.AC.show())
