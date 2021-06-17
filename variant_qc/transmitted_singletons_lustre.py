@@ -124,8 +124,8 @@ if __name__ == "__main__":
 
     # Calculations based on Eugene's logic for the matrixtable, calculations are done on entries, so cannot be done on hail table. 
 
-    mt_trans=mt_filtered.filter_entries(mt_filtered.info.AC[0] ==2)
-    mt_untrans=mt_filtered.filter_entries(mt_filtered.info.AC[0] <=2)
+    mt_trans=mt_filtered.filter_rows(mt_filtered.info.AC[0] ==2)
+    mt_untrans=mt_filtered.filter_rows(mt_filtered.info.AC[0] ==1)
     print(mt_filtered.info.AC.summarize())
     print(mt_filtered.info.AC.show())
     mt_trans_count=mt_trans.group_cols_by(mt_trans.id).aggregate(transmitted_singletons_count=hl.agg.count_where((mt_trans.info.AC[0] == 2) 
@@ -166,5 +166,5 @@ print(ht.variant_transmitted_singletons.summarize())
 print(ht.variant_untransmitted_singletons.summarize())
 ht_stats=hl.read_table(f'{lustre_dir}/variant_qc/MegaWES_stats.ht')
 ht=ht.annotate(fam=ht_stats[ht.key])
-ht.write(f'{lustre_dir}/variant_qc/models/{run_hash}_rf_result_FINAL_for_RANKING.ht', overwrite=True)
+ht.write(f'{lustre_dir}/variant_qc/models/{run_hash}_rf_result_FINAL_for_RANKING_new.ht', overwrite=True)
 
