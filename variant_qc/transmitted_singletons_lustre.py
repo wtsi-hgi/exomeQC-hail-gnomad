@@ -143,7 +143,8 @@ if __name__ == "__main__":
     #print(mt_untrans.father_entry.GT.show())
     #print(mt_untrans.mother_entry.GT.show())
     #print(mt_untrans.proband_entry.GT.show())
-    mt_untrans_count = mt_untrans.group_cols_by(mt_untrans.id).aggregate(
+    #group_cols_by(mt_untrans.id)
+    mt_untrans_count = mt_untrans.group_rows(mt_untrans.locus).aggregate(
     untransmitted_singletons_count=hl.agg.count_where(
                      (mt_untrans.proband_entry.GT == hl.Call([0, 0])) 
                       & (
@@ -152,9 +153,9 @@ if __name__ == "__main__":
                      (mt_untrans.mother_entry.GT ==hl.Call([0,1])) | (mt_untrans.mother_entry.GT==hl.Call([1,0]))  )
                                                      ))
     
-Total_transmitted_singletons=mt_trans_count.aggregate_entries(hl.agg.count_where(mt_trans_count.transmitted_singletons_count >0))
+Total_transmitted_singletons=mt_trans_count.aggregate_rows(hl.agg.count_where(mt_trans_count.transmitted_singletons_count >0))
 print(Total_transmitted_singletons)
-Total_untransmitted_singletons=mt_untrans_count.aggregate_entries(hl.agg.count_where(mt_untrans_count.untransmitted_singletons_count >0))
+Total_untransmitted_singletons=mt_untrans_count.aggregate_rows(hl.agg.count_where(mt_untrans_count.untransmitted_singletons_count >0))
 print(Total_untransmitted_singletons)
 Ratio_transmitted_untransmitted=Total_transmitted_singletons/Total_untransmitted_singletons
 print("RATIO:")
