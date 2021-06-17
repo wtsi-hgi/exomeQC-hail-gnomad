@@ -105,9 +105,9 @@ if __name__ == "__main__":
 
     # mt_trios = hl.read_matrix_table(
     #    f'{temp_dir}/ddd-elgh-ukbb/variant_qc/mt_trios_adj.mt')
-    run_hash = "91b132aa"
-    ht = hl.read_table(
-        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/{run_hash}_rf_result_sanger_cohorts_DENOVO_family_stats_SYNONYMOUS.ht')
+    #run_hash = "91b132aa"
+    #ht = hl.read_table(
+    #    f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/{run_hash}_rf_result_sanger_cohorts_DENOVO_family_stats_SYNONYMOUS.ht')
 
         # mt_trios = mt_trios.annotate_rows(
     #    consequence=ht[mt_trios.row_key].consequence)
