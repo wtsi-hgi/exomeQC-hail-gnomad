@@ -128,7 +128,7 @@ if __name__ == "__main__":
     mt_untrans=mt_filtered.filter_entries(mt_filtered.info.AC[0] < 2)
     print(mt_filtered.info.AC.summarize())
     print(mt_filtered.info.AC.show())
-    mt_trans_count=mt_trans.group_cols_by(mt_trans.id).aggregate(transmitted_singletons_count=hl.agg.count_where((mt_trans.info.AC[0] >= 1) 
+    mt_trans_count=mt_trans.group_cols_by(mt_trans.id).aggregate(transmitted_singletons_count=hl.agg.count_where((mt_trans.info.AC[0] == 2) 
                                 & (mt_trans.proband_entry.GT.is_non_ref()) & 
                                                                                             
                                (  (mt_trans.father_entry.GT.is_non_ref()) | (mt_trans.mother_entry.GT.is_non_ref() ))
@@ -143,7 +143,7 @@ if __name__ == "__main__":
                      (mt_untrans.mother_entry.GT.is_non_ref()) )
                                                      ))
     
-Total_transmitted_singletons=mt_trans_count.aggregate_entries(hl.agg.count_where(mt_trans_count.transmitted_singletons_count ==1))
+Total_transmitted_singletons=mt_trans_count.aggregate_entries(hl.agg.count_where(mt_trans_count.transmitted_singletons_count >0))
 print(Total_transmitted_singletons)
 Total_untransmitted_singletons=mt_untrans_count.aggregate_entries(hl.agg.count_where(mt_untrans_count.untransmitted_singletons_count ==1))
 print(Total_untransmitted_singletons)
