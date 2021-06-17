@@ -140,7 +140,7 @@ if __name__ == "__main__":
                      (mt_untrans.proband_entry.GT.is_hom_ref()) 
                       & (
                      (mt_untrans.father_entry.GT.is_non_ref()) 
-                      | (mt_untrans.father_entry.GT.is_het_non_ref()) |(mt_untrans.father_entry.GT.is_het()) |
+                      | (mt_untrans.father_entry.GT.is_het_non_ref()) |(hl.is_defined(mt_untrans.father_entry.GT)) |
                      (mt_untrans.mother_entry.GT.is_non_ref()) | (mt_untrans.mother_entry.GT.is_het_non_ref()) |(mt_untrans.mother_entry.GT.is_het()) )
                                                      ))
     
