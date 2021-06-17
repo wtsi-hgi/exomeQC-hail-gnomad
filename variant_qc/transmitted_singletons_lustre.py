@@ -123,7 +123,8 @@ if __name__ == "__main__":
     #    f'{tmp_dir}/sanger_cohorts_AC_synonymous_filtered.mt', overwrite=True)
 
     # Calculations based on Eugene's logic for the matrixtable, calculations are done on entries, so cannot be done on hail table. 
-    mt_filtered=hl.filter_intervals(mt_filtered, hl.parse_locus_interval("chr5",reference_genome='GRCh38'))
+    intervals=["chr5"]
+    mt_filtered=hl.filter_intervals(mt_filtered, hl.parse_locus_interval(intervals,reference_genome='GRCh38'))
     mt_trans=mt_filtered.filter_rows(mt_filtered.info.AC[0] ==2,keep=True)
     mt_untrans=mt_filtered
     #.filter_rows(mt_filtered.info.AC[0] ==, keep=True)
