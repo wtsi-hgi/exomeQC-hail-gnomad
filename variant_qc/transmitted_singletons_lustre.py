@@ -142,7 +142,7 @@ if __name__ == "__main__":
                       & (
                      (mt_untrans.father_entry.GT ==hl.Call([0, 1])) 
                       | (mt_untrans.father_entry.GT ==hl.Call([1, 0] )) |
-                     (mt_untrans.mother_entry.GT ==hl.Call([0,1])) | (mt_untrans.mother_entry.GT==hl.Cal([1,0]))  )
+                     (mt_untrans.mother_entry.GT ==hl.Call([0,1])) | (mt_untrans.mother_entry.GT==hl.Call([1,0]))  )
                                                      ))
     
 Total_transmitted_singletons=mt_trans_count.aggregate_entries(hl.agg.count_where(mt_trans_count.transmitted_singletons_count >0))
