@@ -122,7 +122,7 @@ if __name__ == "__main__":
 
     # Calculations based on Eugene's logic for the matrixtable, calculations are done on entries, so cannot be done on hail table. 
 
-    mt_trans=mt_filtered.filter_entries(mt_filtered.info.AC[0]==2)
+    mt_trans=mt_filtered.filter_entries(mt_filtered.info.AC[0]==3)
     mt_untrans=mt_filtered.filter_entries(mt_filtered.info.AC[0]==2)
 
     mt_trans_count=mt_trans.group_cols_by(mt_trans.id).aggregate(transmitted_singletons_count=hl.agg.count_where((mt_trans.info.AC[0] == 2) 
