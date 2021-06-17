@@ -148,6 +148,7 @@ print(Total_transmitted_singletons)
 Total_untransmitted_singletons=mt_untrans_count.aggregate_entries(hl.agg.count_where(mt_untrans_count.untransmitted_singletons_count >0))
 print(Total_untransmitted_singletons)
 Ratio_transmitted_untransmitted=Total_transmitted_singletons/Total_untransmitted_singletons
+print("RATIO:")
 print(Ratio_transmitted_untransmitted)
 
 mt2=mt_trans_count.annotate_rows(variant_transmitted_singletons=hl.agg.count_where(mt_trans_count.transmitted_singletons_count==1))
