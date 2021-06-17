@@ -138,12 +138,16 @@ if __name__ == "__main__":
     print(mt_untrans.proband_entry.GT.show())
     mt_untrans_count = mt_untrans.group_cols_by(mt_untrans.id).aggregate(
     untransmitted_singletons_count=hl.agg.count_where(
-                     (mt_untrans.proband_entry.GT.is_hom_ref()) 
-                      & (
-                     (mt_untrans.father_entry.GT.is_non_ref()) 
-                      | (mt_untrans.father_entry.GT.is_het_non_ref()) |(hl.is_defined(mt_untrans.father_entry.GT)) |
-                     (mt_untrans.mother_entry.GT.is_non_ref()) | (mt_untrans.mother_entry.GT.is_het_non_ref()) |(mt_untrans.mother_entry.GT.is_het()) )
-                                                     ))
+                     (mt_untrans.proband_entry.GT.is_non_ref()) 
+                      & 
+                      (  (mt_trans.father_entry.GT.is_non_ref()) | (mt_trans.mother_entry.GT.is_non_ref() ))
+                                                                                                             ))
+                      # 
+                     # (
+                     #(mt_untrans.father_entry.GT.is_non_ref()) 
+                     # | (mt_untrans.father_entry.GT.is_het_non_ref()) |(hl.is_defined(mt_untrans.father_entry.GT)) |
+                     #(mt_untrans.mother_entry.GT.is_non_ref()) | (mt_untrans.mother_entry.GT.is_het_non_ref()) |(mt_untrans.mother_entry.GT.is_het()) )
+                                         #            ))
     
 Total_transmitted_singletons=mt_trans_count.aggregate_entries(hl.agg.count_where(mt_trans_count.transmitted_singletons_count >0))
 print(Total_transmitted_singletons)
