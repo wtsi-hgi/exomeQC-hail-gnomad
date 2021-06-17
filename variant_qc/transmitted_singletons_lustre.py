@@ -164,5 +164,7 @@ ht=ht.annotate(variant_transmitted_singletons=mt2.rows()[ht.key].variant_transmi
 ht=ht.annotate(variant_untransmitted_singletons=mt3.rows()[ht.key].variant_untransmitted_singletons)
 print(ht.variant_transmitted_singletons.summarize())
 print(ht.variant_untransmitted_singletons.summarize())
+ht_stats=hl.read_table(f'{lustre_dir}/variant_qc/MegaWES_stats.ht')
+ht=ht.annotate(fam=ht_stats[ht.key])
 ht.write(f'{lustre_dir}/variant_qc/models/{run_hash}_rf_result_FINAL_for_RANKING.ht', overwrite=True)
 
