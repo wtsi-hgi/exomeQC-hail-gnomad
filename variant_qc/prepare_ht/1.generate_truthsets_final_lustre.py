@@ -106,14 +106,46 @@ def main(args):
     qc_ac_ht = generate_ac(mt, fam)
 
     ht_inbreeding.write(
-        f'{args.output_dir}/MegaWES_inbreeding_new.ht', overwrite=True)
+        f'{args.output_dir}/variant_qc/MegaWES_inbreeding_new.ht', overwrite=True)
     qc_ac_ht.write(
-        f'{args.output_dir}/MegaWES_qc_ac_new.ht', overwrite=True)
+        f'{args.output_dir}/variant_qc/MegaWES_qc_ac_new.ht', overwrite=True)
     allele_data_ht.write(
-        f'{args.output_dir}/MegaWES_allele_data_new.ht', overwrite=True)
+        f'{args.output_dir}/variant_qc/MegaWES_allele_data_new.ht', overwrite=True)
 
 
+    # Trio matrix table
+    mt = hl.split_multi_hts(
+        mt, keep_star=False, left_aligned=False, permit_shuffle=True)
+    mt=mt.checkpoint(f'{args.output_dir}/variant_qc/MegaWESSanger_cohorts_sampleQC_filtered_split.mt', overwrite=True)
+    fam = args.trio_fam
+    pedigree = hl.Pedigree.read(fam)
+    trio_dataset = hl.trio_matrix(mt, pedigree, complete_trios=True)
+    trio_dataset.write(
+        f'{args.output_dir}/variant_qc/MegaWES_trio_table.mt', overwrite=True)
 
+    # Family stats
+    (ht1, famstats_ht) = generate_family_stats(mt, fam)
+    print("Writing mt and family stats_ht")
+    ht1.write(f'{args.output_dir}/variant_qc/MegaWES_family_stats.ht',
+              overwrite=True)
+
+    mt = mt.annotate_rows(family_stats=ht1[mt.row_key].family_stats)
+    mt=mt.checkpoint(f'{args.output_dir}/variant_qc/MegaWES_family_stats.mt', overwrite=True)
+
+    #Family stats with Allele Frequencies from gnomad
+    priors = hl.read_table(args.priors)
+    mt = mt.annotate_rows(gnomad_maf=priors[mt.row_key].maf)
+    mt = mt.checkpoint(
+        f'{lustre_dir}/variant_qc/MegaWES_family_stats_gnomad_AF.mt', overwrite=True)
+
+    #De novo table
+    de_novo_table = hl.de_novo(
+        mt, pedigree, mt.gnomad_maf)
+
+    de_novo_table = de_novo_table.key_by(
+        'locus', 'alleles').collect_by_key('de_novo_data')
+    de_novo_table.write(
+        f'{args.output_dir}/variant_qc/MegaWES_denovo_table.ht', overwrite=True)
 
 
 if __name__ == "__main__":
@@ -172,6 +204,12 @@ if __name__ == "__main__":
         "--trio_fam",
         help="Full path of trio fam file for cohort",
         default=f"{lustre_dir}/trios/DDD_trios.fam",
+        type=str,
+    )
+    input_params.add_argument(
+        "--priors",
+        help="Full path of prior AF for gnomad cohort",
+        default=f'{lustre_dir}/gnomad_v3-0_AF.ht',
         type=str,
     )
 
