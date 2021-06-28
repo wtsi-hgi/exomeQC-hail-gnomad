@@ -80,14 +80,14 @@ def main(args):
         f'{args.output_dir}/variant_qc/truthset_table.ht', overwrite=True)
     # Trio data
     # trio annotation:
-    logger("Trio annotation and writing trios_adj.mt")
+    logger.info("Trio annotation and writing trios_adj.mt")
     mt_adj = annotate_adj(mt)
     fam = args.trio_fam
     pedigree = hl.Pedigree.read(fam)
     trio_dataset = hl.trio_matrix(mt_adj, pedigree, complete_trios=True)
     trio_dataset.checkpoint(
         f'{args.output_dir}/variant_qc/MegaWES_trios_adj.mt', overwrite=True)
-    logger("Trio stats and writing MegaWes_stats.ht")
+    logger.info("Trio stats and writing MegaWes_stats.ht")
     trio_stats_ht = generate_trio_stats(
         trio_dataset, autosomes_only=True, bi_allelic_only=True)
     trio_stats_ht.write(
@@ -107,7 +107,7 @@ def main(args):
 
     qc_ac_ht = generate_ac(mt, fam)
 
-    logger("Writing tables for inbreeding, allele counts")
+    logger.info("Writing tables for inbreeding, allele counts")
     ht_inbreeding.write(
         f'{args.output_dir}/variant_qc/MegaWES_inbreeding_new.ht', overwrite=True)
     qc_ac_ht.write(
@@ -117,19 +117,19 @@ def main(args):
 
 
     # Trio matrix table
-    logger("Split multi allelic variants and write mt")
+    logger.info("Split multi allelic variants and write mt")
     mt = hl.split_multi_hts(
         mt, keep_star=False, left_aligned=False, permit_shuffle=True)
     mt=mt.checkpoint(f'{args.output_dir}/variant_qc/MegaWESSanger_cohorts_sampleQC_filtered_split.mt', overwrite=True)
     fam = args.trio_fam
     pedigree = hl.Pedigree.read(fam)
-    logger("Trio matrixtable generation:")
+    logger.info("Trio matrixtable generation:")
     trio_dataset = hl.trio_matrix(mt, pedigree, complete_trios=True)
     trio_dataset.write(
         f'{args.output_dir}/variant_qc/MegaWES_trio_table.mt', overwrite=True)
 
     # Family stats
-    logger("Family stats")
+    logger.info("Family stats")
     (ht1, famstats_ht) = generate_family_stats(mt, fam)
     print("Writing mt and family stats_ht")
     ht1.write(f'{args.output_dir}/variant_qc/MegaWES_family_stats.ht',
@@ -139,13 +139,13 @@ def main(args):
     mt=mt.checkpoint(f'{args.output_dir}/variant_qc/MegaWES_family_stats.mt', overwrite=True)
 
     #Family stats with Allele Frequencies from gnomad
-    logger("Family stats with gnomad AF")
+    logger.info("Family stats with gnomad AF")
     priors = hl.read_table(args.priors)
     mt = mt.annotate_rows(gnomad_maf=priors[mt.row_key].maf)
     mt = mt.checkpoint(
         f'{lustre_dir}/variant_qc/MegaWES_family_stats_gnomad_AF.mt', overwrite=True)
 
-    logger("De novo table cration")
+    logger.info("De novo table cration")
     #De novo table
     de_novo_table = hl.de_novo(
         mt, pedigree, mt.gnomad_maf)
