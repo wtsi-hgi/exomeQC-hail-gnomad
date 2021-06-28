@@ -1,4 +1,6 @@
 import hail as hl
+from typing import Any, Counter, List, Optional, Tuple, Union
+
 from gnomad.resources.grch38 import gnomad
 from gnomad.utils.annotations import annotate_adj
 from gnomad.utils.annotations import unphase_call_expr, add_variant_type
