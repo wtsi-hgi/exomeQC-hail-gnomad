@@ -77,8 +77,8 @@ FEATURES = [
     "was_mixed",
     "has_star",
     "QD",
-    "MQRankSum",
-    "SOR",
+    "info.MQRankSum",
+    "info.SOR",
     "ReadPosRankSum",
     "FS",
     "DP"
