@@ -71,9 +71,9 @@ INFO_FEATURES = [
 ]  # Note: AS_SOR is currently in VQSR HT and named SOR in the VQSR split HT
 FEATURES = [
     "InbreedingCoeff",
-    "allele_data.variant_type",
-    "allele_data.allele_type",
-    "allele_data.n_alt_alleles",
+    "variant_type",
+    "allele_type",
+    "n_alt_alleles",
     "was_mixed",
     "has_star",
     "QD",
@@ -149,7 +149,7 @@ def main(args):
         **inbreeding_ht[ht.key],
         **trio_stats_ht[ht.key],
         **truth_data_ht[ht.key],
-       # **allele_data_ht[ht.key].allele_data,
+        **allele_data_ht[ht.key].allele_data,
         **allele_data_ht[ht.key],
         **allele_counts_ht[ht.key],
     )
