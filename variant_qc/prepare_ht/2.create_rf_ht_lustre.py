@@ -39,7 +39,7 @@ logging.basicConfig(format="%(levelname)s (%(name)s %(lineno)s): %(message)s")
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-project_root = Path(__file__).parent.parent
+project_root = Path(__file__).parent.parent.parent
 print(project_root)
 
 s3credentials = os.path.join(
@@ -135,11 +135,11 @@ def main(args):
     ).key_rows_by('locus', 'alleles')
     # mt = mt.select_entries(
     #    GT=hl.unphased_diploid_gt_index_call(mt.GT.n_alt_alleles()))
-    # mt = mt.annotate_rows(InbreedingCoeff=hl.or_missing(
-    #   ~hl.is_nan(mt.info.InbreedingCoeff), mt.info.InbreedingCoeff))
+    mt = mt.annotate_rows(InbreedingCoeff=hl.or_missing(
+       ~hl.is_nan(mt.info.InbreedingCoeff), mt.info.InbreedingCoeff))
     ht = mt.rows()
     ht = ht.transmute(**ht.info)
-    #ht = ht.select("FS", "MQ", "QD", "InbreedingCoeff", *INFO_FEATURES)
+    ht = ht.select("FS", "MQ", "QD", "InbreedingCoeff", *INFO_FEATURES, *FEATURES)
 
     trio_stats_ht = trio_stats_table.select(
         f"n_transmitted_{group}", f"ac_children_{group}"
@@ -163,19 +163,19 @@ def main(args):
         ht[f"n_transmitted_{group}"] == 1) & (ht[f"ac_qc_samples_{group}"] == 2))
 
     # the following only selects the required RF fields but I commented it out because some of the fields excluded are needed later
-    # ht = ht.select(
-    #    "a_index",
-    #    "was_split",
-    #    *FEATURES,
-    #    *TRUTH_DATA,
-    #    **{
-    #        "transmitted_singleton": (ht[f"n_transmitted_{group}"] == 1)
-    #        & (ht[f"ac_qc_samples_{group}"] == 2),
-    #        "fail_hard_filters": (ht.QD < 2) | (ht.FS > 60) | (ht.MQ < 30),
-    #    },
-    #    ac_raw=ht.ac_qc_samples_raw
+    ht = ht.select(
+        "a_index",
+        "was_split",
+        *FEATURES,
+        *TRUTH_DATA,
+        **{
+            "transmitted_singleton": (ht[f"n_transmitted_{group}"] == 1)
+            & (ht[f"ac_qc_samples_{group}"] == 2),
+            "fail_hard_filters": (ht.QD < 2) | (ht.FS > 60) | (ht.MQ < 30),
+        },
+        ac_raw=ht.ac_qc_samples_raw
 
-    # )
+     )
 
     ht = ht.repartition(n_partitions, shuffle=False)
     ht = ht.checkpoint(
@@ -211,13 +211,13 @@ if __name__ == "__main__":
     input_params.add_argument(
         "--matrixtable",
         help="Full path of input matrixtable. Path format \"file:///home/ubuntu/data/tmp/path/to/.mt\"",
-        default=f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_sampleQC_filtered_autosomes.mt',
+        default=f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_sampleQC_filtered_split.mt',
         type=str,
     )
     input_params.add_argument(
         "--truthset_table",
         help="Full path of the truthset table created in variant qc step 1.",
-        default=f'{lustre_dir}/variant_qc/truthset.ht',
+        default=f'{lustre_dir}/variant_qc/truthset_table.ht',
         type=str,
     )
     input_params.add_argument(
