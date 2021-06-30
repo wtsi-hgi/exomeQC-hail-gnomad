@@ -147,7 +147,7 @@ def main(args):
        ~hl.is_nan(mt.info.InbreedingCoeff), mt.info.InbreedingCoeff))
     ht = mt.rows()
     ht = ht.transmute(**ht.info)
-    ht = ht.select( "MQ", "QD", "InbreedingCoeff", *INFO_FEATURES)
+    ht = ht.select( "MQ", "InbreedingCoeff", *INFO_FEATURES)
 
     trio_stats_ht = trio_stats_table.select(
         f"n_transmitted_{group}", f"ac_children_{group}"
