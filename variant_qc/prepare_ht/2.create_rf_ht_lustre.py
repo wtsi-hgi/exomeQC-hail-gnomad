@@ -150,7 +150,7 @@ def main(args):
         **trio_stats_ht[ht.key],
         **truth_data_ht[ht.key],
        # **allele_data_ht[ht.key].allele_data,
-        **allele_data_ht[ht.key].allele_data,
+        **allele_data_ht[ht.key],
         **allele_counts_ht[ht.key],
     )
     # Filter to only variants found in high quality samples or controls with no LowQual filter
