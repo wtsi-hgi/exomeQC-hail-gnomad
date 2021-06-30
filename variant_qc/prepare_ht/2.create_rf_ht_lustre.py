@@ -164,7 +164,7 @@ def main(args):
 
     # the following only selects the required RF fields but I commented it out because some of the fields excluded are needed later
     ht = ht.select(
-        "a_index",
+        #"a_index",
         "was_split",
         *FEATURES,
         *TRUTH_DATA,
