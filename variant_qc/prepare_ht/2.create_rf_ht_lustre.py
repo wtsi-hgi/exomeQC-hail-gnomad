@@ -68,6 +68,13 @@ INFO_FEATURES = [
     "AS_ReadPosRankSum",
     "AS_MQRankSum",
     "AS_SOR",
+    "QD",
+    "MQRankSum",
+    "SOR",
+    "ReadPosRankSum",
+    "FS",
+    "DP"
+
 ]  # Note: AS_SOR is currently in VQSR HT and named SOR in the VQSR split HT
 FEATURES = [
     "InbreedingCoeff",
@@ -77,8 +84,8 @@ FEATURES = [
     "was_mixed",
     "has_star",
     "QD",
-    "info.MQRankSum",
-    "info.SOR",
+    "MQRankSum",
+    "SOR",
     "ReadPosRankSum",
     "FS",
     "DP"
