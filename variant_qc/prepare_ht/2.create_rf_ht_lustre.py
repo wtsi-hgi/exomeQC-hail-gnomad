@@ -71,7 +71,6 @@ INFO_FEATURES = [
 ]  # Note: AS_SOR is currently in VQSR HT and named SOR in the VQSR split HT
 FEATURES = [
     "InbreedingCoeff",
-    "variant_type",
     "allele_type",
     "n_alt_alleles",
     "was_mixed",
