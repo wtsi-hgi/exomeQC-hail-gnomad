@@ -71,6 +71,7 @@ INFO_FEATURES = [
 ]  # Note: AS_SOR is currently in VQSR HT and named SOR in the VQSR split HT
 FEATURES = [
     "InbreedingCoeff",
+    "variant_type",
     "allele_type",
     "n_alt_alleles",
     "was_mixed",
@@ -138,7 +139,7 @@ def main(args):
        ~hl.is_nan(mt.info.InbreedingCoeff), mt.info.InbreedingCoeff))
     ht = mt.rows()
     ht = ht.transmute(**ht.info)
-    ht = ht.select("FS", "MQ", "QD", "InbreedingCoeff", *INFO_FEATURES, *FEATURES)
+    ht = ht.select("FS", "MQ", "QD", "InbreedingCoeff", *INFO_FEATURES)
 
     trio_stats_ht = trio_stats_table.select(
         f"n_transmitted_{group}", f"ac_children_{group}"
