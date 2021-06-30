@@ -185,7 +185,7 @@ def main(args):
         ac_raw=ht.ac_qc_samples_raw
 
      )
-
+    logger.info("Repartirioning")
     ht = ht.repartition(n_partitions, shuffle=False)
     ht = ht.checkpoint(
         f'{args.output_dir}/variant_qc/MegaWES_for_RF_all_cols.ht', overwrite=True)
