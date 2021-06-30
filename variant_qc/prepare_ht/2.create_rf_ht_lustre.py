@@ -133,8 +133,8 @@ def main(args):
         args.matrixtable)
     mt = mt.key_rows_by('locus').distinct_by_row(
     ).key_rows_by('locus', 'alleles')
-    # mt = mt.select_entries(
-    #    GT=hl.unphased_diploid_gt_index_call(mt.GT.n_alt_alleles()))
+    mt = mt.select_entries(
+        GT=hl.unphased_diploid_gt_index_call(mt.GT.n_alt_alleles()))
     mt = mt.annotate_rows(InbreedingCoeff=hl.or_missing(
        ~hl.is_nan(mt.info.InbreedingCoeff), mt.info.InbreedingCoeff))
     ht = mt.rows()
