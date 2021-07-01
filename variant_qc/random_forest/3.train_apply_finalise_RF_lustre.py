@@ -165,12 +165,14 @@ def train_rf(ht, args):
 
     if args.no_inbreeding_coeff:
         features.remove("InbreedingCoeff")
+    
 
     fp_expr = ht.fail_hard_filters
     tp_expr = ht.omni | ht.mills | ht.kgp_phase1_hc | ht.hapmap
-    ht = ht.annotate(tp=tp_expr, fp=fp_expr)
     if not args.no_transmitted_singletons:
-        tp_expr = tp_expr | ht.transmitted_singleton
+        tp_expr = ht.omni | ht.mills | ht.kgp_phase1_hc | ht.hapmap | ht.transmitted_singleton
+    ht = ht.annotate(tp=tp_expr, fp=fp_expr)
+    
 
 
     if test_intervals:
