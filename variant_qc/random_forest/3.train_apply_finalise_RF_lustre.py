@@ -419,6 +419,8 @@ def main(args):
     print("main table")
     ht = hl.read_table(
         f'{lustre_dir}/variant_qc/MegaWES_for_RF_all_cols.ht')
+    logger.info("filter to autosomes")
+    ht=filter_to_autosomes(ht)
 
     if args.train_rf:
         # ht = hl.read_table(
