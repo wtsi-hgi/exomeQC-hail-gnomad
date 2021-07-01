@@ -168,8 +168,10 @@ def train_rf(ht, args):
 
     fp_expr = ht.fail_hard_filters
     tp_expr = ht.omni | ht.mills | ht.kgp_phase1_hc | ht.hapmap
+    ht = ht.annotate(tp=tp_expr, fp=fp_expr)
     if not args.no_transmitted_singletons:
         tp_expr = tp_expr | ht.transmitted_singleton
+
 
     if test_intervals:
         test_intervals_str = [] if not args.test_intervals else [args.test_intervals] if isinstance(args.test_intervals, str) else args.test_intervals
@@ -188,7 +190,7 @@ def train_rf(ht, args):
        # print("Resulting intervals")
        # print(hl.eval(test_intervals))
 
-    ht = ht.annotate(tp=tp_expr, fp=fp_expr)
+    ht=ht.persist()
     logger.info("Now runnning train_rf_model method")
     test_expr=hl.literal(test_intervals).any(
             lambda interval: interval.contains(ht.locus))
