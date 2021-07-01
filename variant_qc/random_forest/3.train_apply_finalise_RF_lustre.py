@@ -419,7 +419,7 @@ def main(args):
 
     print("main table")
     ht = hl.read_table(
-        f'{lustre_dir}/variant_qc/MegaWES_for_RF_by_variant_type_all_cols.ht')
+        f'{lustre_dir}/variant_qc/MegaWES_for_RF_all_cols.ht')
 
     if args.train_rf:
         # ht = hl.read_table(
