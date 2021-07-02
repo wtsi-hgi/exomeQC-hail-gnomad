@@ -554,7 +554,7 @@ if __name__ == "__main__":
         help='The specified interval(s) will be held out for testing and evaluation only. (default to "chr20")',
         nargs="+",
         type=str,
-        default="chr21",
+        default="chr20:1-200000",
     )
     rf_params.add_argument(
         "--num_trees",
