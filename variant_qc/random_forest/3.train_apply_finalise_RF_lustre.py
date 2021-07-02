@@ -175,14 +175,6 @@ def train_rf(ht, args):
     
 
 
-    if test_intervals:
-        test_intervals_str = [] if not args.test_intervals else [args.test_intervals] if isinstance(args.test_intervals, str) else args.test_intervals
-        test_intervals_locus = [hl.parse_locus_interval(x, reference_genome="GRCh38") for x in test_intervals_str]
-
-        if test_intervals_locus:
-            ht = ht.annotate_globals(
-            test_intervals=test_intervals_locus
-            )
     if isinstance(test_intervals, str):
         test_intervals = [test_intervals]
         test_intervals = [
@@ -419,8 +411,8 @@ def main(args):
     print("main table")
     ht = hl.read_table(
         f'{lustre_dir}/variant_qc/MegaWES_for_RF_all_cols.ht')
-    logger.info("filter to autosomes")
-    ht=filter_to_autosomes(ht)
+    #logger.info("filter to autosomes")
+    #ht=filter_to_autosomes(ht)
 
     if args.train_rf:
         # ht = hl.read_table(
