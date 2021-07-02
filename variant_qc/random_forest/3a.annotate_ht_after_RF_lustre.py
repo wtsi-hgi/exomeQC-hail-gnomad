@@ -78,9 +78,11 @@ if __name__ == "__main__":
    
     run_hash="5ad0be9c"
 
+    #ht = hl.read_table(
+    #    f'{lustre_dir}/variant_qc/models/{run_hash}/rf_result_MegaWES_new.ht')
     ht = hl.read_table(
-        f'{lustre_dir}/variant_qc/models/{run_hash}/rf_result_MegaWES_new.ht')
-
+        f'{lustre_dir}/variant_qc/models/{run_hash}/rf_result_MegaWES_new_non_missing.ht')
+        
     #synonymous="s3a://DDD-ELGH-UKBB-exomes/vep/vep_consequences_worst_synonymous.tsv"
     #Look at notebooks/lustre_prepare_ht_after.RF.ipynb about how the following ht was created
     #Annotate with synonymous consequences
