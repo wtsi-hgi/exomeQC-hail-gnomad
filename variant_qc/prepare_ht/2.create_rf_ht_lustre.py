@@ -64,16 +64,8 @@ LABEL_COL = "rf_label"
 TRAIN_COL = "rf_train"
 PREDICTION_COL = "rf_prediction"
 INFO_FEATURES = [
-    "AS_QD",
-    "AS_ReadPosRankSum",
-    "AS_MQRankSum",
-    "AS_SOR",
-    "QD",
-    "MQRankSum",
-    "SOR",
-    "ReadPosRankSum",
- # "FS",
- #   "DP"
+    "FS",
+    "DP"
 
 ]  # Note: AS_SOR is currently in VQSR HT and named SOR in the VQSR split HT
 FEATURES = [
@@ -176,6 +168,7 @@ def main(args):
         "a_index",
         "was_split",
         *FEATURES,
+        *INFO_FEATURES
         *TRUTH_DATA,
         **{
             "transmitted_singleton": (ht[f"n_transmitted_{group}"] == 1)
