@@ -76,7 +76,7 @@ INFO_FEATURES = [
     "AS_SOR",
 ]
 FEATURES = [
-    "InbreedingCoeff",
+   # "InbreedingCoeff",
     "variant_type",
     "allele_type",
     "n_alt_alleles",

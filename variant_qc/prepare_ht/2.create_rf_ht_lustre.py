@@ -72,8 +72,8 @@ INFO_FEATURES = [
     "MQRankSum",
     "SOR",
     "ReadPosRankSum",
-    "FS",
-    "DP"
+ # "FS",
+ #   "DP"
 
 ]  # Note: AS_SOR is currently in VQSR HT and named SOR in the VQSR split HT
 FEATURES = [
@@ -88,8 +88,8 @@ FEATURES = [
     "MQRankSum",
     "SOR",
     "ReadPosRankSum",
-    "FS",
-    "DP"
+ #   "FS",
+ #   "DP"
 ]
 TRUTH_DATA = ["hapmap", "omni", "mills", "kgp_phase1_hc"]
 INBREEDING_COEFF_HARD_CUTOFF = -0.3
