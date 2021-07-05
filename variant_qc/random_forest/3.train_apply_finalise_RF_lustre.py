@@ -409,8 +409,10 @@ def filter_to_autosomes(
 def main(args):
 
     print("main table")
+    #ht = hl.read_table(
+    #    f'{lustre_dir}/variant_qc/MegaWES_for_RF_all_cols.ht')
     ht = hl.read_table(
-        f'{lustre_dir}/variant_qc/MegaWES_for_RF_all_cols.ht')
+        f'{lustre_dir}/variant_qc/MegaWES_for_RF_by_variant_type_all_cols.ht')
     #logger.info("filter to autosomes")
     #ht=filter_to_autosomes(ht)
 
