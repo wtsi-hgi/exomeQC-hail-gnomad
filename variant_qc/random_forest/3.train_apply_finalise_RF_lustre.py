@@ -76,7 +76,7 @@ INFO_FEATURES = [
     "AS_SOR",
 ]
 FEATURES = [
-   # "InbreedingCoeff",
+    "InbreedingCoeff",
     "variant_type",
     "allele_type",
     "n_alt_alleles",
@@ -86,8 +86,8 @@ FEATURES = [
     "MQRankSum",  # MappingQualityRankSumTest
     "SOR",  # StrandOddsRatio
     "ReadPosRankSum",  # ReadPosRankSumTest
-    "FS",  # FisherStrand
-    "DP"  # Depth
+   # "FS",  # FisherStrand
+   # "DP"  # Depth
 ]
 
 TRUTH_DATA = ["hapmap", "omni", "mills", "kgp_phase1_hc"]
