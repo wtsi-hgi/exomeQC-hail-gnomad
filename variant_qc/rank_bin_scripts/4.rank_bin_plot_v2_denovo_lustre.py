@@ -79,130 +79,7 @@ temp_dir = "file:///home/ubuntu/data/tmp"
 plot_dir="/lustre/scratch123/teams/hgi/mercury/megaWES-variantqc"
 lustre_dir = "file:///lustre/scratch123/teams/hgi/mercury/megaWES-variantqc"
 
-def get_rf(
-    data: str = "rf_result",
-    run_hash: Optional[str] = None,
-) -> Union[str, TableResource]:
-    """
-    Gets the path to the desired RF data.
-    Data can take the following values:
-        - 'training': path to the training data for a given run
-        - 'model': path to pyspark pipeline RF model
-        - 'rf_result' (default): path to HT containing result of RF filtering
-    :param str data: One of 'training', 'model' or 'rf_result' (default)
-    :param str run_hash: Hash of RF run to load
-    :return: Path to desired RF data
-    """
 
-    if data == "model":
-        return f"{tmp_dir}/models/{run_hash}/{data}.model"
-    else:
-        return TableResource(f"{tmp_dir}/models/{run_hash}/{data}.ht")
-
-
-def get_rf_runs(rf_json_fp: str) -> Dict:
-    """
-    Loads RF run data from JSON file.
-    :param rf_json_fp: File path to rf json file.
-    :return: Dictionary containing the content of the JSON file, or an empty dictionary if the file wasn't found.
-    """
-    if file_exists(rf_json_fp):
-        with hl.hadoop_open(rf_json_fp) as f:
-            return json.load(f)
-    else:
-        logger.warning(
-            f"File {rf_json_fp} could not be found. Returning empty RF run hash dict."
-        )
-        return {}
-
-
-def get_truth_ht() -> Table:
-    """
-    Returns a table with the following annotations from the latest version of the corresponding truth data:
-    - hapmap
-    - kgp_omni (1000 Genomes intersection Onni 2.5M array)
-    - kgp_phase_1_hc (high confidence sites in 1000 genonmes)
-    - mills (Mills & Devine indels)
-    :return: A table with the latest version of popular truth data annotations
-    """
-    omni_ht = hl.read_table(omni)
-    mills_ht = hl.read_table(mills)
-    thousand_genomes_ht = hl.read_table(thousand_genomes)
-    hapmap_ht = hl.read_table(hapmap)
-    return (
-        hapmap_ht
-        .select(hapmap=True)
-        .join(omni_ht.select(omni=True), how="outer")
-        .join(thousand_genomes_ht.select(kgp_phase1_hc=True), how="outer")
-        .join(mills_ht.select(mills=True), how="outer")
-        .repartition(200, shuffle=False)
-        .persist()
-    )
-
-
-def save_model(
-    rf_pipeline: pyspark.ml.PipelineModel, out_path: str, overwrite: bool = False
-) -> None:
-    """
-    Saves a Random Forest pipeline model.
-    :param rf_pipeline: Pipeline to save
-    :param out_path: Output path
-    :param overwrite: If set, will overwrite existing file(s) at output location
-    :return: Nothing
-    """
-    logger.info("Saving model to %s" % out_path)
-    if overwrite:
-        rf_pipeline.write().overwrite().save(out_path)
-    else:
-        rf_pipeline.save(out_path)
-
-
-def get_run_data(
-    transmitted_singletons: bool,
-    adj: bool,
-    vqsr_training: bool,
-    test_intervals: List[str],
-    features_importance: Dict[str, float],
-    test_results: List[hl.tstruct],
-
-
-) -> Dict:
-    """
-    Creates a Dict containing information about the RF input arguments and feature importance
-    :param bool transmitted_singletons: True if transmitted singletons were used in training
-    :param bool adj: True if training variants were filtered by adj
-    :param bool vqsr_training: True if VQSR training examples were used for RF training
-    :param List of str test_intervals: Intervals withheld from training to be used in testing
-    :param Dict of float keyed by str features_importance: Feature importance returned by the RF
-    :param List of struct test_results: Accuracy results from applying RF model to the test intervals
-    :return: Dict of RF information
-    """
-    if vqsr_training:
-        transmitted_singletons = None
-
-    run_data = {
-        "input_args": {
-            "transmitted_singletons": transmitted_singletons,
-            "adj": adj,
-            "vqsr_training": vqsr_training,
-        },
-        "features_importance": features_importance,
-        "test_intervals": test_intervals,
-    }
-
-    if test_results is not None:
-        tps = 0
-        total = 0
-        for row in test_results:
-            values = list(row.values())
-            # Note: values[0] is the TP/FP label and values[1] is the prediction
-            if values[0] == values[1]:
-                tps += values[2]
-            total += values[2]
-        run_data["test_results"] = [dict(x) for x in test_results]
-        run_data["test_accuracy"] = tps / total
-
-    return run_data
 
 
 def add_rank(
@@ -269,7 +146,7 @@ def create_binned_data_initial(ht: hl.Table, data: str, data_type: str, n_bins: 
     logger.info(
         f"Found the following variant counts:\n {pformat(rank_variant_counts)}")
     ht_truth_data = hl.read_table(
-        f"{lustre_dir}/variant_qc/truthset.ht")
+        f"{lustre_dir}/variant_qc/truthset_table.ht")
     ht = ht.annotate_globals(rank_variant_counts=rank_variant_counts)
     ht = ht.annotate(
         **ht_truth_data[ht.key],
@@ -297,7 +174,7 @@ def create_binned_data_initial(ht: hl.Table, data: str, data_type: str, n_bins: 
     ht = ht.filter(hl.is_defined(ht.bin))
 
     ht = ht.checkpoint(
-        f'{tmp_dir}/gnomad_score_binning_tmp.ht', overwrite=True)
+        f'{lustre_dir}/gnomad_score_binning_tmp.ht', overwrite=True)
 
     # Create binned data
     return (
@@ -390,7 +267,7 @@ def main(args):
 
     if args.add_rank:
         ht_ranked = add_rank(ht,
-                             score_expr=1-ht.rf_probability["TP"],
+                             score_expr=(ht.rf_probability["FP"]),
                              #score_expr=ht.rf_probability["TP"],
                              subrank_expr={
                                  'singleton_rank': ht.transmitted_singleton,
@@ -405,7 +282,7 @@ def main(args):
                                  # 'adj_biallelic_singleton_rank': ~ht.was_split & ht.transmitted_singleton & (ht.ac > 0)
                              }
                              )
-        ht_ranked = ht_ranked.annotate(score=1-ht_ranked.rf_probability["TP"])
+        ht_ranked = ht_ranked.annotate(score=ht_ranked.rf_probability["FP"])
         #ht_ranked = ht_ranked.annotate(score=ht_ranked.rf_probability["TP"])
         ht_ranked = ht_ranked.checkpoint(
             f'{lustre_dir}/variant_qc/models/{run_hash}_rf_result_ranked.ht', overwrite=True)
