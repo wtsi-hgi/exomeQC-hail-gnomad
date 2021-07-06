@@ -148,5 +148,11 @@ if __name__ == "__main__":
     ht=ht.annotate(variant_untransmitted_singletons=mt3.rows()[ht.key].variant_untransmitted_singletons)
     
     
+    #validated denovos
+    
+    ht_val_filtered=hl.read_table(f'{lustre_dir}/variant_qc/DDD_validated_denovo_b38_only_denovo_interitance.ht')
+    ht=ht.annotate(validated_denovo_inheritance=ht_val_filtered[ht.key].inheritance)
+
     ht.write(f'{lustre_dir}/variant_qc/models/{run_hash}_rf_result_FINAL_for_RANKING.ht', overwrite=True)
 
+    
