@@ -348,6 +348,7 @@ def create_binned_data_initial(ht: hl.Table, data: str, data_type: str, n_bins: 
                 ht.variant_transmitted_singletons > 0 ),
             n_untrans_singletons_synonymous_algorithm=hl.agg.count_where(
                 ht.variant_untransmitted_singletons > 0),
+            validated_de_novos=hl.agg.count_where(ht.validated_denovo_inheritance=="De novo constitutive"),
             # n_de_novo_no_lcr=hl.agg.filter(~ht.lcr & (
             #    ht.family_stats.unrelated_qc_callstats.AC[1] == 0), hl.agg.sum(ht.family_stats.mendel.errors)),
             n_de_novo_sites=hl.agg.filter(ht.family_stats.unrelated_qc_callstats.AC[0][1] == 0, hl.agg.count_where(
@@ -385,7 +386,7 @@ def main(args):
 
     # ht after random model
     run_hash = args.run_hash
-    ht = hl.read_table(f'{lustre_dir}/variant_qc/models/{run_hash}_rf_result_FINAL_for_RANKING.ht')
+    ht = hl.read_table(f'{lustre_dir}/variant_qc/models/{run_hash}_rf_result_FINAL_for_RANKING_denovo_validated.ht')
 
     if args.add_rank:
         ht_ranked = add_rank(ht,
