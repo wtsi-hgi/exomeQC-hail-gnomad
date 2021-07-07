@@ -267,7 +267,7 @@ def main(args):
 
     if args.add_rank:
         ht_ranked = add_rank(ht,
-                             score_expr=1-ht.rf_probability["FP"],
+                             score_expr=1-ht.rf_probability["TP"],
                              #score_expr=ht.rf_probability["TP"],
                              subrank_expr={
                                  'singleton_rank': ht.transmitted_singleton,
