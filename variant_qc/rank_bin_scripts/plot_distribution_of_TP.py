@@ -99,3 +99,4 @@ if __name__ == "__main__":
     hadoop_config.set("fs.s3a.access.key", credentials["mer"]["access_key"])
     hadoop_config.set("fs.s3a.secret.key", credentials["mer"]["secret_key"])
     n_partitions = 500
+    main()
