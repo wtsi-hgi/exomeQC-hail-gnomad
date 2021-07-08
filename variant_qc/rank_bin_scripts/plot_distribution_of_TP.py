@@ -79,7 +79,7 @@ temp_dir = "file:///home/ubuntu/data/tmp"
 plot_dir="/lustre/scratch123/teams/hgi/mercury/megaWES-variantqc"
 lustre_dir = "file:///lustre/scratch123/teams/hgi/mercury/megaWES-variantqc"
 
-def main(args):
+def main():
     ht=ht=hl.read_table(f'{lustre_dir}/variant_qc/models/91ba5f38/rf_result_MegaWES_new.ht')
     array_TP=ht.rf_probability['TP'].collect()
     df = pd.DataFrame(array_TP)
