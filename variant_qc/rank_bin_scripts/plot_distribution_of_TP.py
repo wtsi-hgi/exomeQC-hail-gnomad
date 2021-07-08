@@ -81,12 +81,12 @@ lustre_dir = "file:///lustre/scratch123/teams/hgi/mercury/megaWES-variantqc"
 
 def main():
     ht=ht=hl.read_table(f'{lustre_dir}/variant_qc/models/91ba5f38/rf_result_MegaWES_new.ht')
-    df=ht.to_pandas()
-    df.to_csv(f'{lustre_dir}/variant_qc/91ba5f38_RF_dataframe.csv')
+    ht.export(f'{lustre_dir}/variant_qc/91ba5f38_RF_table.tsv.bgz')
+    #df.to_csv(f'{lustre_dir}/variant_qc/91ba5f38_RF_dataframe.csv')
     #array_TP=ht.rf_probability['TP'].collect()
     #df = pd.DataFrame(array_TP)
     #df.to_csv(f'{lustre_dir}/variant_qc/TP_values')
-    print(df.head())
+    print("Done")
 
 if __name__ == "__main__":
     # need to create spark cluster first before intiialising hail
