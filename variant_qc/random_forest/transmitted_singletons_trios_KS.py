@@ -68,7 +68,11 @@ def main():
     samples=set(accessions.s.collect())
     print(samples)
     set_samples=hl.literal(samples)
-    mt_100_trios=mt_trios.filter_cols(set_samples.contains(mt_trios['s']))
+    #mt_100_trios=mt_trios.filter_cols(set_samples.contains(mt_trios['s']))
+    mt_100_trios=mt_trios.filter_cols(
+    (set_samples.contains(mt_trios.proband.s)) & 
+    (set_samples.contains(mt_trios.father.s)) & 
+    (set_samples.contains( mt_trios.mother.s)))    
     print(mt_trios.count())
 
     print(mt_100_trios.count())
