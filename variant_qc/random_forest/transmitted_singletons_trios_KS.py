@@ -65,7 +65,7 @@ def main():
     accessions=hl.import_table(f'{lustre_dir}/kaitlin_trios/forPavlos_100trios_EGA_accessions.txt',no_header=False).key_by('s')   
     mt_trios = hl.read_matrix_table(
         f'{lustre_dir}/variant_qc/MegaWES_trios_adj.mt')
-    samples=accessions.s.collect()
+    samples=set(accessions.s.collect())
 
     mt_100_trios=mt_trios.filter_cols(samples.contains(mt_trios['s']))
     print(mt_trios.count())
