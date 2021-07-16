@@ -82,6 +82,10 @@ lustre_dir = "file:///lustre/scratch123/teams/hgi/mercury/megaWES-variantqc"
 def main():
     ht=ht=hl.read_table(f'{lustre_dir}/variant_qc/models/91ba5f38/rf_result_MegaWES_new.ht')
     ht.flatten().export(f'{lustre_dir}/variant_qc/91ba5f38_RF_table.tsv.bgz')
+    n=10000
+    df = pd.read_csv(f'{lustre_dir}/variant_qc/91ba5f38_RF_table.tsv.bgz', sep="\t",compression='gzip',header=0, skiprows=lambda i: i % n != 0)
+    df['TP_rf_probability']=df.rf_probability.apply(lambda x:json.loads(x)[1]['value'])
+    
     #df.to_csv(f'{lustre_dir}/variant_qc/91ba5f38_RF_dataframe.csv')
     #array_TP=ht.rf_probability['TP'].collect()
     #df = pd.DataFrame(array_TP)
