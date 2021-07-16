@@ -116,7 +116,7 @@ def main():
 
     print(mt_100_trios.count())
 
-    mt_100_trios.write("f'{lustre_dir}/variant_qc/MegaWES_96_trios.mt", overwrite=True)
+    mt_100_trios.write(f'{lustre_dir}/variant_qc/MegaWES_96_trios.mt', overwrite=True)
 
     ht=count_trans_untransmitted_singletons(mt_100_trios, ht)
 
