@@ -66,8 +66,9 @@ def main():
     mt_trios = hl.read_matrix_table(
         f'{lustre_dir}/variant_qc/MegaWES_trios_adj.mt')
     samples=set(accessions.s.collect())
-
-    mt_100_trios=mt_trios.filter_cols(samples.contains(mt_trios['s']))
+    print(samples)
+    set_samples=hl.literal(samples)
+    mt_100_trios=mt_trios.filter_cols(set_samples.contains(mt_trios['s']))
     print(mt_trios.count())
 
     print(mt_100_trios.count())
