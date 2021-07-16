@@ -98,6 +98,8 @@ def main():
     run_hash="91ba5f38"
     ht = hl.read_table(
         f'{lustre_dir}/variant_qc/models/{run_hash}/rf_result_MegaWES_new.ht')
+    ht_synonymous=hl.read_table( f'{lustre_dir}/grch38_synonymous_variants.ht')
+    ht=ht.annotate(consequence=ht_synonymous[ht.key].consequence)
     accessions=hl.import_table(f'{lustre_dir}/kaitlin_trios/forPavlos_100trios_EGA_accessions.txt',no_header=False).key_by('s')   
     mt_trios = hl.read_matrix_table(
         f'{lustre_dir}/variant_qc/MegaWES_trios_adj.mt')
