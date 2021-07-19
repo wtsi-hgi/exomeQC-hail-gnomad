@@ -66,8 +66,12 @@ def count_trans_untransmitted_singletons(mt_filtered, ht):
     mt_trans_count=mt_trans.group_cols_by(mt_trans.id).aggregate(transmitted_singletons_count=hl.agg.count_where(
                                 (mt_trans.info.AC[0] == 2) &
                                 (mt_trans.proband_entry.GT.is_non_ref() ) &
-                                ((mt_trans.father_entry.GT.is_non_ref()) |
-                                (mt_trans.mother_entry.GT.is_non_ref()))))
+                                (
+                                (mt_trans.father_entry.GT.is_non_ref())
+                                 |
+                                (mt_trans.mother_entry.GT.is_non_ref())
+                                )
+                                ))
     
 
     
@@ -76,10 +80,12 @@ def count_trans_untransmitted_singletons(mt_filtered, ht):
     mt_untrans_count = (mt_untrans.group_cols_by(mt_untrans.id).aggregate(
     untransmitted_singletons_count=hl.agg.count_where(
                    # (mt_untrans.info.AC[0] == 1) &
-                   #  (mt_untrans.proband_entry.GT.is_hom_ref()) &
-                    (mt_untrans.proband_entry.GT.is_hom_ref()) & (mt_untrans.father_entry.GT.is_non_ref()) 
+                    (mt_untrans.proband_entry.GT.is_hom_ref()) &
+                    (
+                    (mt_untrans.father_entry.GT.is_non_ref()) 
                     |
-                     ((mt_untrans.proband_entry.GT.is_hom_ref()) & (mt_untrans.mother_entry.GT.is_non_ref()))
+                    (mt_untrans.mother_entry.GT.is_non_ref())
+                    )
                      )))
     Total_untransmitted_singletons=mt_untrans_count.aggregate_entries(hl.agg.count_where(mt_untrans_count.untransmitted_singletons_count==1))
     print(Total_untransmitted_singletons)
@@ -132,7 +138,9 @@ def main():
     
     mt_filtered=mt_filtered.checkpoint(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered_kaitlin.mt',overwrite=True)
     '''
-    mt=hl.read_matrix_table(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered_kaitlin.mt')
+    mt=hl.read_matrix_table(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered_july_2021.mt')
+
+    #mt=hl.read_matrix_table(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered_kaitlin.mt')
     ht=count_trans_untransmitted_singletons(mt, ht)
 
     ht_val_filtered=hl.read_table(f'{lustre_dir}/variant_qc/DDD_validated_denovo_b38_only_denovo_interitance.ht')
