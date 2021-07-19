@@ -123,6 +123,7 @@ def main():
 
     mt_100_trios.write(f'{lustre_dir}/variant_qc/MegaWES_96_trios.mt', overwrite=True)
     '''
+    logger.info("Running count_trans_untransmitted singletons")
     mt_100_trios=hl.read_matrix_table(f'{lustre_dir}/variant_qc/MegaWES_96_trios.mt')
     ht=count_trans_untransmitted_singletons(mt_100_trios, ht)
 
