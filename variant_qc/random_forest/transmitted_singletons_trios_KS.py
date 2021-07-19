@@ -101,6 +101,9 @@ def main():
     ht = hl.read_table(
         f'{lustre_dir}/variant_qc/models/{run_hash}/rf_result_MegaWES_new.ht')
     ht_synonymous=hl.read_table( f'{lustre_dir}/grch38_synonymous_variants.ht')
+    '''
+    
+    
     ht=ht.annotate(consequence=ht_synonymous[ht.key].consequence)
     accessions=hl.import_table(f'{lustre_dir}/kaitlin_trios/forPavlos_100trios_EGA_accessions.txt',no_header=False).key_by('s')   
     mt_trios = hl.read_matrix_table(
@@ -119,7 +122,8 @@ def main():
     print(mt_100_trios.count())
 
     mt_100_trios.write(f'{lustre_dir}/variant_qc/MegaWES_96_trios.mt', overwrite=True)
-
+    '''
+    mt_100_trios=hl.read_matrix_table(f'{lustre_dir}/variant_qc/MegaWES_96_trios.mt')
     ht=count_trans_untransmitted_singletons(mt_100_trios, ht)
 
     ht_val_filtered=hl.read_table(f'{lustre_dir}/variant_qc/DDD_validated_denovo_b38_only_denovo_interitance.ht')
