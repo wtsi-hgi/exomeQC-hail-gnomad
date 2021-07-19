@@ -58,7 +58,7 @@ plot_dir = "/home/ubuntu/data/tmp"
 lustre_dir = "file:///lustre/scratch123/teams/hgi/mercury/megaWES-variantqc"
 
 
-def count_trans_untransmitted_singletons(mt, ht):
+def count_trans_untransmitted_singletons(mt_filtered, ht):
     
     mt_trans = mt_filtered.filter_entries(mt_filtered.info.AC[0] == 2)
     mt_untrans = mt_filtered.filter_entries(mt_filtered.info.AC[0] == 1)
