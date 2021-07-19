@@ -140,9 +140,10 @@ def main():
     mt_filtered=mt_filtered.checkpoint(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered_kaitlin.mt',overwrite=True)
     '''
     #mt=hl.read_matrix_table(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered_july_2021.mt')
-
+    mt_100_trios=hl.read_matrix_table(f'{lustre_dir}/variant_qc/MegaWES_96_trios.mt')
+    mt_filtered = mt_100_trios.filter_rows((mt_100_trios.info.AC[0] <= 2))
     mt=hl.read_matrix_table(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered_kaitlin.mt')
-    ht=count_trans_untransmitted_singletons(mt, ht)
+    ht=count_trans_untransmitted_singletons(mt_filtered, ht)
 
     ht_val_filtered=hl.read_table(f'{lustre_dir}/variant_qc/DDD_validated_denovo_b38_only_denovo_interitance.ht')
     ht=ht.annotate(validated_denovo_inheritance=ht_val_filtered[ht.key].inheritance)
