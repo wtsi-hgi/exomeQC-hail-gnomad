@@ -144,6 +144,7 @@ def main():
 
     mt=hl.read_matrix_table(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered_kaitlin.mt')
     mt = mt.filter_rows(hl.is_defined(interval_table[mt.locus]))
+    print(mt.count())
     ht=count_trans_untransmitted_singletons(mt, ht)
 
     ht_val_filtered=hl.read_table(f'{lustre_dir}/variant_qc/DDD_validated_denovo_b38_only_denovo_interitance.ht')
