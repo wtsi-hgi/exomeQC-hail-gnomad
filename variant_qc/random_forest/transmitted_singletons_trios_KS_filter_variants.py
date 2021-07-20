@@ -114,6 +114,16 @@ def main():
     mt_trios = hl.read_matrix_table(
         f'{lustre_dir}/variant_qc/MegaWES_trios_adj.mt')
     print(mt_trios.count())
+    accessions=hl.import_table(f'{lustre_dir}/kaitlin_trios/forPavlos_100trios_EGA_accessions.txt',no_header=False).key_by('s')   
+    mt_trios = mt_trios.annotate_rows(consequence=ht[mt_trios.row_key].consequence)
+    mt_100_trios = mt_trios.filter_cols(hl.is_defined(accessions[mt_trios.proband.s]) | hl.is_defined(accessions[mt_trios.father.s]) | hl.is_defined(accessions[mt_trios.mother.s])  )
+    
+    mt_100_trios.write(f'{lustre_dir}/variant_qc/MegaWES_98_trios.mt', overwrite=True)
+    mt_filtered = mt_100_trios.filter_rows((mt_100_trios.info.AC[0] <= 2) )
+    #& (
+    #    mt_100_trios.consequence == "synonymous_variant"))
+    
+    mt_filtered=mt_filtered.checkpoint(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered_kaitlin.mt',overwrite=True)
     '''
     
     
@@ -127,8 +137,8 @@ def main():
     set_samples=hl.literal(samples)
     #mt_100_trios=mt_trios.filter_cols(set_samples.contains(mt_trios['s']))
     mt_100_trios=mt_trios.filter_cols(
-    (set_samples.contains(mt_trios.proband.s)) & 
-    (set_samples.contains(mt_trios.father.s)) & 
+    (set_samples.contains(mt_trios.s)) | 
+    (set_samples.contains(mt_trios.father.s)) | 
     (set_samples.contains( mt_trios.mother.s)))    
     print(mt_trios.count())
 
