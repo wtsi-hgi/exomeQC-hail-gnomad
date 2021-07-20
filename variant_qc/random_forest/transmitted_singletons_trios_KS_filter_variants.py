@@ -110,7 +110,7 @@ def main():
         f'{lustre_dir}/variant_qc/models/{run_hash}/rf_result_MegaWES_new.ht')
     ht_synonymous=hl.read_table( f'{lustre_dir}/grch38_synonymous_variants.ht')
     interval_table = hl.import_bed(f'{lustre_dir}/kaitlin_trios/all_variants_lifted_b38_sorted.bed', reference_genome='GRCh38')
-    
+    print(interval_table.count())
     '''
     
     
