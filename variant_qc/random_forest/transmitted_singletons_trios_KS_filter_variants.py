@@ -109,6 +109,7 @@ def main():
     ht = hl.read_table(
         f'{lustre_dir}/variant_qc/models/{run_hash}/rf_result_MegaWES_new.ht')
     ht_synonymous=hl.read_table( f'{lustre_dir}/grch38_synonymous_variants.ht')
+    ht=ht.annotate(consequence=ht_synonymous[ht.key].consequence)
     interval_table = hl.import_bed(f'{lustre_dir}/kaitlin_trios/all_variants_lifted_b38_sorted.bed', reference_genome='GRCh38')
     print(interval_table.count())
     mt_trios = hl.read_matrix_table(
