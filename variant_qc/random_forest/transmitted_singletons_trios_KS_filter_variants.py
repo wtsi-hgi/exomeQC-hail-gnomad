@@ -111,6 +111,9 @@ def main():
     ht_synonymous=hl.read_table( f'{lustre_dir}/grch38_synonymous_variants.ht')
     interval_table = hl.import_bed(f'{lustre_dir}/kaitlin_trios/all_variants_lifted_b38_sorted.bed', reference_genome='GRCh38')
     print(interval_table.count())
+    mt_trios = hl.read_matrix_table(
+        f'{lustre_dir}/variant_qc/MegaWES_trios_adj.mt')
+    print(mt_trios.count())
     '''
     
     
