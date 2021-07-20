@@ -76,7 +76,7 @@ def count_trans_untransmitted_singletons(mt_filtered, ht):
 
     
     Total_transmitted_singletons=mt_trans_count.aggregate_entries(hl.agg.count_where(mt_trans_count.transmitted_singletons_count >0))
-    print(Total_transmitted_singletons)
+    print(f"\nTransmitted singletons:{Total_transmitted_singletons}\n")
     mt_untrans_count = (mt_untrans.group_cols_by(mt_untrans.id).aggregate(
     untransmitted_singletons_count=hl.agg.count_where(
                    # (mt_untrans.info.AC[0] == 1) &
@@ -88,9 +88,9 @@ def count_trans_untransmitted_singletons(mt_filtered, ht):
                     )
                      )))
     Total_untransmitted_singletons=mt_untrans_count.aggregate_entries(hl.agg.count_where(mt_untrans_count.untransmitted_singletons_count >0))
-    print(Total_untransmitted_singletons)
+    print(f"\nUntransmitted singletons:{Total_untransmitted_singletons}")
     Ratio_transmitted_untransmitted=Total_transmitted_singletons/Total_untransmitted_singletons
-    print(Ratio_transmitted_untransmitted)
+    print(f"\nRatio:{Ratio_transmitted_untransmitted}\n")
 
     mt2=mt_trans_count.annotate_rows(variant_transmitted_singletons=hl.agg.count_where(mt_trans_count.transmitted_singletons_count==1))
     mt2.variant_transmitted_singletons.summarize()
