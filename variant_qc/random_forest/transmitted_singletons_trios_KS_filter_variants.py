@@ -136,7 +136,7 @@ def main():
     mt_trios = mt_trios.annotate_rows(consequence=ht[mt_trios.row_key].consequence)
     ''' 
     mt=hl.read_matrix_table(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered_kaitlin.mt')
-
+    print(mt.describe())
     #mt_100_trios = mt_trios.filter_cols(hl.is_defined(accessions[mt_trios.proband.s]) | hl.is_defined(accessions[mt_trios.father.s]) | hl.is_defined(accessions[mt_trios.mother.s])  )
     
     #mt_100_trios.write(f'{lustre_dir}/variant_qc/MegaWES_98_trios.mt', overwrite=True)
