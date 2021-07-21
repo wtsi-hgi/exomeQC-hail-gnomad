@@ -61,8 +61,11 @@ lustre_dir = "file:///lustre/scratch123/teams/hgi/mercury/megaWES-variantqc"
 def count_trans_untransmitted_singletons(mt_filtered, ht):
     
     mt_trans = mt_filtered.filter_entries(mt_filtered.info.AC[0] == 2)
+    print("mt_trans count:\n")
+    print(mt_trans.count())
     mt_untrans = mt_filtered.filter_entries(mt_filtered.info.AC[0] == 1)
-    
+    print("mt_untrans count:\n")
+    print(mt_untrans.count())
     mt_trans_count=mt_trans.group_cols_by(mt_trans.id).aggregate(transmitted_singletons_count=hl.agg.count_where(
                                # (mt_trans.info.AC[0] == 2) &
                                 (mt_trans.proband_entry.GT.is_non_ref()) &
@@ -160,6 +163,8 @@ def main():
     #mt=hl.read_matrix_table(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered_kaitlin.mt')
     mt = mt.filter_rows(hl.is_defined(interval_table[mt.locus]))
     print(mt.count())
+    mt.write(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered_kaitlin.mt', overwrite=True)
+    mt=hl.read_matrix_table(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered_kaitlin.mt')
     ht=count_trans_untransmitted_singletons(mt, ht)
 
     ht_val_filtered=hl.read_table(f'{lustre_dir}/variant_qc/DDD_validated_denovo_b38_only_denovo_interitance.ht')
