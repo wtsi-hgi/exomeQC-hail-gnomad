@@ -79,7 +79,7 @@ def count_trans_untransmitted_singletons(mt_filtered, ht):
                                 ))
     
     '''
-    mt_trans=mt_trans.aggregate_entries(hl.Struct(mt_trans_count=hl.agg.count_where(
+    mt_trans=mt_trans.aggregate_rows(hl.Struct(mt_trans_count=hl.agg.count_where(
                                # (mt_trans.info.AC[0] == 2) &
                                 (mt_trans.proband_entry.GT.is_non_ref()) &
                                 (
