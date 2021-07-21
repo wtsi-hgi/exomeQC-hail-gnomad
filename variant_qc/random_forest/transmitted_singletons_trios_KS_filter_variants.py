@@ -101,7 +101,9 @@ def count_trans_untransmitted_singletons(mt_filtered, ht):
     )
 
     print(mt_trans.mt_trans_count.summarize())    
-    Total_transmitted_singletons=mt_trans.mt_trans_count
+    transmiited_singletons=mt_trans.aggregate_rows(hl.agg.count_where(mt_trans.mt_trans_count > 0))
+
+    Total_transmitted_singletons=transmiited_singletons
     
     #Total_transmitted_singletons=mt_trans_count.aggregate_entries(hl.agg.count_where(mt_trans_count.transmitted_singletons_count >0))
     print(f"\nTransmitted singletons:{Total_transmitted_singletons}\n")
