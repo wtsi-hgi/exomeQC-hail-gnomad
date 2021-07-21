@@ -63,10 +63,23 @@ def count_trans_untransmitted_singletons(mt_filtered, ht):
     mt_trans = mt_filtered.filter_entries(mt_filtered.info.AC[0] == 2)
     print("mt_trans count:\n")
     print(mt_trans.count())
+
     mt_untrans = mt_filtered.filter_entries(mt_filtered.info.AC[0] == 1)
     print("mt_untrans count:\n")
     print(mt_untrans.count())
+    '''
     mt_trans_count=mt_trans.group_cols_by(mt_trans.id).aggregate(transmitted_singletons_count=hl.agg.count_where(
+                               # (mt_trans.info.AC[0] == 2) &
+                                (mt_trans.proband_entry.GT.is_non_ref()) &
+                                (
+                                (mt_trans.father_entry.GT.is_non_ref()  )
+                                 |
+                                (mt_trans.mother_entry.GT.is_non_ref())
+                                )
+                                ))
+    
+    '''
+    mt_trans_count=mt_trans.aggregate(transmitted_singletons_count=hl.agg.count_where(
                                # (mt_trans.info.AC[0] == 2) &
                                 (mt_trans.proband_entry.GT.is_non_ref()) &
                                 (
@@ -113,6 +126,7 @@ def main():
         f'{lustre_dir}/variant_qc/models/{run_hash}/rf_result_MegaWES_new.ht')
     ht_synonymous=hl.read_table( f'{lustre_dir}/grch38_synonymous_variants.ht')
     ht=ht.annotate(consequence=ht_synonymous[ht.key].consequence)
+    '''
     interval_table = hl.import_bed(f'{lustre_dir}/kaitlin_trios/all_variants_lifted_b38_sorted.bed', reference_genome='GRCh38')
     print(interval_table.count())
     mt_trios = hl.read_matrix_table(
@@ -120,6 +134,9 @@ def main():
     print(mt_trios.count())
     accessions=hl.import_table(f'{lustre_dir}/kaitlin_trios/forPavlos_100trios_EGA_accessions.txt',no_header=False).key_by('s')   
     mt_trios = mt_trios.annotate_rows(consequence=ht[mt_trios.row_key].consequence)
+    ''' 
+    mt=hl.read_matrix_table(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered_kaitlin.mt')
+
     #mt_100_trios = mt_trios.filter_cols(hl.is_defined(accessions[mt_trios.proband.s]) | hl.is_defined(accessions[mt_trios.father.s]) | hl.is_defined(accessions[mt_trios.mother.s])  )
     
     #mt_100_trios.write(f'{lustre_dir}/variant_qc/MegaWES_98_trios.mt', overwrite=True)
@@ -159,12 +176,12 @@ def main():
     mt_filtered=mt_filtered.checkpoint(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered_kaitlin.mt',overwrite=True)
     '''
     #mt=hl.read_matrix_table(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered_july_2021.mt')
-    mt=mt_trios
     #mt=hl.read_matrix_table(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered_kaitlin.mt')
-    mt = mt.filter_rows(hl.is_defined(interval_table[mt.locus]))
-    print(mt.count())
-    mt.write(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered_kaitlin.mt', overwrite=True)
-    mt=hl.read_matrix_table(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered_kaitlin.mt')
+    
+    #mt = mt.filter_rows(hl.is_defined(interval_table[mt.locus]))
+    #print(mt.count())
+   #mt.write(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered_kaitlin.mt', overwrite=True)
+   # mt=hl.read_matrix_table(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered_kaitlin.mt')
     ht=count_trans_untransmitted_singletons(mt, ht)
 
     ht_val_filtered=hl.read_table(f'{lustre_dir}/variant_qc/DDD_validated_denovo_b38_only_denovo_interitance.ht')
