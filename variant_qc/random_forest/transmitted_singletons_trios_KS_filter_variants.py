@@ -117,10 +117,11 @@ def main():
     print(mt_trios.count())
     accessions=hl.import_table(f'{lustre_dir}/kaitlin_trios/forPavlos_100trios_EGA_accessions.txt',no_header=False).key_by('s')   
     mt_trios = mt_trios.annotate_rows(consequence=ht[mt_trios.row_key].consequence)
-    mt_100_trios = mt_trios.filter_cols(hl.is_defined(accessions[mt_trios.proband.s]) | hl.is_defined(accessions[mt_trios.father.s]) | hl.is_defined(accessions[mt_trios.mother.s])  )
+    #mt_100_trios = mt_trios.filter_cols(hl.is_defined(accessions[mt_trios.proband.s]) | hl.is_defined(accessions[mt_trios.father.s]) | hl.is_defined(accessions[mt_trios.mother.s])  )
     
-    mt_100_trios.write(f'{lustre_dir}/variant_qc/MegaWES_98_trios.mt', overwrite=True)
-    mt_filtered = mt_100_trios.filter_rows((mt_100_trios.info.AC[0] <= 2) )
+    #mt_100_trios.write(f'{lustre_dir}/variant_qc/MegaWES_98_trios.mt', overwrite=True)
+    #mt_filtered = mt_100_trios.filter_rows((mt_100_trios.info.AC[0] <= 2) )
+    mt_filtered = mt_trios.filter_rows((mt_trios.info.AC[0] <= 2) )
     #& (
     #    mt_100_trios.consequence == "synonymous_variant"))
     
