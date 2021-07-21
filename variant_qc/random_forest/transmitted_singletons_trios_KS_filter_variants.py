@@ -79,7 +79,7 @@ def count_trans_untransmitted_singletons(mt_filtered, ht):
                                 ))
     
     '''
-    mt_trans_count=mt_trans.aggregate(transmitted_singletons_count=hl.agg.count_where(
+    mt_trans_count=mt_trans.aggregate_entries(transmitted_singletons_count=hl.agg.count_where(
                                # (mt_trans.info.AC[0] == 2) &
                                 (mt_trans.proband_entry.GT.is_non_ref()) &
                                 (
@@ -95,7 +95,7 @@ def count_trans_untransmitted_singletons(mt_filtered, ht):
     print(f"\nTransmitted singletons:{Total_transmitted_singletons}\n")
 
 
-    mt_untrans_count = mt_untrans.aggregate(
+    mt_untrans_count = mt_untrans.aggregate_rows(
     untransmitted_singletons_count=hl.agg.count_where(
                    # (mt_untrans.info.AC[0] == 1) &
                     (mt_untrans.proband_entry.GT.is_hom_ref()) &
