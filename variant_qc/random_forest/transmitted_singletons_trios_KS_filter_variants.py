@@ -121,11 +121,11 @@ def main():
     
     #mt_100_trios.write(f'{lustre_dir}/variant_qc/MegaWES_98_trios.mt', overwrite=True)
     #mt_filtered = mt_100_trios.filter_rows((mt_100_trios.info.AC[0] <= 2) )
-    mt_filtered = mt_trios.filter_rows((mt_trios.info.AC[0] <= 2) )
+    #mt_filtered = mt_trios.filter_rows((mt_trios.info.AC[0] <= 2) )
     #& (
     #    mt_100_trios.consequence == "synonymous_variant"))
     
-    mt_filtered=mt_filtered.checkpoint(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered_kaitlin.mt',overwrite=True)
+    #mt_filtered=mt_filtered.checkpoint(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered_kaitlin.mt',overwrite=True)
     '''
     
     
@@ -156,8 +156,8 @@ def main():
     mt_filtered=mt_filtered.checkpoint(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered_kaitlin.mt',overwrite=True)
     '''
     #mt=hl.read_matrix_table(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered_july_2021.mt')
-
-    mt=hl.read_matrix_table(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered_kaitlin.mt')
+    mt=mt_trios
+    #mt=hl.read_matrix_table(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered_kaitlin.mt')
     mt = mt.filter_rows(hl.is_defined(interval_table[mt.locus]))
     print(mt.count())
     ht=count_trans_untransmitted_singletons(mt, ht)
