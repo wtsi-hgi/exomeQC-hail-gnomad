@@ -60,11 +60,11 @@ lustre_dir = "file:///lustre/scratch123/teams/hgi/mercury/megaWES-variantqc"
 
 def count_trans_untransmitted_singletons(mt_filtered, ht):
     
-    mt_trans = mt_filtered.filter_entries(mt_filtered.info.AC[0] == 2)
+    mt_trans = mt_filtered.filter_rows(mt_filtered.info.AC[0] == 2)
     print("mt_trans count:\n")
     print(mt_trans.count())
 
-    mt_untrans = mt_filtered.filter_entries(mt_filtered.info.AC[0] == 1)
+    mt_untrans = mt_filtered.filter_rows(mt_filtered.info.AC[0] == 1)
     print("mt_untrans count:\n")
     print(mt_untrans.count())
     '''
