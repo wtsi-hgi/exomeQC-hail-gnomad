@@ -109,7 +109,7 @@ def count_trans_untransmitted_singletons(mt_filtered, ht):
     print(f"\nTransmitted singletons:{Total_transmitted_singletons}\n")
 
 
-    mt_untrans_count = mt_untrans.aggregate_rows(
+    mt_untrans = mt_untrans.annotate_rows(
     untransmitted_singletons_count=hl.agg.count_where(
                    # (mt_untrans.info.AC[0] == 1) &
                     (mt_untrans.proband_entry.GT.is_hom_ref()) &
@@ -119,7 +119,10 @@ def count_trans_untransmitted_singletons(mt_filtered, ht):
                     (mt_untrans.mother_entry.GT.is_non_ref())
                     )
                      ))
-    Total_untransmitted_singletons=mt_untrans_count.aggregate_entries(hl.agg.count_where(mt_untrans_count.untransmitted_singletons_count >0))
+    print(mt_untrans.untransmitted_singletons_count.summarize())    
+    Total_untransmitted_singletons=mt_untrans.aggregate_rows(hl.agg.count_where(mt_untrans.untransmitted_singletons_count > 0))
+
+    #Total_untransmitted_singletons=mt_untrans_count.aggregate_entries(hl.agg.count_where(mt_untrans_count.untransmitted_singletons_count >0))
     print(f"\nUntransmitted singletons:{Total_untransmitted_singletons}")
     Ratio_transmitted_untransmitted=Total_transmitted_singletons/Total_untransmitted_singletons
     print(f"\nRatio:{Ratio_transmitted_untransmitted}\n")
