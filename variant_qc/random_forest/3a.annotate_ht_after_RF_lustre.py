@@ -57,6 +57,53 @@ temp_dir = "file:///home/ubuntu/data/tmp"
 plot_dir = "/home/ubuntu/data/tmp"
 lustre_dir = "file:///lustre/scratch123/teams/hgi/mercury/megaWES-variantqc"
 
+
+def count_trans_untransmitted_singletons(mt_filtered, ht):
+    
+    mt_trans = mt_filtered.filter_entries(mt_filtered.info.AC[0] == 2)
+    mt_untrans = mt_filtered.filter_entries(mt_filtered.info.AC[0] == 1)
+    
+    mt_trans_count=mt_trans.group_cols_by(mt_trans.id).aggregate(transmitted_singletons_count=hl.agg.count_where(
+                               # (mt_trans.info.AC[0] == 2) &
+                                (mt_trans.proband_entry.GT.is_non_ref()) &
+                                (
+                                (mt_trans.father_entry.GT.is_non_ref()  )
+                                 |
+                                (mt_trans.mother_entry.GT.is_non_ref())
+                                )
+                                ))
+    
+
+    
+    Total_transmitted_singletons=mt_trans_count.aggregate_entries(hl.agg.count_where(mt_trans_count.transmitted_singletons_count >0))
+    print(Total_transmitted_singletons)
+    mt_untrans_count = (mt_untrans.group_cols_by(mt_untrans.id).aggregate(
+    untransmitted_singletons_count=hl.agg.count_where(
+                   # (mt_untrans.info.AC[0] == 1) &
+                    (mt_untrans.proband_entry.GT.is_hom_ref()) &
+                    (
+                    (mt_untrans.father_entry.GT.is_non_ref()) 
+                    |
+                    (mt_untrans.mother_entry.GT.is_non_ref())
+                    )
+                     )))
+    Total_untransmitted_singletons=mt_untrans_count.aggregate_entries(hl.agg.count_where(mt_untrans_count.untransmitted_singletons_count >0))
+    print(Total_untransmitted_singletons)
+    Ratio_transmitted_untransmitted=Total_transmitted_singletons/Total_untransmitted_singletons
+    print(Ratio_transmitted_untransmitted)
+
+    mt2=mt_trans_count.annotate_rows(variant_transmitted_singletons=hl.agg.count_where(mt_trans_count.transmitted_singletons_count==1))
+    mt2.variant_transmitted_singletons.summarize()
+
+    mt3=mt_untrans_count.annotate_rows(variant_untransmitted_singletons=hl.agg.count_where(mt_untrans_count.untransmitted_singletons_count==1))
+    mt3.variant_untransmitted_singletons.summarize()
+
+    ht=ht.annotate(variant_transmitted_singletons=mt2.rows()[ht.key].variant_transmitted_singletons)
+    ht=ht.annotate(variant_untransmitted_singletons=mt3.rows()[ht.key].variant_untransmitted_singletons)
+    return(ht)
+    
+
+
 if __name__ == "__main__":
     # need to create spark cluster first before intiialising hail
     sc = pyspark.SparkContext()
@@ -112,40 +159,14 @@ if __name__ == "__main__":
 
 
     mt_trios = mt_trios.checkpoint(
-        f'{tmp_dir}/sanger_cohorts_trios_consequence.mt', overwrite=True)
+        f'{lustre_dir}/sanger_cohorts_trios_consequence.mt', overwrite=True)
     mt_filtered = mt_trios.filter_rows((mt_trios.info.AC[0] <= 2) & (
         mt_trios.consequence == "synonymous_variant"))
     #mt_filtered=hl.read_matrix_table(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered.mt')
     #mt_filtered=filter_to_autosomes(mt_filtered)
     mt_filtered=mt_filtered.checkpoint(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered_july_2021.mt',overwrite=True)
-    mt_trans = mt_filtered.filter_entries(mt_filtered.info.AC[0] == 2)
-    mt_untrans = mt_filtered.filter_entries(mt_filtered.info.AC[0] == 1)
     
-    mt_trans_count=mt_trans.group_cols_by(mt_trans.id).aggregate(transmitted_singletons_count=hl.agg.count_where((mt_trans.info.AC[0] == 2) &
-                                (mt_trans.proband_entry.GT.is_het_ref()) &
-                                (mt_trans.father_entry.GT.is_het_ref()) |
-                                (mt_trans.mother_entry.GT.is_het_ref())))
-    
-    Total_transmitted_singletons=mt_trans_count.aggregate_entries(hl.agg.count_where(mt_trans_count.transmitted_singletons_count==1))
-    print(Total_transmitted_singletons)
-    mt_untrans_count = (mt_untrans.group_cols_by(mt_untrans.id).aggregate(
-    untransmitted_singletons_count=hl.agg.count_where((mt_untrans.info.AC[0] == 1) &
-                     (mt_untrans.proband_entry.GT.is_hom_ref()) &
-                     (mt_untrans.father_entry.GT.is_het_ref()) |
-                     (mt_untrans.mother_entry.GT.is_het_ref()))))
-    Total_untransmitted_singletons=mt_untrans_count.aggregate_entries(hl.agg.count_where(mt_untrans_count.untransmitted_singletons_count==1))
-    print(Total_untransmitted_singletons)
-    Ratio_transmitted_untransmitted=Total_transmitted_singletons/Total_untransmitted_singletons
-    print(Ratio_transmitted_untransmitted)
-
-    mt2=mt_trans_count.annotate_rows(variant_transmitted_singletons=hl.agg.count_where(mt_trans_count.transmitted_singletons_count==1))
-    mt2.variant_transmitted_singletons.summarize()
-
-    mt3=mt_untrans_count.annotate_rows(variant_untransmitted_singletons=hl.agg.count_where(mt_untrans_count.untransmitted_singletons_count==1))
-    mt3.variant_untransmitted_singletons.summarize()
-
-    ht=ht.annotate(variant_transmitted_singletons=mt2.rows()[ht.key].variant_transmitted_singletons)
-    ht=ht.annotate(variant_untransmitted_singletons=mt3.rows()[ht.key].variant_untransmitted_singletons)
+    ht=count_trans_untransmitted_singletons(mt_filtered, ht)
     
     
     #validated denovos
