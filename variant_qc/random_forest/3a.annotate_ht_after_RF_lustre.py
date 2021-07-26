@@ -165,10 +165,10 @@ if __name__ == "__main__":
 
     mt_trios = mt_trios.checkpoint(
         f'{lustre_dir}/sanger_cohorts_trios_consequence.mt', overwrite=True)
-   # mt_filtered = mt_trios.filter_rows((mt_trios.info.AC[0] <= 2) & (
-   #     mt_trios.consequence == "synonymous_variant"))
-    mt_filtered = mt_trios.filter_entries((mt_trios.info.AC[0] <= 2) & (
+    mt_filtered = mt_trios.filter_rows((mt_trios.info.AC[0] <= 2) & (
         mt_trios.consequence == "synonymous_variant"))
+    #mt_filtered = mt_trios.filter_entries((mt_trios.info.AC[0] <= 2) & (
+    #    mt_trios.consequence == "synonymous_variant"))
     #mt_filtered=hl.read_matrix_table(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered.mt')
     #mt_filtered=filter_to_autosomes(mt_filtered)
     mt_filtered=mt_filtered.checkpoint(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered_july_2021.mt',overwrite=True)
