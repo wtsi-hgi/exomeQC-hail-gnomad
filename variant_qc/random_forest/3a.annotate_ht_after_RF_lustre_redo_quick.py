@@ -134,7 +134,7 @@ if __name__ == "__main__":
     #    f'{lustre_dir}/variant_qc/models/{run_hash}/rf_result_MegaWES_new.ht')
     ht = hl.read_table(
         f'{lustre_dir}/variant_qc/models/{run_hash}/rf_result_MegaWES_new.ht')
-     '''   
+    '''   
     #synonymous="s3a://DDD-ELGH-UKBB-exomes/vep/vep_consequences_worst_synonymous.tsv"
     #Look at notebooks/lustre_prepare_ht_after.RF.ipynb about how the following ht was created
     #Annotate with synonymous consequences
@@ -165,7 +165,7 @@ if __name__ == "__main__":
 
     mt_trios = mt_trios.checkpoint(
         f'{lustre_dir}/sanger_cohorts_trios_consequence.mt', overwrite=True)
-        '''
+    '''
         
     ht=hl.read_table(f'{lustre_dir}/variant_qc/models/{run_hash}_megaWES_RF_SYNONYMOUS_denovo_family_stats.ht')
     mt_trios=hl.read_matrix_table(f'{lustre_dir}/sanger_cohorts_trios_consequence.mt')
