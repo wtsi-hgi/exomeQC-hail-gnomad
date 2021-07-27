@@ -172,7 +172,7 @@ def create_binned_data_initial(ht: hl.Table, data: str, data_type: str, n_bins: 
         bin=ht.rank_bins.bin
     )
     ht = ht.filter(hl.is_defined(ht.bin))
-    
+
     ht = ht.checkpoint(
         f'{lustre_dir}/gnomad_score_binning_tmp.ht', overwrite=True)
 
@@ -222,9 +222,9 @@ def create_binned_data_initial(ht: hl.Table, data: str, data_type: str, n_bins: 
             n_high_quality_de_novos_synonymous=hl.agg.count_where(
                 (ht.de_novo_data.p_de_novo[0] > 0.99) & (ht.consequence == "synonymous_variant")),
             n_trans_singletons_synonymous_algorithm=hl.agg.count_where(
-                ht.variant_transmitted_singletons > 0 ),
+                ht.variant_transmitted_singletons ==1 ),
             n_untrans_singletons_synonymous_algorithm=hl.agg.count_where(
-                ht.variant_untransmitted_singletons > 0),
+                ht.variant_untransmitted_singletons ==1 ),
             validated_de_novos=hl.agg.count_where(ht.validated_denovo_inheritance=="De novo constitutive"),
             # n_de_novo_no_lcr=hl.agg.filter(~ht.lcr & (
             #    ht.family_stats.unrelated_qc_callstats.AC[1] == 0), hl.agg.sum(ht.family_stats.mendel.errors)),
