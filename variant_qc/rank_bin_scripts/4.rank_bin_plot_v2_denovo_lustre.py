@@ -267,8 +267,8 @@ def main(args):
 
     if args.add_rank:
         ht_ranked = add_rank(ht,
-                             #score_expr=1-ht.rf_probability["TP"],
-                             score_expr=ht.rf_probability["FP"],
+                             score_expr=1-ht.rf_probability["TP"],
+                             #score_expr=ht.rf_probability["FP"],
                              #score_expr=ht.rf_probability["TP"],
                              subrank_expr={
                                  'singleton_rank': ht.transmitted_singleton,
@@ -283,8 +283,8 @@ def main(args):
                                  # 'adj_biallelic_singleton_rank': ~ht.was_split & ht.transmitted_singleton & (ht.ac > 0)
                              }
                              )
-        #ht_ranked = ht_ranked.annotate(score=1-ht_ranked.rf_probability["TP"])
-        ht_ranked = ht_ranked.annotate(score=ht_ranked.rf_probability["FP"])
+        ht_ranked = ht_ranked.annotate(score=1-ht_ranked.rf_probability["TP"])
+        #ht_ranked = ht_ranked.annotate(score=ht_ranked.rf_probability["FP"])
         #ht_ranked = ht_ranked.annotate(score=ht_ranked.rf_probability["TP"])
         ht_ranked = ht_ranked.checkpoint(
             f'{lustre_dir}/variant_qc/models/{run_hash}_rf_result_ranked.ht', overwrite=True)
