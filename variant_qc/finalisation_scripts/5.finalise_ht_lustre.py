@@ -1,46 +1,35 @@
 # Pavlos Antoniou
 # 16/09/2020
 #  trio matrixtable creation from fam file
-from hail import Table
 import os
-import argparse
 import hail as hl
 import pandas as pd
-import numpy as np
 import pyspark
-from pprint import pformat
 import json
 import sys
 import re
 from pathlib import Path
 import logging
-from typing import Any, Counter, List, Optional, Tuple, Union, Dict
-import uuid
-import json
-from bokeh.plotting import output_file, save, show
+import argparse
+from typing import Any, Counter, List, Optional, Tuple, Union
 from gnomad.resources.grch38 import gnomad
+from gnomad.utils.annotations import annotate_adj
 from gnomad.utils.annotations import unphase_call_expr, add_variant_type
-from gnomad.variant_qc.pipeline import create_binned_ht, score_bin_agg, train_rf_model
-from gnomad.utils.file_utils import file_exists
-from gnomad.resources.resource_utils import TableResource, MatrixTableResource
-from gnomad.utils.filtering import add_filters_expr
-
-from gnomad.variant_qc.random_forest import (
-    apply_rf_model,
-    load_model,
-    median_impute_features,
-    pretty_print_runs,
-    save_model,
+from gnomad.utils.annotations import annotate_adj, bi_allelic_expr, bi_allelic_site_inbreeding_expr
+from gnomad.utils.filtering import filter_to_autosomes
+from gnomad.sample_qc.relatedness import (
+    SIBLINGS,
+    generate_sib_stats_expr,
+    generate_trio_stats_expr,
 )
-
-
-os.environ['PYSPARK_PYTHON'] = sys.executable
+from hail import Table
+from helper_functions import *
 
 logging.basicConfig(format="%(levelname)s (%(name)s %(lineno)s): %(message)s")
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-project_root = Path(__file__).parent.parent
+project_root = Path(__file__).parent.parent.parent
 print(project_root)
 
 s3credentials = os.path.join(
@@ -64,63 +53,17 @@ with open(f"{thresholds}", 'r') as f:
 LABEL_COL = "rf_label"
 TRAIN_COL = "rf_train"
 PREDICTION_COL = "rf_prediction"
-INFO_FEATURES = [
-    "AS_QD",
-    "AS_ReadPosRankSum",
-    "AS_MQRankSum",
-    "AS_SOR",
-]  # Note: AS_SOR is currently in VQSR HT and named SOR in the VQSR split HT
-FEATURES = [
-    "InbreedingCoeff",
-    "variant_type",
-    "allele_type",
-    "n_alt_alleles",
-    "was_mixed",
-    "has_star",
-    # "AS_QD",
-    #    "AS_MQRankSum",
-    #    "AS_SOR",
-    #    "AS_ReadPosRankSum",
-]
 
 TRUTH_DATA = ["hapmap", "omni", "mills", "kgp_phase1_hc"]
 INBREEDING_COEFF_HARD_CUTOFF = -0.3
+
+################################
+# Define the hail persistent storage directory
 tmp_dir = "hdfs://spark-master:9820/"
 temp_dir = "file:///home/ubuntu/data/tmp"
-#plot_dir = "/home/ubuntu/data/tmp"
-plot_dir="/lustre/scratch123/teams/hgi/mercury/megaWES-variantqc"
 lustre_dir = "file:///lustre/scratch123/teams/hgi/mercury/megaWES-variantqc"
-
-
-
 ######################################
-# main
-########################################
 
-# annotate with RF probability score 1-
-    # 'rf_probability': dict<str, float64>
-    #  'rf_train': bool
-    # 'rf_label': str
-    # 'rf_test': bool
-    # 'rf_probability': dict<str, float64> :  - rf_probability['TP']
-    # 'rf_prediction': str
-    # 'consequence': str
-    # 'inheritance': str
-    # 'rank': int64
-    # 'score': float64
-
-    # info rf_probability['TP']
-    # FILTER column to PASS for ≤80 InDels ≤90 SNVs
-   # ht = generate_final_rf_ht(
-   #     ht,
-   #     snp_cutoff=args.snp_cutoff,
-   #     indel_cutoff=args.indel_cutoff,
-   #     determine_cutoff_from_bin=False,
-   #     bin_id=ht.bin,
-   #     inbreeding_coeff_cutoff=INBREEDING_COEFF_HARD_CUTOFF,
-   # )
-    # This column is added by the RF module based on a 0.5 threshold which doesn't correspond to what we use
-    #ht = ht.drop(ht[PREDICTION_COL])
 def main(args):
 
     print("main")
@@ -195,20 +138,6 @@ if __name__ == "__main__":
 
     hadoop_config.set("fs.s3a.access.key", credentials["mer"]["access_key"])
     hadoop_config.set("fs.s3a.secret.key", credentials["mer"]["secret_key"])
-    n_partitions = 500
-    parser = argparse.ArgumentParser()
-
-    finalize_params = parser.add_argument_group("Finalize RF Table parameters")
-    finalize_params.add_argument(
-        "--snp_cutoff", help="Percentile to set RF cutoff", type=float, default=90.0
-    )
-    finalize_params.add_argument(
-        "--indel_cutoff", help="Percentile to set RF cutoff", type=float, default=80.0
-    )
-    finalize_params.add_argument(
-        "--treat_cutoff_as_prob",
-        help="If set snp_cutoff and indel_cutoff will be probability rather than percentile ",
-        action="store_true",
-    )
-    args = parser.parse_args()
-    main(args)
+    
+   
+    main()
