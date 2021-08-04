@@ -53,7 +53,7 @@ temp_dir = "file:///home/ubuntu/data/tmp"
 lustre_dir = "file:///lustre/scratch123/teams/hgi/mercury/megaWES-variantqc"
 ######################################
 
-def main(args):
+def main():
 
     print("main")
 
