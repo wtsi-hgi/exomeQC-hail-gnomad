@@ -12,18 +12,7 @@ from pathlib import Path
 import logging
 import argparse
 from typing import Any, Counter, List, Optional, Tuple, Union
-from gnomad.resources.grch38 import gnomad
-from gnomad.utils.annotations import annotate_adj
-from gnomad.utils.annotations import unphase_call_expr, add_variant_type
-from gnomad.utils.annotations import annotate_adj, bi_allelic_expr, bi_allelic_site_inbreeding_expr
-from gnomad.utils.filtering import filter_to_autosomes
-from gnomad.sample_qc.relatedness import (
-    SIBLINGS,
-    generate_sib_stats_expr,
-    generate_trio_stats_expr,
-)
-from hail import Table
-from helper_functions import *
+
 
 logging.basicConfig(format="%(levelname)s (%(name)s %(lineno)s): %(message)s")
 logger = logging.getLogger(__name__)
