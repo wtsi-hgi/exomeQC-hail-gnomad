@@ -138,7 +138,7 @@ def add_rank(
     return ht
 
 
-def create_binned_data_initial(ht: hl.Table, data: str, data_type: str, n_bins: int) -> hl.Table:
+def create_binned_data_initial(ht: hl.Table, data: str, data_type: str,run_hash: str, n_bins: int) -> hl.Table:
     # Count variants for ranking
     count_expr = {x: hl.agg.filter(hl.is_defined(ht[x]), hl.agg.counter(hl.cond(hl.is_snp(
         ht.alleles[0], ht.alleles[1]), 'snv', 'indel'))) for x in ht.row if x.endswith('rank')}
@@ -174,7 +174,7 @@ def create_binned_data_initial(ht: hl.Table, data: str, data_type: str, n_bins: 
     ht = ht.filter(hl.is_defined(ht.bin))
 
     ht = ht.checkpoint(
-        f'{lustre_dir}/gnomad_score_binning_tmp.ht', overwrite=True)
+        f'{lustre_dir}/variant_qc/models/{run_hash}_gnomad_score_binning_tmp.ht', overwrite=True)
 
     # Create binned data
     return (
@@ -297,7 +297,8 @@ def main(args):
             f'{lustre_dir}/variant_qc/models/{run_hash}_rf_result_ranked.ht')
 
        
-        ht_bins = create_binned_data_initial(ht, "exomes", "RF", n_bins=100)
+        ht_bins = create_binned_data_initial(ht, "exomes", "RF", {run_hash}, n_bins=100,)
+        
         ht_bins.write(
             f'{lustre_dir}/variant_qc/models/{run_hash}_rf_result_ranked_BINS.ht', overwrite=True)
         # ht_grouped = compute_grouped_binned_ht(ht_bins)
