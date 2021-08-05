@@ -1,6 +1,6 @@
 # Pavlos Antoniou
-# 16/09/2020
-#  trio matrixtable creation from fam file
+# 05/08/2021
+#  Export mt and VCF from final results of RF
 import os
 import hail as hl
 import pandas as pd
