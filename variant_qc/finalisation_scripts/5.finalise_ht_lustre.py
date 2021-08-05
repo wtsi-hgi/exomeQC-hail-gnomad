@@ -62,6 +62,56 @@ def main():
 
     mt = hl.read_matrix_table(
         f'{lustre_dir}/MegaWESSanger_cohorts_sampleQC_filtered.mt')
+
+
+    table_cohort = hl.import_table(
+        f"{lustre_dir}/sanger_cohorts_corrected_ukbb_july_2020.tsv", delimiter="\t").key_by('s')
+
+    mt = mt.annotate_cols(cohort=table_cohort[mt.s].cohort)
+    df = pd.read_csv(
+        f"{lustre_dir}/sanger_cohorts_corrected_ukbb_july_2020.tsv", sep="\t")
+    cohorts_array = df.cohort.unique()
+
+    mt = mt.annotate_rows(
+        MAF_cohorts=hl.agg.group_by(mt.cohort,
+                                    hl.min(hl.agg.call_stats(mt.GT, mt.alleles).AF))
+    )
+    mt = mt.annotate_rows(
+        AN_cohorts=hl.agg.group_by(mt.cohort,
+                                   hl.min(hl.agg.call_stats(mt.GT, mt.alleles).AN))
+    )
+
+    mt = mt.annotate_rows(
+        AC_cohorts=hl.agg.group_by(mt.cohort,
+                                   hl.min(hl.agg.call_stats(mt.GT, mt.alleles).AC))
+    )
+
+    mt = mt.annotate_rows(
+        missingness_cohorts=hl.agg.group_by(mt.cohort, hl.min(
+            (hl.agg.count_where(hl.is_missing(mt['GT']))) / mt.count_rows()*2))
+
+    )
+
+    mt = mt.annotate_rows(
+        info=mt.info.annotate(cohort_names=mt.MAF_cohorts.keys())
+    )
+    mt = mt.annotate_rows(
+        info=mt.info.annotate(MAF_cohorts_values=mt.MAF_cohorts.values())
+    )
+
+    mt = mt.annotate_rows(
+        info=mt.info.annotate(AN_cohorts_values=mt.AN_cohorts.values())
+    )
+
+    mt = mt.annotate_rows(
+        info=mt.info.annotate(AC_cohorts=mt.AC_cohorts.values())
+    )
+
+    mt = mt.annotate_rows(
+        info=mt.info.annotate(
+            missingness_cohorts_values=mt.missingness_cohorts.values())
+    )
+
     mt = mt.annotate_rows(
         Variant_Type=hl.cond((hl.is_snp(mt.alleles[0], mt.alleles[1])), "SNP",
                              hl.cond(
@@ -104,15 +154,18 @@ def main():
 
     mt2 = mt2.checkpoint(
         f'{lustre_dir}/variant_qc/megaWES_final_after_RF_{run_hash}.mt', overwrite=True)
-   
+    #Remove gt and entries and samples
+    mt1 = mt2.select_entries()
+    mt_fin = mt2.filter_cols(mt2['s'] == 'sample')
+
     chroms=[*range(1,23),"X","Y"]
     chromosomes=["chr"+ str(chr) for chr in chroms]
     for chromosome in chromosomes:
         print(chromosome)
-        mt=mt2.filter_rows(mt2.locus.contig==chromosome)
-        mt.write(f'{lustre_dir}/final_matrixtables_VCFs/{chromosome}_after_RF_{run_hash}.mt',overwrite=True)
+        mt=mt_fin.filter_rows(mt_fin.locus.contig==chromosome)
+        mt.write(f'{lustre_dir}/final_matrixtables_VCFs/{chromosome}_after_RF_{run_hash}_NOSAMPLES_GT.mt',overwrite=True)
         hl.export_vcf(
-        mt, f'{lustre_dir}/final_matrixtables_VCFs/VCFs/{chromosome}_after_RF_{run_hash}.vcf.bgz',parallel='separate_header')
+        mt, f'{lustre_dir}/final_matrixtables_VCFs/VCFs/{chromosome}_after_RF_{run_hash}_LOCI_only.vcf.bgz',parallel='separate_header')
 
 
 if __name__ == "__main__":
