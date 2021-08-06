@@ -167,7 +167,7 @@ def main():
         mt=mt_fin.filter_rows(mt_fin.locus.contig==chromosome)
         mt.write(f'{lustre_dir}/final_matrixtables_VCFs/{chromosome}_after_RF_{run_hash}_NOSAMPLES_GT.mt',overwrite=True)
         hl.export_vcf(
-        mt, f'{lustre_dir}/final_matrixtables_VCFs/VCFs/{chromosome}_after_RF_{run_hash}_LOCI_only.vcf.bgz',parallel='separate_header')
+        mt, f'{lustre_dir}/final_matrixtables_VCFs/VCFs/{chromosome}_after_RF_{run_hash}_LOCI_only',parallel='separate_header')
 
 
 if __name__ == "__main__":
