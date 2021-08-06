@@ -53,6 +53,8 @@ temp_dir = "file:///home/ubuntu/data/tmp"
 lustre_dir = "file:///lustre/scratch123/teams/hgi/mercury/megaWES-variantqc"
 ######################################
 
+SNV_PASS_BIN=91
+INDEL_PASS_BIN=86
 def main():
 
     print("main")
@@ -134,8 +136,8 @@ def main():
     
     filter_column_annotation = (
         hl.case()
-        .when(((mt.Variant_Type == "SNP") & (mt.info.bin <= 91)), "PASS")
-        .when(((mt.Variant_Type == "INDEL") & (mt.info.bin <= 86)), "PASS")
+        .when(((mt.Variant_Type == "SNP") & (mt.info.bin <= SNV_PASS_BIN)), "PASS")
+        .when(((mt.Variant_Type == "INDEL") & (mt.info.bin <= INDEL_PASS_BIN)), "PASS")
         .default(".")  # remove everything else
     )
 
