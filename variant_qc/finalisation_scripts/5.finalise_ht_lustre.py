@@ -138,7 +138,7 @@ def main():
         hl.case()
         .when(((mt.Variant_Type == "SNP") & (mt.info.bin <= SNV_PASS_BIN)), "PASS")
         .when(((mt.Variant_Type == "INDEL") & (mt.info.bin <= INDEL_PASS_BIN)), "PASS")
-        .default(".")  # remove everything else
+        .default(".")  # not pass for rest
     )
 
 # mt_annotated = mt.annotate_rows(mt.filters=filter_column_annotation)
