@@ -7,6 +7,14 @@ Please visit https://confluence.sanger.ac.uk/display/HGI/WSI+Exome+Joint+Call fo
 Please contact Pavlos (pa10) for any questions.
 
 ---
+## Requirements
+Spark Cluster with hail installed. 
+To obtain the code please type:
+```
+mkdir gnomad_sanger_cohorts
+git init
+git pull 
+``` 
 
 ## Part 1: Import data to hail
 
@@ -15,3 +23,4 @@ Please contact Pavlos (pa10) for any questions.
 ## Part 2: Sample QC
 
 ## Part 3: Variant QC
+
