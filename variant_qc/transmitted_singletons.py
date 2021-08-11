@@ -102,14 +102,15 @@ if __name__ == "__main__":
     ht = hl.read_table(
         f'{temp_dir}/ddd-elgh-ukbb/variant_qc/models/{run_hash}/{run_hash}_rf_result_sanger_cohorts_DENOVO_family_stats_SYNONYMOUS.ht')
 
-        # mt_trios = mt_trios.annotate_rows(
+    # mt_trios = mt_trios.annotate_rows(
     #    consequence=ht[mt_trios.row_key].consequence)
 
     # mt_trios = mt_trios.checkpoint(
     #    f'{tmp_dir}/sanger_cohorts_trios_consequence.mt', overwrite=True)
     # mt_filtered = mt_trios.filter_rows((mt_trios.info.AC[0] <= 2) & (
     #    mt_trios.consequence == "synonymous_variant"))
-    mt_filtered=hl.read_matrix_table(f'{lustre_dir}/variant_qc/MegaWESSanger_cohorts_AC_synonymous_filtered_june_2021.mt')
+    mt_filtered = hl.read_matrix_table(
+        f'{temp_dir}/ddd-elgh-ukbb/variant_qc/sanger_cohorts_AC_synonymous_filtered.mt')
     # mt_filtered = mt_filtered.checkpoint(
     #    f'{tmp_dir}/sanger_cohorts_AC_synonymous_filtered.mt', overwrite=True)
 
