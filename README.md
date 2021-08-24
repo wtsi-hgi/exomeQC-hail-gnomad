@@ -15,3 +15,12 @@ Please contact Pavlos (pa10) for any questions.
 ## Part 2: Sample QC
 
 ## Part 3: Variant QC
+![alt text](https://github.com/wtsi-hgi/exomeQC-hail-gnomad/blob/lustre/img/variant_qc_step1.png?raw=true)
+
+![alt text](https://github.com/wtsi-hgi/exomeQC-hail-gnomad/blob/lustre/img/variant_qc_step2.png?raw=true)
+
+![alt text](https://github.com/wtsi-hgi/exomeQC-hail-gnomad/blob/lustre/img/variant_qc_step3.png?raw=true)
+
+![alt text](https://github.com/wtsi-hgi/exomeQC-hail-gnomad/blob/lustre/img/variant_qc_step3a.png?raw=true)
+
+![alt text](https://github.com/wtsi-hgi/exomeQC-hail-gnomad/blob/lustre/img/variant_qc_step4.png?raw=true)
