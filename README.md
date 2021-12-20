@@ -1,3 +1,6 @@
+birth_cohort_wes
+New branch of code under development for birth cohort WES
+
 # sanger_gnomad_hail_qc
 
 This repository contains hail scripts designed to import, analyse and execute sample_qc and variant_qc on a collection of data cohorts at the Sanger Institute.
